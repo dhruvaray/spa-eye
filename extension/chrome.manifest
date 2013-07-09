@@ -1,0 +1,6 @@
+content spa_eye chrome/content/spa_eye/     xpcnativewrappers=no
+skin    spa_eye classic/1.0   chrome/skin/classic/
+locale  spa_eye en-US   chrome/locale/en-US/
+
+resource spa_eye chrome/
+

@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>SPA-I Test Application</title>
+
+    <script type="text/javascript" src="./lib/jquery.js"></script>
+    <script type="text/javascript" src="./lib/underscore.js"></script>
+    <script type="text/javascript" src="./lib/backbone.js"></script>
+    <script type="text/javascript" src="./lib/backbone-associations.js"></script>
+
+    <script type="text/html" id="user_tmpl">
+        <% for ( var i = 0; i < users.length; i++ ) { %>
+        <li><a href="<%=users[i].url%>"><%=users[i].name%></a></li>
+        <% } %>
+    </script>
+
+
+    <script>
+        //f = escape("console.log('hi');console.log('hi2');console.log('hi3');");
+        //gensrc = "data:text/javascript;fileName='myscript';,"+f;
+    </script>
+    <!--<script type="text/javascript" src="data:text/javascript;fileName='myscript';,console.log('hi'); %0d console.log('hi2');console.log('hi3');"></script>-->
+
+    <script>
+
+        window.counter=0;
+        window.extendsModel = Backbone.Model.extend();       
+        function testBed(extend){
+            var m = {
+                qty: parseInt(Math.random()*100),
+                done: false
+            };
+                
+            if (extend) {
+                window["model"+window.counter] = new Backbone.AssociatedModel(m);
+            } else {                              
+                window["model"+window.counter] = new Backbone.Model(m);
+            }
+
+            window["model"+window.counter].on('all', function(event){
+                console.log(event);
+                console.log(this);
+            });
+            window["model"+window.counter++].url = 'http://www.google.com/models';            
+        }
+        
+        function genTemplateAndData(){
+            var UserView = Backbone.View.extend({
+                initialize: function(){
+                    this.render();
+                },
+                render: function(){
+                    // Compile the template using underscore
+                    var template = _.template( $("#user_tmpl").html(), {users:[{name:'amol', url:'vava'}]} );
+                    // Load the compiled HTML into the Backbone "el"
+                    this.$el.html( template );
+                }
+            });
+            var v = new UserView({ el: $("#ph") });
+        }
+
+        function setRandom(){
+            var m = window["model"+parseInt(Math.random()*100) % window.counter];
+            m && m.set('qty',  parseInt(Math.random()*100));
+        }
+        
+        function save(){
+            var m = window["model"+parseInt(Math.random()*100) % window.counter];
+            m && m.save();
+        }
+    </script>
+
+
+
+</head>
+<body>
+<input type="button" onclick="testBed()" value="Create a BB model"/>
+<input type="button" onclick="testBed(true)" value="Create an extended BB model"/>
+<input type="button" onclick="save()" value="save"/>
+<input type="button" value="Generate view + data..." onclick="genTemplateAndData()"/>
+<input type="button" value="Perform random set" onclick="setRandom()"/>
+<div id="ph"/>
+<a class="refresh"></a>
+</body>
+</html>

@@ -1,0 +1,76 @@
+.green {
+    color: green;
+}
+.show{
+    display: block;
+}
+.hide{
+    display: none;
+}
+
+.modelRow td{
+    border-top: 1px solid #EFEFEF !important;
+}
+
+.modelRow:hover{
+    background-color: #F5F5F5;
+    border-top: 1px solid #EEEEEE;
+    border-bottom: 1px solid #EEEEEE;
+}
+
+.headerRow{
+    background-color: #EEEEEE;
+    color: #727272;
+    font-weight: bold;
+    white-space: nowrap;
+    padding-left: 18px;
+    overflow: hidden;
+    cursor: pointer;
+    line-height: 25px;
+}
+
+.headerContent{
+    padding: 2px 0 2px 5px;
+    vertical-align: top;
+}
+
+.headerImage{
+    background-repeat: no-repeat;
+    background-position: 6px;
+    background-image: url(chrome://firebug/skin/mac/twistyOpen.svg);
+}
+
+.headerRow.headerImage.opened{
+    background-repeat: no-repeat;
+    background-position: 6px;
+    background-image: url(chrome://firebug/skin/mac/twistyClosed.svg);
+}
+
+.row-success{
+    color: #468847;
+    background-color: #dff0d8;
+    border-color: #d6e9c6;:
+}
+
+.row-error{
+    color: #b94a48;
+    background-color: #f2dede;
+    border-color: #eed3d7;
+}
+
+.row-info {
+    color: #3a87ad;
+    background-color: #d9edf7;
+    border-color: #bce8f1;
+}
+
+.row-warning {
+    background-color: #ffe167;
+}
+
+.fade-in {   
+   transition: background-color 1s linear; 
+   -moz-transition: background-color 1s linear;  
+   -webkit-transition: background-color 1s linear; 
+   -ms-transition: background-color 1s linear; 
+}
