@@ -6,9 +6,12 @@ define([
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/events",
-    "firebug/chrome/reps"
+    "firebug/chrome/reps",
+    "firebug/chrome/tableRep",
+
+    "spa_eye/lib/dom"
 ],
-function(Obj, FBTrace, Locale, Domplate, Dom, Css, Events, FirebugReps){
+function(Obj, FBTrace, Locale, Domplate, Dom, Css, Events, FirebugReps, TableRep, DomUtil){
 
 // ********************************************************************************************* //
 
@@ -46,7 +49,7 @@ function(Obj, FBTrace, Locale, Domplate, Dom, Css, Events, FirebugReps){
         },
 
         show: function(){
-            var partial = "";
+            var partial = Locale.$STR("spa_eye.view.noview");
             var source ="__p";
 
             Firebug.CommandLine.evaluate(source, this.context, null, this.context.getCurrentGlobal(),
@@ -61,7 +64,22 @@ function(Obj, FBTrace, Locale, Domplate, Dom, Css, Events, FirebugReps){
                         partial = exc.message;
                 }
             );
+
+            //this.registerAppStyleSheets();
             this.panelNode.innerHTML = partial;
+            //this.unregisterAppStyleSheets();
+        },
+
+        registerAppStyleSheets : function(){
+            var hrefs = DomUtil.getAllWebContextStyleSheets(this.context.window.document);
+            for (var i = 0; i < hrefs.length; i++)
+                Firebug.registerStylesheet(hrefs[i]);
+        },
+
+        unregisterAppStyleSheets : function(){
+            var hrefs = DomUtil.getAllWebContextStyleSheets(this.context.window.document);
+            for (var i = 0; i < hrefs.length; i++)
+                Firebug.unregisterStylesheet(hrefs[i]);
         }
 
     });

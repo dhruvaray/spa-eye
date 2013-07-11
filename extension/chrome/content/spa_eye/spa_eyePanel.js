@@ -797,8 +797,15 @@ function(Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, DOMEdit
                     }
                 },
                 formatName : function(obj){
-                    var aScript = obj.getAssociatedScript();
-                    return obj.cid + (aScript ? " ("+ aScript +")": '');
+                    var templates = obj.inferredTemplates;
+                    var tIds="";
+
+                    if (templates){
+                        for(var i=0;i<templates.length;i++){
+                            tIds = tIds + templates[i] + " ";
+                        }
+                    }
+                    return obj.cid + (tIds ? " ("+ tIds +")": '');
                 }
 
             });

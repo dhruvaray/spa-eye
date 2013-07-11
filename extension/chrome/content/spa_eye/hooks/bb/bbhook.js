@@ -20,7 +20,6 @@ function(FBTrace, Http, Events, Dom, SHA, DOM, URI) {
         const Ci = Components.interfaces;
         const Cr = Components.results;
         const bbhook_wp = "chrome://spa_eye/content/hooks/bb/bbhook_wp.js";
-        const CSeps = ["{", ";", "}"];
 
 // ********************************************************************************************* //
 //  BBHook Class
@@ -55,11 +54,10 @@ function(FBTrace, Http, Events, Dom, SHA, DOM, URI) {
                 }
 
                 win._templates =  win._templates || {};
-                win._els = win._els || {};
 
                 //Hook #2
                 win._.template = function (text, data, settings) {
-                    var resultHtml="";
+
                     try{
                         if (!text) {
                             if (FBTrace.DBG_SPA_EYE) {
@@ -71,16 +69,16 @@ function(FBTrace, Http, Events, Dom, SHA, DOM, URI) {
                         var script_id = (script && script.id) ? script.id : SHA.getTextHash(text);
                         var compiledTemplate = win._templates[script_id];
 
-
                         if (!compiledTemplate){
                             compiledTemplate = _templateProxy.call(win._, text);
-                            var source = compiledTemplate.source || compiledTemplate.toSource();
+                            var source = compiledTemplate.source;
                             if (source){
-                                var f = "window._t"+script_id+"="+source;
-                                //Make it readable
-                                f = win._.reduce(CSeps,function(memo,sep){return memo.split(sep).join(sep+"%0d")},f);
+                                var proxiedTemplateRef = '_t'+script_id;
+
+                                var f = escape("window['"+proxiedTemplateRef+"']="+source);
+
                                 // Attach to body
-                                DOM.appendExternalScriptTagToBody(win.document,
+                                DOM.appendExternalScriptTagToHead(win.document,
                                     "data:text/javascript;fileName="+script_id+";,"+f);
 
                                 // Record using script_id
@@ -94,32 +92,38 @@ function(FBTrace, Http, Events, Dom, SHA, DOM, URI) {
                                         text
                                     );
                             }
-
                         }
 
-                        if (!data) return compiledTemplate;
+                        var attachTemplatesToViews = function(){
+                            var rendered = win._crv;
+                            if (rendered){
+                                var templates = rendered.inferredTemplates;
+                                if (templates.indexOf(script_id) == -1){
+                                    templates.push(script_id);
+                                }
+                            }
+                        };
 
-                        var slice = Array.prototype.slice;
-
-                        var resultHtml =  win["_t"+script_id]
-                                ? win["_t"+script_id].apply(win._, slice.call(arguments, 1))
-                                : compiledTemplate.apply(win._, slice.call(arguments, 1));
-
-                        // TODO To be removed
-                        if (resultHtml) {
-                            win._els[SHA.getTextHash(resultHtml)] = script_id;
+                        if (data){
+                            attachTemplatesToViews();
+                            return compiledTemplate(data,_);;
                         }
+
                     }catch(e){
                         if (FBTrace.DBG_ERRORS)
                             FBTrace.sysout("spa_eye; Unexpected error", e);
-                        resultHtml=e;
                     }
 
-                    return resultHtml;
+                    return function(data,_){
+                        if (win[proxiedTemplateRef]){
+                            win[proxiedTemplateRef].source = win[proxiedTemplateRef].source || source;
+                            attachTemplatesToViews();
+                            return win[proxiedTemplateRef].call(this, data, _);;
+                        }
+                        return undefined;
+                    };
                 }
 
-                //Hook #3
-                this.createInferredScriptHookForViews(win);
             },
 
             registerSetHooks: function(win) {
@@ -156,62 +160,11 @@ function(FBTrace, Http, Events, Dom, SHA, DOM, URI) {
             registerWPHooks: function(win) {
                 Firebug.CommandLine.evaluateInWebPage(
                     Http.getResource(bbhook_wp),
-                    Firebug.currentContext,
+                    this.context,
                     win);
-            }, 
-
-            /*createTransientViewScript: function(baseurl,view,doc){
-                try{
-                    var foStream = Cc["@mozilla.org/network/file-output-stream;1"]
-                        .createInstance(Ci.nsIFileOutputStream);
-                    var file = Cc["@mozilla.org/file/directory_service;1"]
-                        .getService(Ci.nsIProperties)
-                        .get("TmpD", Ci.nsIFile);
-                    var converter = Cc["@mozilla.org/intl/converter-output-stream;1"].
-                        createInstance(Components.interfaces.nsIConverterOutputStream);
-
-                    file.append("firebug");
-                    file.append("spa_eye");
-                    file.append(baseurl)
-                    file.append(view+".js");
-
-                    if (file.exists()) file.remove(true);
-                    file.create(Ci.nsIFile.NORMAL_FILE_TYPE, 0666);
-
-                    // write, create, truncate
-                    foStream.init(file, 0x02 | 0x08 | 0x20, 0664, 0);
-                    converter.init(foStream, "UTF-8", 0, 0);
-                    converter.writeString(doc);
-
-                    converter.close(); // this closes foStream
-                    foStream.close();
-                }catch (e) {
-                    if (FBTrace.DBG_ERRORS)
-                        FBTrace.sysout("spa_eye; Could not write the generated javascript file for view : "+
-                            view +
-                            " at location : \'" +
-                            baseurl+"\'", e);
-                }
-                return file.path;
-            },*/
-
-            createInferredScriptHookForViews: function(win){
-                win._els = win._els || {};
-                if (win.Backbone && win.Backbone.View) {
-                    win.Backbone.View.prototype.getAssociatedScript = function() {
-                        return (this.el && this.el.innerHTML) ? win._els[SHA.getTextHash(this.el.innerHTML)] : undefined;
-                    }
-                } else {
-                    if (FBTrace.DBG_SPA_EYE){
-                        FBTrace.sysout("spa_eye; Could not add view:associated script hook... Either Backbone : "+
-                            win.Backbone +
-                            " or Backbone.View : "+
-                            win.Backbone.View +
-                            " could not be found.");
-                    }
-                }
-
             },
+
+
 
             readModelAudit: function(baseurl, model){
                 var ios = Cc["@mozilla.org/network/io-service;1"]
@@ -322,7 +275,6 @@ function(FBTrace, Http, Events, Dom, SHA, DOM, URI) {
                 this.hooked = false;
                 if (this.win) {
                     this.win._templates =  [];
-                    this.win._els = [];
                     this.win._models = [];
                     this.win._views = [];
                     this.win._collections = [];

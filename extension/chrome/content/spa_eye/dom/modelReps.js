@@ -12,7 +12,7 @@ define([
     "firebug/lib/css",
     "firebug/lib/string",
     "firebug/dom/toggleBranch",
-    "firebug/dom/domModule",
+    "firebug/dom/domModule"
 ],
 function(Firebug, D, FirebugReps, Locale, Events, Dom, Css, Str, ToggleBranch, DOMModule) {
 
@@ -390,7 +390,7 @@ var DirTablePlate = D.domplate(Firebug.Rep, {
 return {
     DirTablePlate: DirTablePlate,
     insertSliceSize: insertSliceSize,
-    insertInterval: insertInterval,
+    insertInterval: insertInterval
 };
 
 // ********************************************************************************************* //

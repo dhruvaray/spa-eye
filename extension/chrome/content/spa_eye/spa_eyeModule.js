@@ -38,7 +38,6 @@ function(FBL, FBTrace, Locale, Events, URI, BBHook, spa_eyeObj) {
                 });
                 spObj._spaHook = new BBHook({
                     context: context
-                    //win: context.window.wrappedJSObject
                 });
                 spObj._spaHook.cleanup();
             }

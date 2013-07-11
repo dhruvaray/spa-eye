@@ -36,7 +36,7 @@ function(Obj, FBTrace, Locale, Domplate, Dom, Css, Events, FirebugReps, URI){
             if (!model) return;
             context.spa_eyeObj.currentEventModel = model;
 
-            var win = this.context.window.wrappedJSObject;            
+            var win = this.context.window.wrappedJSObject;
             if(FBTrace.DBG_SPA_EYE){
                 FBTrace.sysout("spa_eye; show events for model - "+model.cid, model);
             }

@@ -27,9 +27,20 @@ if (window.Backbone){
     if (_viewProxy){
         var _viewProxyProto = window.Backbone.View.prototype;
         window.Backbone.View = function(attributes,options){
-            _viewProxy.apply(this, arguments);
+            var renderProxy = this.render;
+            this.render = function(){
+                window._crv = this;
+                this.inferredTemplates = this.inferredTemplates || [];
+                var result = renderProxy.apply(this,arguments);
+                window._crv = undefined;
+                return result;
+            };
+
             window._views = window._views || [];
             window._views.push(this);
+
+            _viewProxy.apply(this, arguments);
+
         };
         window.Backbone.View.prototype = _viewProxyProto;
         _.extend(window.Backbone.View,_viewProxy);
