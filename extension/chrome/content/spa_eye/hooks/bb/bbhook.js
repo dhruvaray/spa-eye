@@ -251,6 +251,10 @@ function(FBTrace, Http, Events, Dom, SHA, DOM, URI) {
             },
 
             writeModelAudit: function(baseurl,model,doc){
+                if (model && model.cid && !(model.cid in this.context.spa_eyeObj._pinned_models)) {
+                    return;
+                }
+
                 try{
                     var foStream = Cc["@mozilla.org/network/file-output-stream;1"]
                         .createInstance(Ci.nsIFileOutputStream);
