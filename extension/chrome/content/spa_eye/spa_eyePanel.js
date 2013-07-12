@@ -41,12 +41,12 @@ define([
             deriveA11yFrom:"dom",
 
             currentPanel: childPanel.MODEL,
-            panels:{},
+            panels: null,
 
             initialize:function () {
+                this.panels = {};
                 Firebug.registerUIListener(this);
                 Firebug.Panel.initialize.apply(this, arguments);
-                this.context.spa_eyeObj._spaHook.listener.addListener(this);
 
                 // Initialize panels
                 this.panels.model = new ModelPanel(this.context, this);
@@ -58,11 +58,13 @@ define([
                 Firebug.unregisterUIListener(this);
                 Firebug.Panel.destroy.apply(this, arguments);
 
-                if (this.context.spa_eyeObj) {
-                    this.context.spa_eyeObj._spaHook.listener.removeListener(this);
-                }
-
                 this.removeListener(this);
+
+                if (this.context.spa_eyeObj) {
+                    try{
+                        this.context.spa_eyeObj._spaHook.listener.removeListener(this);
+                    }catch(e){}
+                }
             },
 
             show:function (state) {
@@ -159,20 +161,27 @@ define([
                 return buttons;
             },
 
-            selectChildPanel:function (childPanelName) {
-                childPanelName = childPanelName || this.currentPanel;
-                if (!childPanelName) return false;
+            selectChildPanel:function (cpName) {
+                cpName = cpName || this.currentPanel;
+                if (!cpName) return false;
 
-                var chrome = Firebug.chrome;
+                var listener = this.context.spa_eyeObj._spaHook.listener,
+                    chrome = Firebug.chrome;
+
+                if (cpName !== this.currentPanel) {
+                    listener.removeListener(this.getCurrentPanel());
+                }
 
                 Object.keys(childPanel).forEach(function (key) {
                     chrome.$('spa_eye_panel_button_' + childPanel[key]).checked = false;
                 });
-                chrome.$('spa_eye_panel_button_' + childPanelName).checked = true;
-                this.currentPanel = childPanelName;
-                this.inspectable = (childPanelName === childPanel.VIEW);
+                chrome.$('spa_eye_panel_button_' + cpName).checked = true;
 
-                this.panels[childPanelName].render();
+                this.currentPanel = cpName;
+                this.inspectable = (cpName === childPanel.VIEW);
+
+                listener.addListener(this.getCurrentPanel());
+                this.getCurrentPanel().render();
             },
 
             getCurrentPanel: function(panelName) {
@@ -202,7 +211,9 @@ define([
                 var row = Dom.getAncestorByClass(target, "memberRow");
                 var items = [];
                 if (row && row.domObject && (0 === parseInt(row.getAttribute('level'), 10))) {
-                    if (this.currentPanel === Firebug.spa_eyePanel.childPanel.MODEL) {
+                    var cp = this.panels[this.currentPanel];
+
+                    if (this.currentPanel === childPanel.MODEL) {
                         var model = row.domObject.value;
 
                         items.push(
@@ -210,19 +221,19 @@ define([
                             {
                                 label:"Audit_Model",
                                 tooltiptext:"spa_eye.audit.title",
-                                command:Obj.bindFixed(this.renderAuditForModel, this, row)
+                                command: Obj.bindFixed(cp.renderAuditForModel, cp, row)
                             },
                             {
                                 label:(model
                                     && model.cid
                                     && this.context.spa_eyeObj._pinned_models[model.cid])
                                     ? "Unpin_this_model" : "Pin_this_model",
-                                command:Obj.bindFixed(this.pinOptionChange, this, row)
+                                command: Obj.bindFixed(cp.pinOptionChange, cp, row)
                             },
                             {
                                 label:"spa_eye.event.title",
                                 tooltiptext:"spa_eye.event.title",
-                                command:Obj.bindFixed(this.showRelatedEvents, this, row)
+                                command: Obj.bindFixed(cp.showRelatedEvents, cp, row)
                             }
                         );
                     }
@@ -242,19 +253,9 @@ define([
                 return this.editor;
             },
 
-            onModelSet: function (model) {
-                this.panels.model.onModelSet(model, 'row-warning');
-            },
-
-            onModelSave: function (model, file) {
-                var isError = NetRequestEntry.isError(file);
-                this.panels.model.onModelSet(model, isError ? 'row-error' : 'row-success');
-            },
-
-            setPropertyValue: function (row, value) {
-                if (this.currentPanel === childPanel.MODEL) {
-                    this.panels.model.setModelPropertyValue(row, value);
-                }
+            setPropertyValue: function() {
+                var p = this.getCurrentPanel();
+                return p && p.setPropertyValue && p.setPropertyValue.apply(p, arguments);
             }
         });
 

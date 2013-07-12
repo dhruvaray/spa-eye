@@ -186,9 +186,9 @@ define([
                         var rowValue = member.value;
 
                         if (typeof rowValue === "boolean")
-                            mainPanel.setModelPropertyValue(row, "" + !rowValue);
+                            mainPanel.setPropertyValue(row, "" + !rowValue);
                         else
-                            mainPanel.editModelProperty(row);
+                            mainPanel.editProperty(row);
 
                         Events.cancelEvent(event);
                     }
