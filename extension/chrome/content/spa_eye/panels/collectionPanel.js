@@ -26,6 +26,7 @@ function (Firebug, FBTrace, Css, Str, DOMEditor, Dom, ChildSection, ModelReps) {
 
     PANEL.prototype = {
         constructor: PANEL,
+        name: 'collection',
         render: function () {
             var args = {
                 sections: this.sections.sort(function (a, b) {

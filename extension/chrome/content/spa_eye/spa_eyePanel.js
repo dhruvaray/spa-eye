@@ -32,15 +32,15 @@ define([
         };
 
         Firebug.spa_eyePanel.prototype = Obj.extend(Firebug.ActivablePanel, {
-            name:"spa_eye",
-            title:Locale.$STR("spa_eye.title"),
-            searchable:true,
-            editable:true,
+            name: "spa_eye",
+            title: Locale.$STR("spa_eye.title"),
+            searchable: true,
+            editable: true,
 
-            enableA11y:true,
+            enableA11y: true,
             deriveA11yFrom:"dom",
 
-            currentPanel:childPanel.MODEL,
+            currentPanel: childPanel.MODEL,
             panels:{},
 
             initialize:function () {
@@ -83,9 +83,7 @@ define([
                     Firebug.spa_eyeModule.removeObserver(this);
             },
 
-            startInspecting:function () {
-
-            },
+            startInspecting:function () {},
 
             inspectNode:function (node) {
                 return false;
@@ -167,14 +165,18 @@ define([
 
                 var chrome = Firebug.chrome;
 
-                ['model', 'collection', 'view'].forEach(function (cpName) {
-                    chrome.$('spa_eye_panel_button_' + cpName).checked = false;
+                Object.keys(childPanel).forEach(function (key) {
+                    chrome.$('spa_eye_panel_button_' + childPanel[key]).checked = false;
                 });
                 chrome.$('spa_eye_panel_button_' + childPanelName).checked = true;
                 this.currentPanel = childPanelName;
                 this.inspectable = (childPanelName === childPanel.VIEW);
 
                 this.panels[childPanelName].render();
+            },
+
+            getCurrentPanel: function(panelName) {
+                return this.panels[panelName || this.currentPanel];
             },
 
             getOptionsMenuItems:function (context) {
@@ -228,37 +230,31 @@ define([
                 return items;
             },
 
-            onViewButton:function () {
-                var args = {
-                    views:this.context.spa_eyeObj.getViews()
-                };
-                spa_eyePanel.view_template.Views.replace(args, this.panelNode, null);
+            search: function () {
+                var p = this.getCurrentPanel();
+                return p && p.search && p.search.apply(p, arguments);
             },
 
-            search:function (key) {
-                if (this.currentPanel === Firebug.spa_eyePanel.childPanel.MODEL)
-                    this.panels.model.search(key);
-            },
-
-            getEditor:function (target, value) {
+            getEditor: function (target, value) {
                 if (!this.editor) {
                     this.editor = new DOMEditor(this.document);
                 }
                 return this.editor;
             },
 
-            onModelSet:function (model) {
+            onModelSet: function (model) {
                 this.panels.model.onModelSet(model, 'row-warning');
             },
 
-            onModelSave:function (model, file) {
+            onModelSave: function (model, file) {
                 var isError = NetRequestEntry.isError(file);
                 this.panels.model.onModelSet(model, isError ? 'row-error' : 'row-success');
             },
 
-            setPropertyValue:function (row, value) {
-                if (this.currentPanel === Firebug.spa_eyePanel.childPanel.MODEL)
+            setPropertyValue: function (row, value) {
+                if (this.currentPanel === childPanel.MODEL) {
                     this.panels.model.setModelPropertyValue(row, value);
+                }
             }
         });
 

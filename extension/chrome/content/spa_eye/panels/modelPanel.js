@@ -28,6 +28,7 @@ define([
         PANEL.prototype = {
 
             constructor:PANEL,
+            name: 'model',
 
             render:function () {
 
