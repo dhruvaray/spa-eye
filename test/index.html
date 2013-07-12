@@ -17,7 +17,7 @@
             window.extendsModel = Backbone.Model.extend();
             function testBed(extend){
                 //window.extendsModel = window.extendsModel ? window.extendsModel : Backbone.Model.extend();
-                window["model"+window.counter] = extend? new Backbone.AssociatedModel() : new Backbone.Model();
+                window["model"+window.counter] = extend? new Backbone.AssociatedModel() : new Backbone.Model({fname: 'fname'+window.counter});
                 window.counter++;
             }
         </script>
