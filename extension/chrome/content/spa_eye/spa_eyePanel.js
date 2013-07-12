@@ -247,6 +247,10 @@ define([
                 return this.editor;
             },
 
+            onModelSet:function (model) {
+                this.panels.model.onModelSet(model, 'row-warning');
+            },
+
             onModelSave:function (model, file) {
                 var isError = NetRequestEntry.isError(file);
                 this.panels.model.onModelSet(model, isError ? 'row-error' : 'row-success');
