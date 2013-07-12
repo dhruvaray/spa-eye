@@ -236,9 +236,21 @@ define([
                         callback && callback.call(context ? context : this, row);
                     } else {
                         var repObj = target.repObject;
-                        if (repObj && repObj.attributes) {
-                            repObj = repObj.attributes;
+                        if (repObj) {
+                            if (repObj.attributes) {
+                                repObj = repObj.attributes;
+                            } else if (repObj.models){
+                                repObj = repObj.models;
+                            } else if (repObj.el) {
+                                repObj = {
+                                    el: repObj.el,
+                                    $el: repObj.$el,
+                                    tagName: repObj.tagName,
+                                    inferredTemplates: repObj.inferredTemplates
+                                };
+                            }
                         }
+
                         var members = Firebug.DOMBasePanel.prototype.getMembers(repObj,
                             level + 1,
                             null);
