@@ -13,10 +13,10 @@ define([
     "firebug/dom/domEditor",
 
     "spa_eye/panels/modelPanel",
-    "spa_eye/viewPanel"
+    "spa_eye/panels/collectionPanel",
+    "spa_eye/panels/viewPanel"
 ],
-    function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, DOMEditor, ModelPanel, ViewPanel) {
-
+    function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, DOMEditor, ModelPanel, CollectionPanel, ViewPanel) {
 
         Firebug.registerStringBundle("chrome://spa_eye/locale/spa_eye.properties");
         Firebug.registerStylesheet("chrome://spa_eye/skin/models.css");
@@ -47,8 +47,11 @@ define([
                 Firebug.registerUIListener(this);
                 Firebug.Panel.initialize.apply(this, arguments);
                 this.context.spa_eyeObj._spaHook.listener.addListener(this);
-                this.panels.model = new ModelPanel(this.context, this);
 
+                // Initialize panels
+                this.panels.model = new ModelPanel(this.context, this);
+                this.panels.collection = new CollectionPanel(this.context, this);
+                this.panels.view = new ViewPanel(this.context, this);
             },
 
             destroy:function () {
@@ -92,9 +95,7 @@ define([
                 this.inspectable = false;
             },
 
-            supportsObject:function (object, type) {
-
-            },
+            supportsObject:function (object, type) {},
 
             showWarning:function () {
                 if (!this.context.spa_eyeObj.hooked()) {
@@ -173,10 +174,7 @@ define([
                 this.currentPanel = childPanelName;
                 this.inspectable = (childPanelName === childPanel.VIEW);
 
-                this['on'
-                    + childPanelName.charAt(0).toUpperCase()
-                    + childPanelName.slice(1).toLowerCase()
-                    + 'Button']();
+                this.panels[childPanelName].render();
             },
 
             getOptionsMenuItems:function (context) {
@@ -235,30 +233,6 @@ define([
                     views:this.context.spa_eyeObj.getViews()
                 };
                 spa_eyePanel.view_template.Views.replace(args, this.panelNode, null);
-                /*//this.renderViews(this.context.spa_eyeObj.getViews());
-
-
-                 var args = {
-                 sections: [new ChildSection({
-                 title:"all",
-                 name:"All",
-                 data:Obj.bindFixed(this.context.spa_eyeObj.getViews,this.context.spa_eyeObj)
-                 })],
-                 mainPanel: this
-                 };
-
-                 //ModelReps.DirTablePlate.tag.replace(args, this.panelNode);*/
-            },
-
-            onCollectionButton:function () {
-                var args = {
-                    collections:this.context.spa_eyeObj.getCollections()
-                };
-                spa_eyePanel.collection_template.Collections.replace(args, this.panelNode, null);
-            },
-
-            onModelButton:function () {
-                this.panels.model.render();
             },
 
             search:function (key) {
@@ -282,14 +256,12 @@ define([
                 if (this.currentPanel === Firebug.spa_eyePanel.childPanel.MODEL)
                     this.panels.model.setModelPropertyValue(row, value);
             }
-
         });
 
 // ********************************************************************************************* //
 // Panel UI (Domplate)
 // ********************************************************************************************* //
         with (Domplate) {
-
             Firebug.spa_eyePanel.prototype.reload_template = domplate({
                 tag:DIV({onclick:"$handleClick", class:"$data|computeVisibility"}, Locale.$STR("spa_eye.reload")),
 
@@ -302,39 +274,7 @@ define([
                 }
 
             });
-
-            Firebug.spa_eyePanel.view_template = domplate({
-                Views:FOR("item", "$views",
-                    DIV({_view:"$item", onclick:"$handleClick"}, "$item|formatName")
-                ),
-                handleClick:function (event) {
-
-                    var selectedView = event.target && event.target.view;
-                    var context = Firebug.currentContext;
-                    var win = context.window.wrappedJSObject;
-                    if (selectedView) {
-                        Firebug.Inspector.highlightObject([selectedView.el],
-                            context,
-                            "frame",
-                            null,
-                            ["#ff0000", {background:"#0000ff", border:"#ff0000"}]);
-                    }
-                },
-                formatName:function (obj) {
-                    var templates = obj.inferredTemplates;
-                    var tIds = "";
-
-                    if (templates) {
-                        for (var i = 0; i < templates.length; i++) {
-                            tIds = tIds + templates[i] + " ";
-                        }
-                    }
-                    return obj.cid + (tIds ? " (" + tIds + ")" : '');
-                }
-
-            });
         }
-
 
 // ********************************************************************************************* //
 // Registration
