@@ -32,7 +32,7 @@ function (Firebug, FBTrace, Css, Str, DOMEditor, Dom, ChildSection, ModelReps) {
                 sections: this.sections.sort(function (a, b) {
                     return a.order > b.order;
                 }),
-                mainPanel: this.parent
+                mainPanel: this
             };
             ModelReps.DirTablePlate.tag.replace(args, this.parent.panelNode);
         },

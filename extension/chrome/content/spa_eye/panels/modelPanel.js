@@ -36,7 +36,7 @@ define([
                     sections:this.sections.sort(function (a, b) {
                         return a.order > b.order;
                     }),
-                    mainPanel:this.parent
+                    mainPanel: this
                 };
 
                 ModelReps.DirTablePlate.tag.replace(args, this.parent.panelNode);
@@ -221,13 +221,17 @@ define([
                 delete this.context.spa_eyeObj._pinned_models[model.cid];
             },
 
-            showRelatedEvents:function (row) {
+            showRelatedEvents: function (row) {
                 Firebug.chrome.selectSidePanel("event");
                 var eventPanel = this.context.getPanel('event', true);
                 eventPanel.showEvents(row.domObject.value, this.context);
             },
 
-            setModelPropertyValue:function (row, value) {
+// ********************************************************************************************* //
+// Editor
+// ********************************************************************************************* //
+
+            setPropertyValue: function (row, value) {
                 var member = row.domObject;
                 var name = member.name;
                 var key = this._getRowName(row);
@@ -251,7 +255,7 @@ define([
                     function failed(exc, context) {
                         try {
                             if (FBTrace.DBG_SPA_EYE) {
-                                FBTrace.sysout("spa_eye; setModelPropertyValue evalute FAILED", exec);
+                                FBTrace.sysout("spa_eye; setPropertyValue evalute FAILED", exec);
                             }
                         } catch (exc) {
                         }
@@ -260,7 +264,7 @@ define([
                 this.refresh(this._getLogicalParentRow(row) || row);
             },
 
-            editModelProperty:function (row, editValue) {
+            editProperty: function (row, editValue) {
                 var model = row.domObject;
                 var object = Firebug.DOMBasePanel.prototype.getRowObject(row);
                 if (!editValue) {
@@ -283,7 +287,11 @@ define([
                 Firebug.Editor.startEditing(row, editValue);
             },
 
-            _getLogicalParentRow:function (row) {
+// ********************************************************************************************* //
+// Utils
+// ********************************************************************************************* //
+
+            _getLogicalParentRow: function (row) {
                 var row_level = parseInt(row.getAttribute("level"), 10);
                 if (row_level === 0) {
                     return null;
@@ -361,11 +369,6 @@ define([
                     this._bubbleUpRow(result[0]);
                 }
             },
-
-// ********************************************************************************************* //
-// On Model Save
-// ********************************************************************************************* //
-
 
 // ********************************************************************************************* //
 // Bubble up and highlight row
