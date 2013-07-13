@@ -80,8 +80,8 @@ define([
                 return sections;
             },
 
-            search:function (key) {
-                if (!key) {
+            search:function (pattern) {
+                if (!pattern) {
                     this._filter(function (row) {
                         Css.removeClass(row, 'hide');
                     }, this);
@@ -94,26 +94,37 @@ define([
                     if (row.domObject.value) {
                         var model = row.domObject.value,
                             cid = row.domObject.name,
-                            sb = key,
                             type = 'attr',
-                            re = null,
-                            found = false;
+                            found = false,
+                            rKey = null,
+                            rValue = null,
 
-                        if (/^#/.test(key)) {
-                            sb = key.substr(1);
+                            kPattern = pattern,
+                            vPattern = pattern;
+
+                        if (/^#/.test(pattern)) {
+                            kPattern = pattern.substr(1);
                             type = 'cid';
+                        } else if (/:/.test(pattern)) {
+                            var match = /^([^:]*):(.*)$/.exec(pattern);
+                            if (pattern.trim() !== ':' && match) {
+                                kPattern = match[1].trim();
+                                vPattern = match[2].trim();
+                            }
                         }
 
-                        re = new RegExp(sb);
+                        rKey = new RegExp(kPattern),
+                        rValue = new RegExp(vPattern);
 
                         if (type === 'cid') {
-                            if (re.test(cid)) {
+                            if (rKey.test(cid)) {
                                 found = true;
                             }
                         } else {
                             var attrs = model.attributes;
                             for (var a in attrs) {
-                                if (re.test(a) || re.test(attrs[a])) {
+                                if ((kPattern === vPattern && (rKey.test(a) || rKey.test(attrs[a])))
+                                    || (rKey.test(a) && rValue.test(attrs[a]))) {
                                     found = true;
                                     break;
                                 }
