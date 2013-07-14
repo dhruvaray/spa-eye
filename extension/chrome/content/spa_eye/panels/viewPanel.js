@@ -1,59 +1,92 @@
-/* See license.txt for terms of usage */
-/*jshint esnext:true, es5:true, curly:false */
-/*global FBTrace:true, XPCNativeWrapper:true, Window:true, define:true */
-
 define([
     "firebug/firebug",
+    "firebug/lib/object",
     "firebug/lib/trace",
-    "firebug/lib/css",
-    "firebug/lib/string",
-    "firebug/dom/domEditor",
+    "firebug/lib/locale",
+    "firebug/lib/domplate",
     "firebug/lib/dom",
+    "firebug/lib/css",
+    "firebug/lib/events",
+    "firebug/chrome/reps",
 
-    "spa_eye/dom/section",
-    "spa_eye/dom/modelReps",
-
-    "spa_eye/auditPanel",
-    "spa_eye/eventPanel"
+    "spa_eye/lib/dom"
 ],
-function (Firebug, FBTrace, Css, Str, DOMEditor, Dom, ChildSection, ModelReps) {
+function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, FirebugReps, DomUtil) {
 
-    var PANEL = function (context, parent) {
-        this.context = context;
-        this.parent = parent;
-        this.sections = this.createSections();
-    };
+// ********************************************************************************************* //
 
-    PANEL.prototype = {
-        constructor: PANEL,
-        name: 'view',
-        render: function () {
-            var args = {
-                sections: this.sections.sort(function (a, b) {
-                    return a.order > b.order;
-                }),
-                mainPanel: this
-            };
-            ModelReps.DirTablePlate.tag.replace(args, this.parent.panelNode);
-        },
-
-        createSections: function () {
-            var sections = [];
-            var allViews = new ChildSection({
-                name: 'all_views',
-                title: 'All Views',
-                parent: this.panelNode,
-                order: 0,
-
-                container: 'allViewsDiv',
-                body: 'allViewsDivBody',
-
-                data: FBL.bindFixed(this.context.spa_eyeObj.getViews, this.context.spa_eyeObj)
-            });
-            sections.push(allViews);
-            return sections;
+        var viewPanel = Firebug.viewPanel = function () {
         }
-    };
 
-    return PANEL;
-});
+
+        viewPanel.prototype = Obj.extend(Firebug.Panel, {
+            name:"view",
+            title:Locale.$STR("spa_eye.script.view.title"),
+
+            parentPanel:"script",
+            order:4,
+
+            initialize:function () {
+                Firebug.Panel.initialize.apply(this, arguments);
+            },
+
+            destroy:function (state) {
+                Firebug.Panel.destroy.apply(this, arguments);
+            },
+
+            updateSelection:function (frame) {
+                // this method is called while the debugger has halted JS,
+                // so failures don't show up in FBS_ERRORS
+                try {
+                    this.show(frame);
+                }
+                catch (exc) {
+                    if (FBTrace.DBG_ERRORS && FBTrace.DBG_STACK)
+                        FBTrace.sysout("updateSelection FAILS " + exc, exc);
+                }
+            },
+
+            show:function () {
+                var partial = Locale.$STR("spa_eye.view.noview");
+                var source = "__p";
+
+                Firebug.CommandLine.evaluate(source, this.context, null, this.context.getCurrentGlobal(),
+                    function success(result, context) {
+                        partial = result;
+                    },
+                    function failed(result, context) {
+                        var exc = result;
+                        if (exc.source !== source || exc.name !== "ReferenceError")
+                            partial = exc.message;
+                    }
+                );
+
+                //this.registerAppStyleSheets();
+                this.panelNode.innerHTML = partial;
+                //this.unregisterAppStyleSheets();
+            },
+
+            registerAppStyleSheets:function () {
+                var hrefs = DomUtil.getAllWebContextStyleSheets(this.context.window.document);
+                for (var i = 0; i < hrefs.length; i++)
+                    Firebug.registerStylesheet(hrefs[i]);
+            },
+
+            unregisterAppStyleSheets:function () {
+                var hrefs = DomUtil.getAllWebContextStyleSheets(this.context.window.document);
+                for (var i = 0; i < hrefs.length; i++)
+                    Firebug.unregisterStylesheet(hrefs[i]);
+            }
+
+        });
+
+
+// ********************************************************************************************* //
+// Registration
+
+        Firebug.registerPanel(Firebug.viewPanel);
+        return Firebug.viewPanel;
+
+// ********************************************************************************************* //
+
+    });

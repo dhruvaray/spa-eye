@@ -13,8 +13,6 @@ define([
     "spa_eye/dom/section",
     "spa_eye/dom/modelReps",
 
-    "spa_eye/auditPanel",
-    "spa_eye/eventPanel"
 ],
     function (Firebug, FBTrace, Css, Str, DOMEditor, Dom, ChildSection, ModelReps) {
 

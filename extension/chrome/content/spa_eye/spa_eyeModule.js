@@ -87,7 +87,7 @@ function(FBL, FBTrace, Locale, Events, URI, BBHook, spa_eyeObj) {
 
         onObserverChange: function(observer) {
             if (this.hasObservers()) {
-                // There are observers (panels) using this model,
+                // There are observers (plates) using this model,
                 // let's activate necessary service/server hooks.
             } else {
                 // There are no observer using this model, let's clean up

@@ -12,11 +12,15 @@ define([
     "firebug/lib/string",
     "firebug/dom/domEditor",
 
-    "spa_eye/panels/modelPanel",
-    "spa_eye/panels/collectionPanel",
-    "spa_eye/panels/viewPanel"
+    "spa_eye/plates/modelPlate",
+    "spa_eye/plates/collectionPlate",
+    "spa_eye/plates/viewPlate",
+
+    "spa_eye/panels/viewPanel",
+    "spa_eye/panels/auditPanel",
+    "spa_eye/panels/eventPanel"
 ],
-    function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, DOMEditor, ModelPanel, CollectionPanel, ViewPanel) {
+    function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, DOMEditor, ModelPlate, CollectionPlate, ViewPlate) {
 
         Firebug.registerStringBundle("chrome://spa_eye/locale/spa_eye.properties");
         Firebug.registerStylesheet("chrome://spa_eye/skin/models.css");
@@ -36,6 +40,7 @@ define([
             title: Locale.$STR("spa_eye.title"),
             searchable: true,
             editable: true,
+            editor: undefined,
 
             enableA11y: true,
             deriveA11yFrom:"dom",
@@ -48,10 +53,10 @@ define([
                 Firebug.registerUIListener(this);
                 Firebug.Panel.initialize.apply(this, arguments);
 
-                // Initialize panels
-                this.panels.model = new ModelPanel(this.context, this);
-                this.panels.collection = new CollectionPanel(this.context, this);
-                this.panels.view = new ViewPanel(this.context, this);
+                // Initialize plates
+                this.panels.model = new ModelPlate(this.context, this);
+                this.panels.collection = new CollectionPlate(this.context, this);
+                this.panels.view = new ViewPlate(this.context, this);
             },
 
             destroy:function () {
