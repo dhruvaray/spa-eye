@@ -93,7 +93,7 @@ function(FBL, FBTrace, Locale, Events, URI, BBHook, spa_eyeObj) {
                 // There are no observer using this model, let's clean up
                 // registered hooks.
             }
-        },
+        }
 
 
     });
@@ -101,7 +101,9 @@ function(FBL, FBTrace, Locale, Events, URI, BBHook, spa_eyeObj) {
 // ********************************************************************************************* //
 // Registration
 
+        Firebug.registerStringBundle("chrome://spa_eye/locale/spa_eye.properties");
         Firebug.registerActivableModule(Firebug.spa_eyeModule);
+
         return Firebug.spa_eyeModule;
 
 // ********************************************************************************************* //

@@ -3,20 +3,13 @@ define([
     "firebug/lib/object",
     "firebug/lib/trace",
     "firebug/lib/locale",
-    "firebug/lib/domplate",
-    "firebug/lib/dom",
-    "firebug/lib/css",
-    "firebug/lib/events",
-    "firebug/chrome/reps",
-
-    "spa_eye/lib/dom"
+    "spa_eye/panels/basePanel"
 ],
-function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, FirebugReps, DomUtil) {
+function (Firebug, Obj, FBTrace, Locale) {
 
-// ********************************************************************************************* //
 
         var viewPanel = Firebug.viewPanel = function () {
-        }
+        };
 
 
         viewPanel.prototype = Obj.extend(Firebug.Panel, {
@@ -50,7 +43,7 @@ function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, FirebugReps
                 var partial = Locale.$STR("spa_eye.view.noview");
                 var source = "__p";
 
-                Firebug.CommandLine.evaluate(source, this.context, null, this.context.getCurrentGlobal(),
+                Firebug.CommandLine.evaluate(source, Firebug.currentContext, null, Firebug.currentContext.getCurrentGlobal(),
                     function success(result, context) {
                         partial = result;
                     },
@@ -61,22 +54,11 @@ function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, FirebugReps
                     }
                 );
 
-                //this.registerAppStyleSheets();
+
                 this.panelNode.innerHTML = partial;
-                //this.unregisterAppStyleSheets();
-            },
 
-            registerAppStyleSheets:function () {
-                var hrefs = DomUtil.getAllWebContextStyleSheets(this.context.window.document);
-                for (var i = 0; i < hrefs.length; i++)
-                    Firebug.registerStylesheet(hrefs[i]);
-            },
-
-            unregisterAppStyleSheets:function () {
-                var hrefs = DomUtil.getAllWebContextStyleSheets(this.context.window.document);
-                for (var i = 0; i < hrefs.length; i++)
-                    Firebug.unregisterStylesheet(hrefs[i]);
             }
+
 
         });
 

@@ -1,5 +1,4 @@
 /* See license.txt for terms of usage */
-
 define([
     "firebug/firebug",
     "firebug/lib/object",
@@ -10,20 +9,19 @@ define([
     "firebug/lib/css",
     "firebug/lib/events",
     "firebug/lib/string",
-    "firebug/dom/domEditor",
+    //"firebug/dom/domEditor",
 
     "spa_eye/plates/modelPlate",
     "spa_eye/plates/collectionPlate",
     "spa_eye/plates/viewPlate",
 
+    "spa_eye/panels/basePanel",
+
     "spa_eye/panels/viewPanel",
     "spa_eye/panels/auditPanel",
     "spa_eye/panels/eventPanel"
 ],
-    function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, DOMEditor, ModelPlate, CollectionPlate, ViewPlate) {
-
-        Firebug.registerStringBundle("chrome://spa_eye/locale/spa_eye.properties");
-        Firebug.registerStylesheet("chrome://spa_eye/skin/models.css");
+function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, ModelPlate, CollectionPlate, ViewPlate) {
 
         var NetRequestEntry = Firebug.NetMonitor.NetRequestEntry;
 
@@ -39,7 +37,7 @@ define([
             name: "spa_eye",
             title: Locale.$STR("spa_eye.title"),
             searchable: true,
-            editable: true,
+            //editable: true,
             editor: undefined,
 
             enableA11y: true,
@@ -261,6 +259,11 @@ define([
             setPropertyValue: function() {
                 var p = this.getCurrentPanel();
                 return p && p.setPropertyValue && p.setPropertyValue.apply(p, arguments);
+            },
+
+            editProperty: function () {
+                var p = this.getCurrentPanel();
+                return p && p.editProperty && p.editProperty.apply(p, arguments);
             }
         });
 
@@ -286,7 +289,6 @@ define([
 // Registration
 
         Firebug.registerPanel(Firebug.spa_eyePanel);
-        Firebug.registerStylesheet("chrome://spa_eye/skin/spa_eye.css");
 
         return Firebug.spa_eyePanel;
 

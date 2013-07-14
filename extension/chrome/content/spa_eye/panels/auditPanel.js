@@ -8,13 +8,11 @@ define([
     "firebug/lib/css",
     "firebug/lib/events",
     "firebug/chrome/reps",
-    "spa_eye/lib/uri"
+    "spa_eye/lib/uri",
+
+    "spa_eye/panels/basePanel"
 ],
 function(Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, FirebugReps, URI){
-
-    Firebug.registerStringBundle("chrome://spa_eye/locale/spa_eye.properties");
-    Firebug.registerStylesheet("chrome://spa_eye/skin/models.css");
-    Firebug.registerStylesheet("chrome://spa_eye/skin/spa_eye.css");
 
 // ********************************************************************************************* //
 
