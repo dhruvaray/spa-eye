@@ -27,7 +27,7 @@ function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, DOMEdi
 
         var spa_eyePanel = Firebug.spa_eyePanel = function spa_eyePanel() {
         };
-        var childPanel = Firebug.spa_eyePanel.childPanel = {
+        var childPlate = Firebug.spa_eyePanel.childPlate = {
             MODEL:'model',
             COLLECTION:'collection',
             VIEW:'view'
@@ -43,18 +43,18 @@ function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, DOMEdi
             enableA11y: true,
             deriveA11yFrom:"dom",
 
-            currentPanel: childPanel.MODEL,
-            panels: null,
+            currentPlate: childPlate.MODEL,
+            plates: null,
 
             initialize:function () {
-                this.panels = {};
+                this.plates = {};
                 Firebug.registerUIListener(this);
                 Firebug.Panel.initialize.apply(this, arguments);
 
                 // Initialize plates
-                this.panels.model = new ModelPlate(this.context, this);
-                this.panels.collection = new CollectionPlate(this.context, this);
-                this.panels.view = new ViewPlate(this.context, this);
+                this.plates.model = new ModelPlate(this.context, this);
+                this.plates.collection = new CollectionPlate(this.context, this);
+                this.plates.view = new ViewPlate(this.context, this);
             },
 
             destroy:function () {
@@ -77,7 +77,7 @@ function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, DOMEdi
                 var active = !this.showWarning();
 
                 if (active) {
-                    this.selectChildPanel();
+                    this.selectChildPlate();
                 }
             },
 
@@ -132,7 +132,7 @@ function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, DOMEdi
                     buttons.push({
                             label:"spa_eye.refresh",
                             className:"refresh",
-                            command:FBL.bindFixed(this.selectChildPanel, this)
+                            command:FBL.bindFixed(this.selectChildPlate, this)
                         },
                         "-",
                         {
@@ -142,7 +142,7 @@ function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, DOMEdi
                             checked:true,
                             className:"toolbar-text-button fbInternational",
                             tooltiptext:"spa_eye.models",
-                            command:FBL.bindFixed(this.selectChildPanel, this, childPanel.MODEL)
+                            command:FBL.bindFixed(this.selectChildPlate, this, childPlate.MODEL)
                         },
                         {
                             id:"spa_eye_panel_button_collection",
@@ -150,7 +150,7 @@ function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, DOMEdi
                             type:"radio",
                             className:"toolbar-text-button fbInternational",
                             tooltiptext:"spa_eye.collections",
-                            command:FBL.bindFixed(this.selectChildPanel, this, childPanel.COLLECTION)
+                            command:FBL.bindFixed(this.selectChildPlate, this, childPlate.COLLECTION)
                         },
                         {
                             id:"spa_eye_panel_button_view",
@@ -158,37 +158,37 @@ function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, DOMEdi
                             type:"radio",
                             className:"toolbar-text-button fbInternational",
                             tooltiptext:"spa_eye.views",
-                            command:FBL.bindFixed(this.selectChildPanel, this, childPanel.VIEW)
+                            command:FBL.bindFixed(this.selectChildPlate, this, childPlate.VIEW)
                         });
                 }
                 return buttons;
             },
 
-            selectChildPanel:function (cpName) {
-                cpName = cpName || this.currentPanel;
+            selectChildPlate:function (cpName) {
+                cpName = cpName || this.currentPlate;
                 if (!cpName) return false;
 
                 var listener = this.context.spa_eyeObj._spaHook.listener,
                     chrome = Firebug.chrome;
 
-                if (cpName !== this.currentPanel) {
-                    listener.removeListener(this.getCurrentPanel());
+                if (cpName !== this.currentPlate) {
+                    listener.removeListener(this.getCurrentPlate());
                 }
 
-                Object.keys(childPanel).forEach(function (key) {
-                    chrome.$('spa_eye_panel_button_' + childPanel[key]).checked = false;
+                Object.keys(childPlate).forEach(function (key) {
+                    chrome.$('spa_eye_panel_button_' + childPlate[key]).checked = false;
                 });
                 chrome.$('spa_eye_panel_button_' + cpName).checked = true;
 
-                this.currentPanel = cpName;
-                this.inspectable = (cpName === childPanel.VIEW);
+                this.currentPlate = cpName;
+                this.inspectable = (cpName === childPlate.VIEW);
 
-                listener.addListener(this.getCurrentPanel());
-                this.getCurrentPanel().render();
+                listener.addListener(this.getCurrentPlate());
+                this.getCurrentPlate().render();
             },
 
-            getCurrentPanel: function(panelName) {
-                return this.panels[panelName || this.currentPanel];
+            getCurrentPlate: function(plateName) {
+                return this.plates[plateName || this.currentPlate];
             },
 
             getOptionsMenuItems:function (context) {
@@ -214,9 +214,9 @@ function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, DOMEdi
                 var row = Dom.getAncestorByClass(target, "memberRow");
                 var items = [];
                 if (row && row.domObject && (0 === parseInt(row.getAttribute('level'), 10))) {
-                    var cp = this.panels[this.currentPanel];
+                    var cp = this.plates[this.currentPlate];
 
-                    if (this.currentPanel === childPanel.MODEL) {
+                    if (this.currentPlate === childPlate.MODEL) {
                         var model = row.domObject.value;
 
                         items.push(
@@ -245,7 +245,7 @@ function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, DOMEdi
             },
 
             search: function () {
-                var p = this.getCurrentPanel();
+                var p = this.getCurrentPlate();
                 return p && p.search && p.search.apply(p, arguments);
             },
 
@@ -257,12 +257,12 @@ function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, DOMEdi
             },
 
             setPropertyValue: function() {
-                var p = this.getCurrentPanel();
+                var p = this.getCurrentPlate();
                 return p && p.setPropertyValue && p.setPropertyValue.apply(p, arguments);
             },
 
             editProperty: function () {
-                var p = this.getCurrentPanel();
+                var p = this.getCurrentPlate();
                 return p && p.editProperty && p.editProperty.apply(p, arguments);
             }
         });
