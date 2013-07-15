@@ -9,7 +9,7 @@ define([
     "firebug/lib/css",
     "firebug/lib/events",
     "firebug/lib/string",
-    //"firebug/dom/domEditor",
+    "firebug/dom/domEditor",
 
     "spa_eye/plates/modelPlate",
     "spa_eye/plates/collectionPlate",
@@ -21,7 +21,7 @@ define([
     "spa_eye/panels/auditPanel",
     "spa_eye/panels/eventPanel"
 ],
-function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, ModelPlate, CollectionPlate, ViewPlate) {
+function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, DOMEditor, ModelPlate, CollectionPlate, ViewPlate) {
 
         var NetRequestEntry = Firebug.NetMonitor.NetRequestEntry;
 
@@ -37,7 +37,7 @@ function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, ModelP
             name: "spa_eye",
             title: Locale.$STR("spa_eye.title"),
             searchable: true,
-            //editable: true,
+            editable: true,
             editor: undefined,
 
             enableA11y: true,
