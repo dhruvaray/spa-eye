@@ -130,14 +130,12 @@ function(FBTrace, Http, Events, Dom, SHA, DOM, URI) {
                 var _setProxy = win.Backbone.Model.prototype.set;
                 var self = this;
                 win.Backbone.Model.prototype.set = function(attributes,options) {
-                    var result = _setProxy.apply(this, Array.prototype.slice.call(arguments));
-                    self.writeModelAudit(URI.getEndPoint(win.location.href), this, this);
                     if (!this.save._proxied) {
                         var _saveProxy = this.save;
                         this.save = function(){
                             win._cm = this;
                             self.writeModelAudit(URI.getEndPoint(win.location.href), this, "Saved attributes");
-                            _saveProxy.apply(this,arguments);
+                            _saveProxy.apply(this, Array.slice(arguments));
                         };
                         this.save._proxied = true;
                     }
@@ -147,11 +145,13 @@ function(FBTrace, Http, Events, Dom, SHA, DOM, URI) {
                         this.fetch = function(){
                             win._cm = this;
                             self.writeModelAudit(URI.getEndPoint(win.location.href), this, "Fetched attributes");
-                            _fetchProxy.apply(this,arguments);
+                            _fetchProxy.apply(this, Array.slice(arguments));
                         };
                         this.fetch._proxied = true;
                     }
 
+                    var result = _setProxy.apply(this, Array.slice(arguments));
+                    self.writeModelAudit(URI.getEndPoint(win.location.href), this, this);
                     Events.dispatch(self.listener.fbListeners, 'onModelSet', [this]);
                     return result;
                 }
