@@ -3,12 +3,13 @@ define([
     "firebug/lib/object",
     "firebug/lib/trace",
     "firebug/lib/locale",
+    "firebug/lib/domplate",
 
     "spa_eye/panels/basePanel",
     "spa_eye/dom/section",
     "spa_eye/dom/modelReps"
 ],
-function (Firebug, Obj, FBTrace, Locale, ModelReps) {
+function (Firebug, Obj, FBTrace, Locale, Domplate) {
 
     var viewPanel = Firebug.viewPanel = function () {
     };
