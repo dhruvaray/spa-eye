@@ -256,14 +256,16 @@ function(FBTrace, Http, Events, Dom, SHA, DOM, URI) {
                     if (!this.hooked) {
                         try {
                             this.win = win;
+                            this.hooked = true;
                             this.registerWPHooks(win);
                             this.registerHooks(win);
-                            this.hooked = true;
+
                             if (FBTrace.DBG_SPA_EYE){
                                 FBTrace.sysout("spa_eye; Successfully registered Backbone hooks for spa-eye module");
                             }
 
                         } catch (e) {
+                            this.hooked = false;
                             if (FBTrace.DBG_ERRORS)
                                 FBTrace.sysout("Could not register Backbone hooks for spa_eye", e);
                         }
@@ -283,6 +285,17 @@ function(FBTrace, Http, Events, Dom, SHA, DOM, URI) {
                     this.win._views = [];
                     this.win._collections = [];
                 }
+            },
+
+            registerContentLoadedHook: function(){
+                var self = this;
+                var win = this.context.window.wrappedJSObject;
+                var register = function(){
+                    self.registerBBHooks(win);
+                };
+                win.document.addEventListener("afterscriptexecute",register);
+                //probably not required.
+                win.addEventListener("load",register);
             },
 
             models: function(){

@@ -101,12 +101,18 @@ function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, DOMEdi
             supportsObject:function (object, type) {},
 
             showWarning:function () {
-                if (!this.context.spa_eyeObj.hooked()) {
-                    this.showNotHooked();
-                } else {
-                    return false;
-                }
-                return true;
+
+                //TODO : Revisit
+                var scriptPanel = undefined;//Firebug.currentContext.getPanel("script", true);
+                var hooked = this.context.spa_eyeObj.hooked();
+                var warn = scriptPanel ?
+                    !hooked || scriptPanel.showWarning() :
+                    !hooked;
+
+                //Firebug.chrome.selectPanel("spa_eye");
+
+                return warn ? this.showNotHooked() : false;
+
             },
 
             showNotHooked:function () {
@@ -275,6 +281,8 @@ function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, DOMEdi
                 tag:DIV({onclick:"$handleClick", class:"$data|computeVisibility"}, Locale.$STR("spa_eye.reload")),
 
                 handleClick:function (event) {
+
+                    Firebug.Options.setPref("javascript", "enabled", true);
                     Firebug.TabWatcher.reloadPageFromMemory(Firebug.currentContext);
                 },
 

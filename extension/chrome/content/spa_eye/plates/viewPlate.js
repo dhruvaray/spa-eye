@@ -10,7 +10,7 @@ define([
     "firebug/lib/dom",
 
     "spa_eye/dom/section",
-    "spa_eye/dom/modelReps",
+    "spa_eye/dom/modelReps"
 
 ],
 function (Firebug, FBTrace, Css, Str, Dom, ChildSection, ModelReps) {

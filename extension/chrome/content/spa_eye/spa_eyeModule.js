@@ -40,6 +40,7 @@ function(FBL, FBTrace, Locale, Events, URI, BBHook, spa_eyeObj) {
                     context: context
                 });
                 spObj._spaHook.cleanup();
+                spObj._spaHook.registerContentLoadedHook();
             }
         },
 
@@ -52,9 +53,6 @@ function(FBL, FBTrace, Locale, Events, URI, BBHook, spa_eyeObj) {
             }
         },
 
-        onCompilationUnit:function(context, url, kind) {
-            context.spa_eyeObj._spaHook.registerBBHooks(context.window.wrappedJSObject)
-        },
 
         onResponseBody: function(context, file) {
             var win = context.window.wrappedJSObject;
