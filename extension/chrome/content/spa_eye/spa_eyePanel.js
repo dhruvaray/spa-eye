@@ -74,7 +74,9 @@ function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, DOMEdi
                 var enabled = this.isEnabled();
                 if (!enabled) return;
 
-                var active = !this.showWarning();
+
+                var scriptPanel = this.context.getPanel('script');
+                var active = !this.showWarning() && !scriptPanel.showWarning();
 
                 if (active) {
                     this.selectChildPlate();
