@@ -135,7 +135,7 @@ function(FBTrace, Http, Events, Dom, SHA, DOM, URI) {
                         this.save = function(){
                             win._cm = this;
                             self.writeModelAudit(URI.getEndPoint(win.location.href), this, "Saved attributes");
-                            _saveProxy.apply(this, Array.slice(arguments));
+                            return _saveProxy.apply(this, Array.slice(arguments));
                         };
                         this.save._proxied = true;
                     }
@@ -145,7 +145,7 @@ function(FBTrace, Http, Events, Dom, SHA, DOM, URI) {
                         this.fetch = function(){
                             win._cm = this;
                             self.writeModelAudit(URI.getEndPoint(win.location.href), this, "Fetched attributes");
-                            _fetchProxy.apply(this, Array.slice(arguments));
+                            return _fetchProxy.apply(this, Array.slice(arguments));
                         };
                         this.fetch._proxied = true;
                     }

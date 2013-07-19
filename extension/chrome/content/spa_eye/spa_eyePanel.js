@@ -23,10 +23,7 @@ define([
 ],
 function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, DOMEditor, ModelPlate, CollectionPlate, ViewPlate) {
 
-        var NetRequestEntry = Firebug.NetMonitor.NetRequestEntry;
-
-        var spa_eyePanel = Firebug.spa_eyePanel = function spa_eyePanel() {
-        };
+        var spa_eyePanel = Firebug.spa_eyePanel = function spa_eyePanel() {};
         var childPlate = Firebug.spa_eyePanel.childPlate = {
             MODEL:'model',
             COLLECTION:'collection',

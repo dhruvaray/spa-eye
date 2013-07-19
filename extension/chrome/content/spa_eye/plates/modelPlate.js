@@ -15,7 +15,7 @@ define([
 ],
     function (Firebug, FBTrace, Css, Str, Dom, ChildSection, ModelReps) {
 
-
+        var NetRequestEntry = Firebug.NetMonitor.NetRequestEntry;
         var PANEL = function (context, parent) {
             this.context = context;
             this.parent = parent;
@@ -328,13 +328,19 @@ define([
             },
 
 // ********************************************************************************************* //
-// OnModelSet
+// OnModelSet and OnModelSave
 // ********************************************************************************************* //
 
-            onModelSet:function (model, type) {
+            onModelSet: function (model, type) {
                 this.sections.forEach(function (p) {
                     this._onModelSet(p, model, type);
                 }, this);
+            },
+
+            onModelSave: function (model, file) {
+                var isError = NetRequestEntry.isError(file);
+                var type = isError ? 'row-error' : 'row-success';
+                this.onModelSet(model, type);
             },
 
             _onModelSet:function (section, model, type) {
