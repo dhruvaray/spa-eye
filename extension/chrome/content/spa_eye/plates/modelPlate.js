@@ -4,16 +4,18 @@
 
 define([
     "firebug/firebug",
+    "firebug/lib/object",
     "firebug/lib/trace",
     "firebug/lib/css",
     "firebug/lib/string",
     "firebug/lib/dom",
 
     "spa_eye/dom/section",
-    "spa_eye/dom/modelReps"
+    "spa_eye/dom/modelReps",
+    "spa_eye/dom/domEditor"
 
 ],
-    function (Firebug, FBTrace, Css, Str, Dom, ChildSection, ModelReps) {
+    function (Firebug, Obj, FBTrace, Css, Str, Dom, ChildSection, ModelReps, DOMEditor) {
 
         var NetRequestEntry = Firebug.NetMonitor.NetRequestEntry;
         var PANEL = function (context, parent) {
@@ -22,10 +24,10 @@ define([
             this.sections = this.createSections();
         };
 
-        PANEL.prototype = {
+        PANEL.prototype = Obj.extend(DOMEditor, {
 
             constructor:PANEL,
-            name: 'model',
+            name:'model',
 
             render:function () {
 
@@ -33,7 +35,7 @@ define([
                     sections:this.sections.sort(function (a, b) {
                         return a.order > b.order;
                     }),
-                    mainPanel: this
+                    mainPanel:this
                 };
 
                 ModelReps.DirTablePlate.tag.replace(args, this.parent.panelNode);
@@ -111,7 +113,7 @@ define([
                         }
 
                         rKey = new RegExp(kPattern),
-                        rValue = new RegExp(vPattern);
+                            rValue = new RegExp(vPattern);
 
                         if (type === 'cid') {
                             if (rKey.test(cid)) {
@@ -229,97 +231,18 @@ define([
                 delete this.context.spa_eyeObj._pinned_models[model.cid];
             },
 
-            showRelatedEvents: function (row) {
+            showRelatedEvents:function (row) {
                 Firebug.chrome.selectSidePanel("event");
                 var eventPanel = this.context.getPanel('event', true);
                 eventPanel.showEvents(row.domObject.value, this.context);
             },
 
 // ********************************************************************************************* //
-// Editor
+// Editable
 // ********************************************************************************************* //
 
-            setPropertyValue: function (row, value) {
-                var member = row.domObject;
-                var name = member.name;
-                var key = this._getRowName(row);
-
-                var object = Firebug.DOMBasePanel.prototype.getRowObject(row);
-                if (name === 'this')
-                    return;
-
-                Firebug.CommandLine.evaluate(value,
-                    this.context,
-                    object,
-                    this.context.getCurrentGlobal(),
-                    function success(result, context) {
-                        if (FBTrace.DBG_SPA_EYE) {
-                            FBTrace.sysout("spa_eye; setPropertyValue evaluate success " +
-                                "object.set(" + name + ", " + result + ");");
-
-                        }
-                        object.set(name, result);
-                    },
-                    function failed(exc, context) {
-                        try {
-                            if (FBTrace.DBG_SPA_EYE) {
-                                FBTrace.sysout("spa_eye; setPropertyValue evalute FAILED", exec);
-                            }
-                        } catch (exc) {
-                        }
-                    });
-
-                this.refresh(this._getLogicalParentRow(row) || row);
-            },
-
-            editProperty: function (row, editValue) {
-                var model = row.domObject;
-                var object = Firebug.DOMBasePanel.prototype.getRowObject(row);
-                if (!editValue) {
-                    var propName = this._getRowName(row);
-                    var propValue = object && object.attributes[propName];
-
-                    var type = typeof propValue;
-
-                    if (type === "undefined" || type === "number" || type === "boolean")
-                        editValue = "" + propValue;
-                    else if (type === "string")
-                        editValue = "\"" + Str.escapeJS(propValue) + "\"";
-                    else if (propValue === null)
-                        editValue = "null";
-                    else if (object instanceof window.Window || object instanceof StackFrame.StackFrame)
-                        editValue = this._getRowName(row);
-                    else
-                        editValue = "this." + this._getRowName(row);
-                }
-                Firebug.Editor.startEditing(row, editValue);
-            },
-
-// ********************************************************************************************* //
-// Utils
-// ********************************************************************************************* //
-
-            _getLogicalParentRow: function (row) {
-                var row_level = parseInt(row.getAttribute("level"), 10);
-                if (row_level === 0) {
-                    return null;
-                }
-
-                var parent = row;
-                while (parent && parseInt(parent.getAttribute("level"), 10) !== (row_level - 1)) {
-                    parent = parent.previousSibling;
-                }
-                return parent;
-            },
-
-            _getRowName:function (row) {
-                var labelNode = row.getElementsByClassName("memberLabelCell").item(0);
-                return labelNode.textContent;
-            },
-
-            _getRowValue:function (row) {
-                var valueNode = row.getElementsByClassName("memberValueCell").item(0);
-                return valueNode.firstChild.repObject;
+            setValue:function (obj, key, value) {
+                obj.set(key, value);
             },
 
             refresh:function (row) {
@@ -331,13 +254,13 @@ define([
 // OnModelSet and OnModelSave
 // ********************************************************************************************* //
 
-            onModelSet: function (model, type) {
+            onModelSet:function (model, type) {
                 this.sections.forEach(function (p) {
                     this._onModelSet(p, model, type);
                 }, this);
             },
 
-            onModelSave: function (model, file) {
+            onModelSave:function (model, file) {
                 var isError = NetRequestEntry.isError(file);
                 var type = isError ? 'row-error' : 'row-success';
                 this.onModelSet(model, type);
@@ -431,7 +354,7 @@ define([
                     }, 2000);
                 }, 1000);
             }
-        };
+        });
 
         return PANEL;
 

@@ -21,9 +21,10 @@ define([
     "spa_eye/panels/auditPanel",
     "spa_eye/panels/eventPanel"
 ],
-function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, DOMEditor, ModelPlate, CollectionPlate, ViewPlate) {
+    function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, DOMEditor, ModelPlate, CollectionPlate, ViewPlate) {
 
-        var spa_eyePanel = Firebug.spa_eyePanel = function spa_eyePanel() {};
+        var spa_eyePanel = Firebug.spa_eyePanel = function spa_eyePanel() {
+        };
         var childPlate = Firebug.spa_eyePanel.childPlate = {
             MODEL:'model',
             COLLECTION:'collection',
@@ -31,17 +32,17 @@ function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, DOMEdi
         };
 
         Firebug.spa_eyePanel.prototype = Obj.extend(Firebug.ActivablePanel, {
-            name: "spa_eye",
-            title: Locale.$STR("spa_eye.title"),
-            searchable: true,
-            editable: true,
-            editor: undefined,
+            name:"spa_eye",
+            title:Locale.$STR("spa_eye.title"),
+            searchable:true,
+            editable:true,
+            editor:undefined,
 
-            enableA11y: true,
+            enableA11y:true,
             deriveA11yFrom:"dom",
 
-            currentPlate: childPlate.MODEL,
-            plates: null,
+            currentPlate:childPlate.MODEL,
+            plates:null,
 
             initialize:function () {
                 this.plates = {};
@@ -61,9 +62,10 @@ function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, DOMEdi
                 this.removeListener(this);
 
                 if (this.context.spa_eyeObj) {
-                    try{
+                    try {
                         this.context.spa_eyeObj._spaHook.listener.removeListener(this);
-                    }catch(e){}
+                    } catch (e) {
+                    }
                 }
             },
 
@@ -87,7 +89,8 @@ function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, DOMEdi
                     Firebug.spa_eyeModule.removeObserver(this);
             },
 
-            startInspecting:function () {},
+            startInspecting:function () {
+            },
 
             inspectNode:function (node) {
                 return false;
@@ -97,7 +100,8 @@ function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, DOMEdi
                 this.inspectable = false;
             },
 
-            supportsObject:function (object, type) {},
+            supportsObject:function (object, type) {
+            },
 
             showWarning:function () {
 
@@ -192,7 +196,7 @@ function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, DOMEdi
                 this.getCurrentPlate().render();
             },
 
-            getCurrentPlate: function(plateName) {
+            getCurrentPlate:function (plateName) {
                 return this.plates[plateName || this.currentPlate];
             },
 
@@ -229,19 +233,19 @@ function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, DOMEdi
                             {
                                 label:"Audit_Model",
                                 tooltiptext:"spa_eye.audit.title",
-                                command: Obj.bindFixed(cp.renderAuditForModel, cp, row)
+                                command:Obj.bindFixed(cp.renderAuditForModel, cp, row)
                             },
                             {
                                 label:(model
                                     && model.cid
                                     && this.context.spa_eyeObj._pinned_models[model.cid])
                                     ? "Unpin_this_model" : "Pin_this_model",
-                                command: Obj.bindFixed(cp.pinOptionChange, cp, row)
+                                command:Obj.bindFixed(cp.pinOptionChange, cp, row)
                             },
                             {
                                 label:"spa_eye.event.title",
                                 tooltiptext:"spa_eye.event.title",
-                                command: Obj.bindFixed(cp.showRelatedEvents, cp, row)
+                                command:Obj.bindFixed(cp.showRelatedEvents, cp, row)
                             }
                         );
                     }
@@ -249,27 +253,23 @@ function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, DOMEdi
                 return items;
             },
 
-            search: function () {
+            search:function () {
                 var p = this.getCurrentPlate();
                 return p && p.search && p.search.apply(p, arguments);
             },
 
-            getEditor: function (target, value) {
+            getEditor:function (target, value) {
                 if (!this.editor) {
                     this.editor = new DOMEditor(this.document);
                 }
                 return this.editor;
             },
 
-            setPropertyValue: function() {
+            setPropertyValue:function () {
                 var p = this.getCurrentPlate();
                 return p && p.setPropertyValue && p.setPropertyValue.apply(p, arguments);
-            },
-
-            editProperty: function () {
-                var p = this.getCurrentPlate();
-                return p && p.editProperty && p.editProperty.apply(p, arguments);
             }
+
         });
 
 // ********************************************************************************************* //
