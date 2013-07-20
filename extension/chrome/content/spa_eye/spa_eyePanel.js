@@ -36,6 +36,8 @@ define([
             title:Locale.$STR("spa_eye.title"),
             searchable:true,
             editable:true,
+            inspectable:true,
+            inspectHighlightColor: "green",
             editor:undefined,
 
             enableA11y:true,
@@ -43,6 +45,7 @@ define([
 
             currentPlate:childPlate.MODEL,
             plates:null,
+
 
             initialize:function () {
                 this.plates = {};
@@ -90,6 +93,7 @@ define([
             },
 
             startInspecting:function () {
+
             },
 
             inspectNode:function (node) {
@@ -97,23 +101,22 @@ define([
             },
 
             stopInspecting:function (node, canceled) {
-                this.inspectable = false;
+
             },
 
             supportsObject:function (object, type) {
+                var views = this.context.spa_eyeObj.getViews();
+                for (i=0;i<views.length;++i){
+                    if (views[i].el.innerHTML === object.innerHTML)
+                        return 1;
+                }
+                return 0;
             },
 
             showWarning:function () {
 
-                //TODO : Revisit
-                var scriptPanel = undefined;//Firebug.currentContext.getPanel("script", true);
                 var hooked = this.context.spa_eyeObj.hooked();
-                var warn = scriptPanel ?
-                    !hooked || scriptPanel.showWarning() :
-                    !hooked;
-
-                //Firebug.chrome.selectPanel("spa_eye");
-
+                var warn = !hooked;
                 return warn ? this.showNotHooked() : false;
 
             },
@@ -190,7 +193,6 @@ define([
                 chrome.$('spa_eye_panel_button_' + cpName).checked = true;
 
                 this.currentPlate = cpName;
-                this.inspectable = (cpName === childPlate.VIEW);
 
                 listener.addListener(this.getCurrentPlate());
                 this.getCurrentPlate().render();

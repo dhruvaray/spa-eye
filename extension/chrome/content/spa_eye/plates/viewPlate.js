@@ -34,6 +34,11 @@ function (Firebug, FBTrace, Css, Str, Dom, ChildSection, ModelReps) {
             ModelReps.DirTablePlate.tag.replace(args, this.parent.panelNode);
         },
 
+        onViewRender:function(){
+            this.sections = this.createSections();
+            this.render();
+        },
+
         createSections: function () {
             var sections = [];
             var allViews = new ChildSection({

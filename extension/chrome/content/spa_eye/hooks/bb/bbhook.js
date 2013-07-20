@@ -104,9 +104,11 @@ function(FBTrace, Http, Events, Dom, SHA, DOM, URI) {
                             }
                         };
 
+                        Events.dispatch(self.listener.fbListeners, 'onViewRender', [win._crv]);
+
                         if (data){
                             attachTemplatesToViews();
-                            return compiledTemplate(data,_);;
+                            return compiledTemplate(data,_);
                         }
 
                     }catch(e){
@@ -118,7 +120,8 @@ function(FBTrace, Http, Events, Dom, SHA, DOM, URI) {
                         if (win[proxiedTemplateRef]){
                             win[proxiedTemplateRef].source = win[proxiedTemplateRef].source || source;
                             attachTemplatesToViews();
-                            return win[proxiedTemplateRef].call(this, data, _);;
+                            Events.dispatch(self.listener.fbListeners, 'onViewRender', [win._crv]);
+                            return win[proxiedTemplateRef].call(this, data, _);
                         }
                         return undefined;
                     };
