@@ -39,6 +39,21 @@ function (Firebug, FBTrace, Css, Str, Dom, ChildSection, ModelReps) {
             this.render();
         },
 
+        expandSelectedView:function(index){
+            var node = this.parent.panelNode;
+            var rows = node.getElementsByClassName('memberRow');
+            if (rows[index]){
+                if (!Css.hasClass(rows[index], "opened")){
+                    ModelReps.DirTablePlate.toggleRow(rows[index]);
+                }
+            }
+            for (var i = 0; i<rows.length; i++){
+                if (Css.hasClass(rows[i], "opened") && index !== i){
+                    ModelReps.DirTablePlate.toggleRow(rows[i])
+                }
+            }
+        },
+
         createSections: function () {
             var sections = [];
             var allViews = new ChildSection({

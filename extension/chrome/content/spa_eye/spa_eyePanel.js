@@ -38,6 +38,7 @@ define([
             editable:true,
             inspectable:true,
             inspectHighlightColor: "green",
+            inspectedViewIndex:-1,
             editor:undefined,
 
             enableA11y:true,
@@ -92,23 +93,21 @@ define([
                     Firebug.spa_eyeModule.removeObserver(this);
             },
 
-            startInspecting:function () {
-
-            },
 
             inspectNode:function (node) {
+                if (this.currentPlate === childPlate.VIEW){
+                    this.plates.view.expandSelectedView(this.inspectedViewIndex);
+                }
                 return false;
-            },
-
-            stopInspecting:function (node, canceled) {
-
             },
 
             supportsObject:function (object, type) {
                 var views = this.context.spa_eyeObj.getViews();
                 for (i=0;i<views.length;++i){
-                    if (views[i].el.innerHTML === object.innerHTML)
+                    if (views[i].el.innerHTML === object.innerHTML){
+                        this.inspectedViewIndex=i;
                         return 1;
+                    }
                 }
                 return 0;
             },
