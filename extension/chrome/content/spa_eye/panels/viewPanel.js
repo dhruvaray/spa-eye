@@ -50,7 +50,7 @@ define([
                 ];
                 var data = {};
                 data[attr[0]] = Locale.$STR("spa_eye.script.view.nodata");
-                data[attr[1]] = Locale.$STR("spa_eye.script.view.notemplate");
+                data[attr[1]] = Locale.$STR("spa_eye.script.view.noviewselected");
 
                 var context = this.context;
 

@@ -95,7 +95,7 @@ define([
                         }
 
                         var attachTemplatesToViews = function () {
-                            var rendered = win._crv;
+                            var rendered = win.spa_eye.cv;
                             if (rendered) {
                                 var templates = rendered.inferredTemplates;
                                 if (templates.indexOf(script_id) == -1) {
@@ -104,7 +104,7 @@ define([
                             }
                         };
 
-                        Events.dispatch(self.listener.fbListeners, 'onViewRender', [win._crv]);
+                        Events.dispatch(self.listener.fbListeners, 'onViewRender', [win.spa_eye.cv]);
 
                         if (data) {
                             attachTemplatesToViews();
@@ -120,7 +120,7 @@ define([
                         if (win[proxiedTemplateRef]) {
                             win[proxiedTemplateRef].source = win[proxiedTemplateRef].source || source;
                             attachTemplatesToViews();
-                            Events.dispatch(self.listener.fbListeners, 'onViewRender', [win._crv]);
+                            Events.dispatch(self.listener.fbListeners, 'onViewRender', [win.spa_eye.cv]);
                             return win[proxiedTemplateRef].call(this, data, _);
                         }
                         return undefined;
@@ -136,9 +136,11 @@ define([
                     if (!this.save._proxied) {
                         var _saveProxy = this.save;
                         this.save = function () {
-                            win._cm = this;
+                            win.spa_eye.cm = this;
                             self.writeModelAudit(URI.getEndPoint(win.location.href), this, "Saved attributes");
-                            return _saveProxy.apply(this, Array.slice(arguments));
+                            var result = _saveProxy.apply(this, Array.slice(arguments));
+                            win.spa_eye.cm = undefined;
+                            return result;
                         };
                         this.save._proxied = true;
                     }
@@ -146,14 +148,17 @@ define([
                     if (!this.fetch._proxied) {
                         var _fetchProxy = this.fetch;
                         this.fetch = function () {
-                            win._cm = this;
+                            win.spa_eye.cm = this;
                             self.writeModelAudit(URI.getEndPoint(win.location.href), this, "Fetched attributes");
-                            return _fetchProxy.apply(this, Array.slice(arguments));
+                            var result = _fetchProxy.apply(this, Array.slice(arguments));
+                            win.spa_eye.cm = undefined;
+                            return result;
                         };
                         this.fetch._proxied = true;
                     }
-
+                    win.spa_eye.cm = this;
                     var result = _setProxy.apply(this, Array.slice(arguments));
+                    win.spa_eye.cm = undefined;
                     self.writeModelAudit(URI.getEndPoint(win.location.href), this, this);
                     Events.dispatch(self.listener.fbListeners, 'onModelSet', [this]);
                     return result;
@@ -287,9 +292,9 @@ define([
                 this.hooked = false;
                 if (this.win) {
                     this.win._templates = [];
-                    this.win._models = [];
-                    this.win._views = [];
-                    this.win._collections = [];
+                    this.win.spa_eye.models = [];
+                    this.win.spa_eye.views = [];
+                    this.win.spa_eye.collections = [];
                 }
             },
 
@@ -306,21 +311,21 @@ define([
 
             models:function () {
                 if (this.win) {
-                    return this.win._models;
+                    return this.win.spa_eye.models;
                 }
                 return [];
             },
 
             views:function () {
                 if (this.win) {
-                    return this.win._views;
+                    return this.win.spa_eye.views;
                 }
                 return [];
             },
 
             collections:function () {
                 if (this.win) {
-                    return this.win._collections;
+                    return this.win.spa_eye.collections;
                 }
                 return [];
             }
