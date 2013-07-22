@@ -53,7 +53,7 @@ define([
                     return false;
                 }
 
-                win._templates = win._templates || {};
+                win.spa_eye.templates = win.spa_eye.templates || {};
 
                 //Hook #2
                 win._.template = function (text, data, settings) {
@@ -67,7 +67,7 @@ define([
                         }
                         var script = DOM.getMatchingNode(win, "script", text)
                         var script_id = (script && script.id) ? script.id : SHA.getTextHash(text);
-                        var compiledTemplate = win._templates[script_id];
+                        var compiledTemplate = win.spa_eye.templates[script_id];
 
                         if (!compiledTemplate) {
                             compiledTemplate = _templateProxy.call(win._, text);
@@ -82,7 +82,7 @@ define([
                                     "data:text/javascript;fileName=" + script_id + ";," + f);
 
                                 // Record using script_id
-                                win._templates[script_id] = source;
+                                win.spa_eye.templates[script_id] = source;
 
                             } else {
                                 if (FBTrace.DBG_ERRORS)
@@ -291,7 +291,7 @@ define([
             cleanup:function () {
                 this.hooked = false;
                 if (this.win) {
-                    this.win._templates = [];
+                    this.win.spa_eye.templates = [];
                     this.win.spa_eye.models = [];
                     this.win.spa_eye.views = [];
                     this.win.spa_eye.collections = [];
