@@ -34,14 +34,14 @@ function (Firebug, FBTrace, Css, Str, Dom, ChildSection, ModelReps) {
             ModelReps.DirTablePlate.tag.replace(args, this.parent.panelNode);
         },
 
-        onViewRender:function(){
+        onViewRender: function() {
             this.sections = this.createSections();
             this.render();
         },
 
-        expandSelectedView:function(index){
+        expandSelectedView: function(index) {
             var node = this.parent.panelNode;
-            var rows = node.getElementsByClassName('memberRow');
+            var rows = node.getElementsByClassName('0level');
             var row = rows[index];
             if (row){
                 if (!Css.hasClass(row, "opened")){
