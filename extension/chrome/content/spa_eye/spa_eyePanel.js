@@ -37,7 +37,7 @@ define([
             searchable:true,
             editable:true,
             inspectable:true,
-            inspectHighlightColor: "green",
+            inspectHighlightColor:"green",
             inspectedViewIndex:-1,
             editor:undefined,
 
@@ -57,6 +57,12 @@ define([
                 this.plates.model = new ModelPlate(this.context, this);
                 this.plates.collection = new CollectionPlate(this.context, this);
                 this.plates.view = new ViewPlate(this.context, this);
+
+                /*var listener = this.context.spa_eyeObj._spaHook.listener;
+
+                 listener.addListener(this.context.getPanel("spa_eye:audit", true));
+                 listener.addListener(this.context.getPanel("spa_eye:event", true));
+                 listener.addListener(this.context.getPanel("spa_eye:script.view", true));*/
             },
 
             destroy:function () {
@@ -95,7 +101,7 @@ define([
 
 
             inspectNode:function (node) {
-                if (this.currentPlate === childPlate.VIEW){
+                if (this.currentPlate === childPlate.VIEW) {
                     this.plates.view.expandSelectedView(this.inspectedViewIndex);
                 }
                 return false;
@@ -103,9 +109,9 @@ define([
 
             supportsObject:function (object, type) {
                 var views = this.context.spa_eyeObj.getViews();
-                for (i=0;i<views.length;++i){
-                    if (views[i].el.innerHTML === object.innerHTML){
-                        this.inspectedViewIndex=i;
+                for (i = 0; i < views.length; ++i) {
+                    if (views[i].el.innerHTML === object.innerHTML) {
+                        this.inspectedViewIndex = i;
                         return 1;
                     }
                 }
@@ -182,9 +188,7 @@ define([
                 var listener = this.context.spa_eyeObj._spaHook.listener,
                     chrome = Firebug.chrome;
 
-                if (cpName !== this.currentPlate) {
-                    listener.removeListener(this.getCurrentPlate());
-                }
+                listener.removeListener(this.getCurrentPlate());
 
                 Object.keys(childPlate).forEach(function (key) {
                     chrome.$('spa_eye_panel_button_' + childPlate[key]).checked = false;

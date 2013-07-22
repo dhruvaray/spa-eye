@@ -7,70 +7,44 @@ define([
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/events",
-    "firebug/chrome/reps",
-    "spa_eye/lib/uri",
+    "firebug/dom/domReps",
+
     "spa_eye/panels/basePanel"
 ],
-function(Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, FirebugReps, URI){
+    function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, DOMReps) {
 
-    var eventPanel = Firebug.eventPanel = function(){}
-    eventPanel.prototype = Obj.extend(Firebug.Panel, {
-        name: "event",
-        title: Locale.$STR("spa_eye.event.title"),
+        var eventPanel = Firebug.eventPanel = function () {
+        }
+        eventPanel.prototype = Obj.extend(Firebug.Panel, {
+            name:"spa_eye:event",
+            title:Locale.$STR("spa_eye.event.title"),
 
-        parentPanel: "spa_eye",
-        tag: Firebug.DOMPanel.DirTable.tag,
-        order: 1,
+            parentPanel:"spa_eye",
+            order:1,
 
-        initialize: function() {
-            //Firebug.registerUIListener(this);
-            Firebug.Panel.initialize.apply(this, arguments);
-        },
+            initialize:function () {
+                Firebug.Panel.initialize.apply(this, arguments);
+                var listener = this.context.spa_eyeObj._spaHook.listener;
+                listener.addListener(this);
 
-        destroy: function(state) {
-            //Firebug.unRegisterUIListener(this);
-            Firebug.Panel.destroy.apply(this, arguments);
-        },
-        
-        showEvents: function(model, context) {
-            if (!model) return;
-            context.spa_eyeObj.currentEventModel = model;
+            },
 
-            var win = this.context.window.wrappedJSObject;
-            if(FBTrace.DBG_SPA_EYE){
-                FBTrace.sysout("spa_eye; show events for model - "+model.cid, model);
+            destroy:function (state) {
+                Firebug.Panel.destroy.apply(this, arguments);
+            },
+
+
+            show:function () {
+                var win = this.context.window.wrappedJSObject;
+                data = win.spa_eye.sequence;
+                DOMReps.DirTablePlate.tag.replace({object:data}, this.panelNode);
+            },
+
+            onSequenceRecordCreated:function (record) {
+                setTimeout(this.show, 2000, record);
             }
-            var objectResult = model._events;
-            objectResult && this.tag.replace({object: objectResult}, this.panelNode);
-        },
 
-        show: function() {
-            var cm = this.context.spa_eyeObj.currentEventModel;
-            if (!cm) {
-                FirebugReps.Warning.tag.replace({object: "spa_eye.event.nomodelselected"}, this.panelNode);
-            } else {
-                this.showEvents(cm, this.context);
-            }
-        },
-
-        getOptionsMenuItems: function(context){
-            return [
-                {
-                    label: "spa_eye.all",
-                    tooltiptext: "spa_eye.all",
-                    command: function(){}
-                },
-                "-",
-                {
-                    label: "spa_eye.refresh",
-                    tooltiptext: "spa_eye.refresh",
-                    command: Obj.bindFixed(this.refresh, this)
-                }
-            ];
-        },
-
-        refresh: function(){}
-    });
+        });
 
 // ********************************************************************************************* //
 // Templates
@@ -78,9 +52,9 @@ function(Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, FirebugReps,
 // ********************************************************************************************* //
 // Registration
 
-    Firebug.registerPanel(Firebug.eventPanel);
-    return Firebug.eventPanel;
+        Firebug.registerPanel(Firebug.eventPanel);
+        return Firebug.eventPanel;
 
 // ********************************************************************************************* //
-    
-});
+
+    });

@@ -1,5 +1,6 @@
 if (window.Backbone) {
     window.spa_eye = {};
+    window.spa_eye.sequence = {};
     var _ModelProxy = window.Backbone.Model;
     if (_ModelProxy) {
         var _ModelProxyProto = window.Backbone.Model.prototype;

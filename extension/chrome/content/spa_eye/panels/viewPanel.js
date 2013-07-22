@@ -15,7 +15,7 @@ define([
         };
 
         viewPanel.prototype = Obj.extend(Firebug.Panel, {
-            name:"view",
+            name:"spa_eye:script.view",
             title:Locale.$STR("spa_eye.script.view.title"),
 
             parentPanel:"script",
@@ -24,6 +24,9 @@ define([
 
             initialize:function () {
                 Firebug.Panel.initialize.apply(this, arguments);
+                var listener = this.context.spa_eyeObj._spaHook.listener;
+                listener.addListener(this);
+
             },
 
             destroy:function (state) {

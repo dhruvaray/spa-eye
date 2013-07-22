@@ -20,6 +20,8 @@ define([
         const Ci = Components.interfaces;
         const Cr = Components.results;
         const bbhook_wp = "chrome://spa_eye/content/hooks/bb/bbhook_wp.js";
+        const Operation = {SAVE:"save", FETCH:"fetch", SET:"set", VIEW:"render"};
+
 
 // ********************************************************************************************* //
 //  BBHook Class
@@ -104,6 +106,11 @@ define([
                             }
                         };
 
+                        self.recordSequenceEvent(win, {
+                            operation:Operation.VIEW,
+                            target:win.spa_eye.cv,
+                            args:arguments
+                        });
                         Events.dispatch(self.listener.fbListeners, 'onViewRender', [win.spa_eye.cv]);
 
                         if (data) {
@@ -119,6 +126,11 @@ define([
                     return function (data, _) {
                         if (win[proxiedTemplateRef]) {
                             win[proxiedTemplateRef].source = win[proxiedTemplateRef].source || source;
+                            self.recordSequenceEvent(win, {
+                                operation:Operation.VIEW,
+                                target:win.spa_eye.cv,
+                                args:arguments
+                            });
                             attachTemplatesToViews();
                             Events.dispatch(self.listener.fbListeners, 'onViewRender', [win.spa_eye.cv]);
                             return win[proxiedTemplateRef].call(this, data, _);
@@ -137,8 +149,15 @@ define([
                         var _saveProxy = this.save;
                         this.save = function () {
                             win.spa_eye.cm = this;
+                            self.recordSequenceEvent(win, {
+                                operation:Operation.SAVE,
+                                target:win.spa_eye.cm,
+                                args:arguments
+                            });
                             self.writeModelAudit(URI.getEndPoint(win.location.href), this, "Saved attributes");
                             var result = _saveProxy.apply(this, Array.slice(arguments));
+                            if (win.spa_eye.cm === win.spa_eye.sr)
+                                win.spa_eye.sr = undefined;
                             win.spa_eye.cm = undefined;
                             return result;
                         };
@@ -149,15 +168,30 @@ define([
                         var _fetchProxy = this.fetch;
                         this.fetch = function () {
                             win.spa_eye.cm = this;
+                            self.recordSequenceEvent(win, {
+                                operation:Operation.FETCH,
+                                target:win.spa_eye.cm,
+                                args:arguments
+                            });
                             self.writeModelAudit(URI.getEndPoint(win.location.href), this, "Fetched attributes");
                             var result = _fetchProxy.apply(this, Array.slice(arguments));
+                            if (win.spa_eye.cm === win.spa_eye.sr)
+                                win.spa_eye.sr = undefined;
                             win.spa_eye.cm = undefined;
+
                             return result;
                         };
                         this.fetch._proxied = true;
                     }
                     win.spa_eye.cm = this;
+                    self.recordSequenceEvent(win, {
+                        operation:Operation.SET,
+                        target:win.spa_eye.cm,
+                        args:arguments
+                    });
                     var result = _setProxy.apply(this, Array.slice(arguments));
+                    if (win.spa_eye.cm === win.spa_eye.sr)
+                        win.spa_eye.sr = undefined;
                     win.spa_eye.cm = undefined;
                     self.writeModelAudit(URI.getEndPoint(win.location.href), this, this);
                     Events.dispatch(self.listener.fbListeners, 'onModelSet', [this]);
@@ -165,11 +199,23 @@ define([
                 }
             },
 
+
             registerWPHooks:function (win) {
                 Firebug.CommandLine.evaluateInWebPage(
                     Http.getResource(bbhook_wp),
                     this.context,
                     win);
+            },
+
+            registerContentLoadedHook:function () {
+                var self = this;
+                var win = this.context.window.wrappedJSObject;
+                var register = function () {
+                    self.registerBBHooks(win);
+                };
+                win.document.addEventListener("afterscriptexecute", register);
+                //probably not required.
+                win.addEventListener("load", register);
             },
 
             readModelAudit:function (baseurl, model) {
@@ -288,6 +334,15 @@ define([
                 return win.Backbone && major > 3 && minor >= 3;
             },
 
+            recordSequenceEvent:function (win, record) {
+                win.spa_eye.sr = win.spa_eye.sr || win.spa_eye.cm;
+                if (win.spa_eye.sr && win.spa_eye.sr.cid) {
+                    win.spa_eye.sequence[win.spa_eye.sr.cid] = win.spa_eye.sequence[win.spa_eye.sr.cid] || [];
+                    win.spa_eye.sequence[win.spa_eye.sr.cid].push(record);
+                    Events.dispatch(this.listener.fbListeners, 'onSequenceRecordCreated', record);
+                }
+            },
+
             cleanup:function () {
                 this.hooked = false;
                 if (this.win) {
@@ -296,17 +351,6 @@ define([
                     this.win.spa_eye.views = [];
                     this.win.spa_eye.collections = [];
                 }
-            },
-
-            registerContentLoadedHook:function () {
-                var self = this;
-                var win = this.context.window.wrappedJSObject;
-                var register = function () {
-                    self.registerBBHooks(win);
-                };
-                win.document.addEventListener("afterscriptexecute", register);
-                //probably not required.
-                win.addEventListener("load", register);
             },
 
             models:function () {

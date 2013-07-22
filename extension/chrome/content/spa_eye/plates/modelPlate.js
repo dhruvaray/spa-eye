@@ -153,7 +153,7 @@ define([
 // ********************************************************************************************* //
 
             renderAuditForModel:function (row) {
-                Firebug.chrome.selectSidePanel("audit");
+                Firebug.chrome.selectSidePanel("spa_eye:audit");
                 var auditPanel = this.context.getPanel('audit', true);
                 auditPanel.showAudit(row.domObject.value, this.context);
             },
@@ -232,7 +232,7 @@ define([
             },
 
             showRelatedEvents:function (row) {
-                Firebug.chrome.selectSidePanel("event");
+                Firebug.chrome.selectSidePanel("spa_eye:event");
                 var eventPanel = this.context.getPanel('event', true);
                 eventPanel.showEvents(row.domObject.value, this.context);
             },
