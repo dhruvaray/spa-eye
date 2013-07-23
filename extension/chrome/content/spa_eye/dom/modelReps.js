@@ -193,6 +193,7 @@ define([
                         Events.cancelEvent(event);
                     }
                 }
+                Css.addClass();
             },
 
             toggleRow:function (row, callback, context) {
@@ -324,13 +325,26 @@ define([
             }
         });
 
+        var highlightRow = function (row, type) {
+                Css.setClass(row, type);
+                setTimeout(function () {
+                    Css.setClass(row, 'fade-in');
+                    Css.removeClass(row, type);
+                    setTimeout(function () {
+                        Css.removeClass(row, 'fade-in');
+                    }, 2000);
+                }, 1000);
+        }
+
 // ********************************************************************************************* //
 // Registration
 
         return {
-            DirTablePlate:DirTablePlate,
-            insertSliceSize:insertSliceSize,
-            insertInterval:insertInterval
+            DirTablePlate: DirTablePlate,
+            insertSliceSize: insertSliceSize,
+            insertInterval: insertInterval,
+
+            highlightRow: highlightRow
         };
 
 // ********************************************************************************************* //

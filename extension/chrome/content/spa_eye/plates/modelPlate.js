@@ -304,7 +304,7 @@ define([
                         if (model.cid == m.cid) {
                             found = true;
                             this._foldRow(row, function (r) {
-                                this._highlightRow(r, type ? type : 'row-warning');
+                                ModelReps.highlightRow(r, type ? type : 'row-warning');
                                 this._bubbleUpRow(r);
                             }, this);
                             break;
@@ -317,7 +317,7 @@ define([
                     obj[model.cid] = model;
                     var members = ModelReps.DirTablePlate.memberIterator(obj);
                     var result = ModelReps.DirTablePlate.rowTag.insertRows({members:members}, tbody);
-                    this._highlightRow(result[0], type ? type : 'row-warning');
+                    ModelReps.highlightRow(result[0], type ? type : 'row-warning');
                     this._bubbleUpRow(result[0]);
                 }
             },
@@ -357,22 +357,9 @@ define([
                         }
                     }
                 }, 100);
-            },
-
-            _highlightRow:function (row, type) {
-                Css.setClass(row, type);
-                setTimeout(function () {
-                    Css.setClass(row, 'fade-in');
-                    Css.removeClass(row, type);
-                    setTimeout(function () {
-                        Css.removeClass(row, 'fade-in');
-                    }, 2000);
-                }, 1000);
             }
         });
 
         return PANEL;
 
     });
-
-
