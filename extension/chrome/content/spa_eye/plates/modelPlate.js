@@ -154,7 +154,7 @@ define([
 
             renderAuditForModel:function (row) {
                 Firebug.chrome.selectSidePanel("spa_eye:audit");
-                var auditPanel = this.context.getPanel('audit', true);
+                var auditPanel = this.context.getPanel('spa_eye:audit', true);
                 auditPanel.showAudit(row.domObject.value, this.context);
             },
 
