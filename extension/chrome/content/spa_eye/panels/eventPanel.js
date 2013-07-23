@@ -32,13 +32,13 @@ define([
                 Firebug.Panel.destroy.apply(this, arguments);
             },
 
-
-            show:function () {
+            showEvents:function (value, context) {
                 var win = this.context.window.wrappedJSObject;
-                data = win.spa_eye.sequence;
+                this.show(value.cid ? win.spa_eye.sequence[value.cid] : {});
+            },
 
-                //DOMReps.DirTablePlate.tag.replace({object:data}, this.panelNode);
-                //DOMReps.DirTablePlate.tag.replace({object:data}, this.panelNode);
+            show:function (data) {
+                data = data || {};
                 Firebug.eventPanel.prototype.timeline.TIMELINE.replace({object:data}, this.panelNode);
             },
 
@@ -54,8 +54,14 @@ define([
 
         with (Domplate) {
             Firebug.eventPanel.prototype.timeline = domplate(DOMReps.DirTablePlate, {
-                TIMELINE:DIV(IFRAME({src:"chrome://spa_eye/content/panels/timeline.xul", width:"100%", frameborder:"0"}), HR(), TAG("$tag", {object:"$data"}))
-
+                TIMELINE:DIV(
+                    IFRAME({src:"chrome://spa_eye/content/panels/timeline.xul?data=$object|format", width:"100%", frameborder:"0"}),
+                    HR(),
+                    TAG("$tag", {object:"$object"}
+                    )),
+                format:function (d) {
+                    return JSON.stringify(d);
+                }
             });
         }
 

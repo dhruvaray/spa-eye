@@ -6,6 +6,10 @@
 
     <div id="diagram"></div>
     <script>
+
+        var data = location.href.split('?')[1].split('=')[1];
+        //JSON.parse("'"+data+"'")
+        alert(data);
         var diagram = Diagram.parse("A->B: Message");
         diagram.drawSVG("diagram", {theme:'hand'});
     </script>

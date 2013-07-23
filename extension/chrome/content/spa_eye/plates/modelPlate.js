@@ -233,7 +233,7 @@ define([
 
             showRelatedEvents:function (row) {
                 Firebug.chrome.selectSidePanel("spa_eye:event");
-                var eventPanel = this.context.getPanel('event', true);
+                var eventPanel = this.context.getPanel('spa_eye:event', true);
                 eventPanel.showEvents(row.domObject.value, this.context);
             },
 
