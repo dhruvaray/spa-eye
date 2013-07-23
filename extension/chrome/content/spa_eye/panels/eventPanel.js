@@ -26,7 +26,6 @@ define([
                 Firebug.Panel.initialize.apply(this, arguments);
                 var listener = this.context.spa_eyeObj._spaHook.listener;
                 listener.addListener(this);
-
             },
 
             destroy:function (state) {
@@ -37,8 +36,12 @@ define([
             show:function () {
                 var win = this.context.window.wrappedJSObject;
                 data = win.spa_eye.sequence;
-                DOMReps.DirTablePlate.tag.replace({object:data}, this.panelNode);
+
+                //DOMReps.DirTablePlate.tag.replace({object:data}, this.panelNode);
+                //DOMReps.DirTablePlate.tag.replace({object:data}, this.panelNode);
+                Firebug.eventPanel.prototype.timeline.TIMELINE.replace({object:data}, this.panelNode);
             },
+
 
             onSequenceRecordCreated:function (record) {
                 setTimeout(this.show, 2000, record);
@@ -48,6 +51,13 @@ define([
 
 // ********************************************************************************************* //
 // Templates
+
+        with (Domplate) {
+            Firebug.eventPanel.prototype.timeline = domplate(DOMReps.DirTablePlate, {
+                TIMELINE:DIV(IFRAME({src:"chrome://spa_eye/content/panels/timeline.xul", width:"100%", frameborder:"0"}), HR(), TAG("$tag", {object:"$data"}))
+
+            });
+        }
 
 // ********************************************************************************************* //
 // Registration
