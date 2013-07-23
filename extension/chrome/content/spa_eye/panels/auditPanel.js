@@ -16,8 +16,7 @@ define([
 
 // ********************************************************************************************* //
 
-        var auditPanel = Firebug.auditPanel = function () {
-        }
+        var auditPanel = Firebug.auditPanel = function () {}
         auditPanel.prototype = Obj.extend(Firebug.Panel, {
             name:"spa_eye:audit",
             title:Locale.$STR("spa_eye.audit.title"),
@@ -31,7 +30,6 @@ define([
                 Firebug.Panel.initialize.apply(this, arguments);
                 var listener = this.context.spa_eyeObj._spaHook.listener;
                 listener.addListener(this);
-
             },
 
             destroy:function (state) {
@@ -45,7 +43,6 @@ define([
                 return (pad + n).slice(-pad.length);
             },
 
-
             getFormattedTime:function (d) {
                 return this._zeroFill(d.getMonth() + 1, 2) + "/"
                     + this._zeroFill(d.getDate(), 2) + "/"
@@ -56,27 +53,32 @@ define([
                     + this._zeroFill(d.getMilliseconds(), 4);
             },
 
-            showAudit:function (model, context) {
-                if (!model) return;
+            // Show model audit
+            showAudit:function (model) {
+                var result = null;
+                if (model && model.cid) {
+                    var spa_eyeObj = this.context.spa_eyeObj;
+                    result = spa_eyeObj
+                            && spa_eyeObj.auditRecords
+                            && spa_eyeObj.auditRecords[model.cid];
+                }
 
-                context.spa_eyeObj.currentAuditModel = model;
+                this.tag.replace({object: result || {}}, this.panelNode);
+            },
 
-                var win = this.context.window.wrappedJSObject;
-                if (FBTrace.DBG_SPA_EYE) {
-                    FBTrace.sysout("spa_eye; show audit for model - " + model.cid, model);
+            // Record audit for model
+            recordAudit: function(model, doc) {
+                var spa_eyeObj = this.context.spa_eyeObj,
+                    t = this.getFormattedTime(new Date());
+
+                // return if `record` is off
+                if (!spa_eyeObj.isRecord) {
+                    return;
                 }
-                var result = context.spa_eyeObj.getHook().readModelAudit(URI.getEndPoint(win.location.href), model);
-                var objectResult = {};
-                if (result.length > 0) {
-                    result = result.substr(0, result.length - 1);
-                    result = JSON.parse('[' + result + ']');
-                }
-                for (var i = 0; i < result.length; i++) {
-                    var item = result[i];
-                    var time = this.getFormattedTime(new Date(+item.t));
-                    objectResult[time] = item.v;
-                }
-                objectResult && this.tag.replace({object:objectResult}, this.panelNode);
+
+                spa_eyeObj.auditRecords = spa_eyeObj.auditRecords || {};
+                spa_eyeObj.auditRecords[model.cid] = spa_eyeObj.auditRecords[model.cid] || {};
+                spa_eyeObj.auditRecords[model.cid][t] = doc;
             },
 
             show:function () {
@@ -93,8 +95,7 @@ define([
                     {
                         label:"spa_eye.all",
                         tooltiptext:"spa_eye.all",
-                        command:function () {
-                        }
+                        command:function () {}
                     },
                     "-",
                     {
@@ -110,6 +111,11 @@ define([
                 if (cm) {
                     this.showAudit(cm);
                 }
+            },
+
+            onCleanup: function(){
+                this.context.spa_eyeObj.auditRecords = undefined;
+                this.showAudit();
             }
         });
 

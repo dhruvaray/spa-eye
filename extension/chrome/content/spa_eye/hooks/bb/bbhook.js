@@ -154,7 +154,7 @@ define([
                                 target:win.spa_eye.cm,
                                 args:arguments
                             });
-                            self.writeModelAudit(URI.getEndPoint(win.location.href), this, "Saved attributes");
+                            self.writeModelAudit(this, "Saved attributes");
                             var result = _saveProxy.apply(this, Array.slice(arguments));
                             if (win.spa_eye.cm === win.spa_eye.sr)
                                 win.spa_eye.sr = undefined;
@@ -173,7 +173,7 @@ define([
                                 target:win.spa_eye.cm,
                                 args:arguments
                             });
-                            self.writeModelAudit(URI.getEndPoint(win.location.href), this, "Fetched attributes");
+                            self.writeModelAudit(this, "Fetched attributes");
                             var result = _fetchProxy.apply(this, Array.slice(arguments));
                             if (win.spa_eye.cm === win.spa_eye.sr)
                                 win.spa_eye.sr = undefined;
@@ -193,21 +193,20 @@ define([
                     if (win.spa_eye.cm === win.spa_eye.sr)
                         win.spa_eye.sr = undefined;
                     win.spa_eye.cm = undefined;
-                    self.writeModelAudit(URI.getEndPoint(win.location.href), this, this);
+                    self.writeModelAudit(this, this);
                     Events.dispatch(self.listener.fbListeners, 'onModelSet', [this]);
                     return result;
                 }
             },
 
-
-            registerWPHooks:function (win) {
+            registerWPHooks: function (win) {
                 Firebug.CommandLine.evaluateInWebPage(
                     Http.getResource(bbhook_wp),
                     this.context,
                     win);
             },
 
-            registerContentLoadedHook:function () {
+            registerContentLoadedHook: function () {
                 var self = this;
                 var win = this.context.window.wrappedJSObject;
                 var register = function () {
@@ -218,92 +217,15 @@ define([
                 win.addEventListener("load", register);
             },
 
-            readModelAudit:function (baseurl, model) {
-                var ios = Cc["@mozilla.org/network/io-service;1"]
-                    .getService(Components.interfaces.nsIIOService);
-                var file = Cc["@mozilla.org/file/directory_service;1"]
-                    .getService(Ci.nsIProperties)
-                    .get("TmpD", Ci.nsIFile);
-
-                file.append("firebug");
-                file.append("spa_eye");
-                file.append(baseurl)
-                file.append(model.cid + ".txt");
-
-                var istream = Cc["@mozilla.org/network/file-input-stream;1"]
-                    .createInstance(Ci.nsIFileInputStream);
-
-                istream.init(file, -1, -1, false);
-
-                var bstream = Cc["@mozilla.org/binaryinputstream;1"]
-                    .createInstance(Ci.nsIBinaryInputStream);
-                bstream.setInputStream(istream);
-
-                var bytes = bstream.readBytes(bstream.available());
-
-                bstream.close();
-                istream.close();
-
-                return bytes;
-            },
-
-            _getAuditData:function (object) {
-                var auditObject = {
-                    t:new Date().getTime().toString(),
-                    v:object
-                };
-                return JSON.stringify(auditObject);
-            },
-
-            writeModelAudit:function (baseurl, model, doc) {
-                if (model && model.cid && !(model.cid in this.context.spa_eyeObj._pinned_models)) {
+            writeModelAudit: function (model, doc) {
+                var spa_eyeObj = this.context.spa_eyeObj;
+                if (model && model.cid && !(model.cid in spa_eyeObj._pinned_models)) {
                     return;
                 }
-
-                try {
-                    var foStream = Cc["@mozilla.org/network/file-output-stream;1"]
-                        .createInstance(Ci.nsIFileOutputStream);
-                    var file = Cc["@mozilla.org/file/directory_service;1"]
-                        .getService(Ci.nsIProperties)
-                        .get("TmpD", Ci.nsIFile);
-                    var outputStream = Cc["@mozilla.org/intl/converter-output-stream;1"].
-                        createInstance(Components.interfaces.nsIConverterOutputStream);
-
-                    file.append("firebug");
-                    file.append("spa_eye");
-                    file.append(baseurl)
-                    file.append(model.cid + ".txt");
-
-                    if (!model.__audit) {
-                        if (file.exists()) file.remove(true);
-                        file.create(Ci.nsIFile.NORMAL_FILE_TYPE, 0666);
-                        model.__audit = file.path;
-                        if (FBTrace.DBG_SPA_EYE) {
-                            FBTrace.sysout("spa_eye; Creating model audit record @ " + file.path);
-                        }
-                    }
-
-                    // write, create, append
-                    foStream.init(file, 0x02 | 0x08 | 0x10, 0666, 0);
-                    outputStream.init(foStream, "UTF-8", 0, 0);
-                    outputStream.writeString(this._getAuditData(doc) + ",");
-
-                    outputStream.close(); // this closes foStream
-                    foStream.close();
-
-                    if (FBTrace.DBG_SPA_EYE) {
-                        FBTrace.sysout("spa_eye; Appending model audit record @ " + file.path);
-                    }
-                } catch (e) {
-                    if (FBTrace.DBG_ERRORS)
-                        FBTrace.sysout("spa_eye; Could not write the audit file for model : " +
-                            model.cid +
-                            " at location : \'" +
-                            baseurl + "\'" + "Content : " + doc, e);
-                }
+                Events.dispatch(this.listener.fbListeners, 'recordAudit', [model, doc]);
             },
 
-            registerBBHooks:function (win) {
+            registerBBHooks: function (win) {
                 if (this.isBackboneInitialized(win)) {
                     if (!this.hooked && !this.registering) {
                         try {
@@ -329,7 +251,7 @@ define([
                 }
             },
 
-            isBackboneInitialized:function (win) {
+            isBackboneInitialized: function (win) {
                 if (win._ && win._.VERSION) {
                     var uscore = win._.VERSION.split('.');
                     var major = parseInt(uscore[1]);
@@ -377,8 +299,6 @@ define([
                 }
                 return [];
             }
-
-
         };
 
 

@@ -153,8 +153,20 @@ define([
 // ********************************************************************************************* //
 
             renderAuditForModel:function (row) {
+                var model = row.domObject.value,
+                    cid = null,
+                    auditPanel = null;
+
+                if (!model || !model.cid) return;
+                cid = model.cid;
+
+                // Pin this model
+                this._pinModel(model);
+
+                // Select audit panel
                 Firebug.chrome.selectSidePanel("spa_eye:audit");
-                var auditPanel = this.context.getPanel('spa_eye:audit', true);
+                // Show audit
+                auditPanel = this.context.getPanel('spa_eye:audit', true);
                 auditPanel.showAudit(row.domObject.value, this.context);
             },
 
@@ -176,8 +188,12 @@ define([
                 }
             },
 
-            _pinModel:function (model) {
+            _pinModel: function (model) {
+                if (this.context.spa_eyeObj._pinned_models[model.cid]) { // Already Pinned
+                    return;
+                }
                 try {
+                    this.context.spa_eyeObj._pinned_models[model.cid] = model;
                     var tbody = Dom.getElementByClass(this.parent.panelNode, 'pinnedModelsDivBody');
                     var noObjectRow = Dom.getChildByClass(tbody, 'noMemberRow');
 
@@ -196,7 +212,6 @@ define([
                         FBTrace.sysout("Error: model.cid - " + model.cid, e);
                     }
                 }
-                this.context.spa_eyeObj._pinned_models[model.cid] = model;
             },
 
             _unPinModel:function (model) {

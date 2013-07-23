@@ -131,11 +131,9 @@ define([
             },
 
             showWarning:function () {
-
                 var hooked = this.context.spa_eyeObj.hooked();
                 var warn = !hooked;
                 return warn ? this.showNotHooked() : false;
-
             },
 
             showNotHooked:function () {
@@ -204,7 +202,7 @@ define([
                 return buttons;
             },
 
-            selectChildPlate:function (cpName) {
+            selectChildPlate: function (cpName) {
                 cpName = cpName || this.currentPlate;
                 if (!cpName) return false;
 
@@ -224,17 +222,21 @@ define([
                 this.getCurrentPlate().render();
             },
 
-            toggleRecord:function () {
+            toggleRecord: function () {
                 var recordButton = Firebug.chrome.$('spa_eye_panel_button_record');
+                var spa_eyeObj = this.context.spa_eyeObj;
                 if (recordButton) {
                     recordButton.image = recordButton.checked
                         ? "chrome://firebug/skin/breakOn.svg"
                         : "chrome://firebug/skin/continue.svg";
-                    this.context.spa_eyeObj.isRecord = recordButton.checked;
+                    spa_eyeObj.isRecord = recordButton.checked;
+                    if (!spa_eyeObj.isRecord) {
+                        Events.dispatch(spa_eyeObj._spaHook.listener.fbListeners, 'onCleanup');
+                    }
                 }
             },
 
-            getCurrentPlate:function (plateName) {
+            getCurrentPlate: function (plateName) {
                 return this.plates[plateName || this.currentPlate];
             },
 
