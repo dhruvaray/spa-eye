@@ -146,12 +146,14 @@ define([
                 var buttons = [];
 
                 if (this.context.spa_eyeObj && this.context.spa_eyeObj.hooked()) {
+                    var isRecord = !!this.context.spa_eyeObj.isRecord;
                     buttons.push(
                         {
                             id: "spa_eye_panel_button_record",
                             tooltiptext: Locale.$STR("spa_eye.record_events"),
-                            image: "chrome://firebug/skin/continue.svg",
+                            image: "chrome://firebug/skin/" + (isRecord ? "breakOn" : "continue") + ".svg",
                             type: "checkbox",
+                            checked: isRecord,
                             className: "toolbar-image-button fbInternational",
                             command: FBL.bindFixed(this.toggleRecord, this)
                         },
@@ -218,6 +220,7 @@ define([
                     recordButton.image = recordButton.checked
                                         ? "chrome://firebug/skin/breakOn.svg"
                                         : "chrome://firebug/skin/continue.svg";
+                    this.context.spa_eyeObj.isRecord = recordButton.checked;
                 }
             },
 
