@@ -193,7 +193,19 @@ define([
                         Events.cancelEvent(event);
                     }
                 }
-                Css.addClass();
+
+                if (!Css.hasClass(row, "0level")) {
+                    return;
+                }
+
+                var topLevelParent = Dom.getAncestorByClass(row, "0level");
+                if (topLevelParent && topLevelParent.parentNode) {
+                    var old = topLevelParent.parentNode.getElementsByClassName("row-selected").item(0);
+                    if (old) {
+                        Css.removeClass(old, "row-selected")
+                    }
+                }
+                Css.setClass(row, "row-selected");
             },
 
             toggleRow:function (row, callback, context) {
