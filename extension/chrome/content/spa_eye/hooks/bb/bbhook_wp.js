@@ -11,21 +11,20 @@ if (window.Backbone) {
         };
         window.Backbone.Model.prototype = _ModelProxyProto;
         _.extend(window.Backbone.Model, _ModelProxy);
-    }
-    ;
+    };
 
     var _colProxy = window.Backbone.Collection;
     if (_colProxy) {
         var _colProxyProto = window.Backbone.Collection.prototype;
         window.Backbone.Collection = function (attributes, options) {
             _colProxy.apply(this, arguments);
+            this.cid = this.cid || window._.uniqueId('c')
             window.spa_eye.collections = window.spa_eye.collections || [];
             window.spa_eye.collections.push(this);
         };
         window.Backbone.Collection.prototype = _colProxyProto;
         _.extend(window.Backbone.Collection, _colProxy);
-    }
-    ;
+    };
 
     var _viewProxy = window.Backbone.View;
     if (_viewProxy) {
@@ -49,8 +48,5 @@ if (window.Backbone) {
         window.Backbone.View.prototype = _viewProxyProto;
         _.extend(window.Backbone.View, _viewProxy);
 
-    }
-    ;
-
-}
-;
+    } ;
+};
