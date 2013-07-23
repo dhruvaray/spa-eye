@@ -55,13 +55,15 @@ define([
 
             // Show model audit
             showAudit:function (model) {
-                if (!model || !model.cid) return;
-                var spa_eyeObj = this.context.spa_eyeObj;
-                var result = spa_eyeObj 
-                        && spa_eyeObj.auditRecords
-                        && spa_eyeObj.auditRecords[model.cid];
+                var result = null;
+                if (model && model.cid) {
+                    var spa_eyeObj = this.context.spa_eyeObj;
+                    result = spa_eyeObj
+                            && spa_eyeObj.auditRecords
+                            && spa_eyeObj.auditRecords[model.cid];
+                }
 
-                result && this.tag.replace({object: result}, this.panelNode);
+                this.tag.replace({object: result || {}}, this.panelNode);
             },
 
             // Record audit for model
@@ -109,6 +111,11 @@ define([
                 if (cm) {
                     this.showAudit(cm);
                 }
+            },
+
+            onCleanup: function(){
+                this.context.spa_eyeObj.auditRecords = undefined;
+                this.showAudit();
             }
         });
 
