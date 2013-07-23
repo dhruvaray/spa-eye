@@ -156,10 +156,23 @@ define([
             getPanelToolbarButtons:function () {
 
                 var buttons = [];
+
+                var isRecord = !!this.context.spa_eyeObj.isRecord;
                 buttons.push(
                     {
-                        label:"spa_eye.refresh",
-                        className:"refresh",
+                        id:"spa_eye_panel_button_record",
+                        tooltiptext:Locale.$STR("spa_eye.record_events"),
+                        image:"chrome://firebug/skin/" + (isRecord ? "breakOn" : "continue") + ".svg",
+                        type:"checkbox",
+                        checked:isRecord,
+                        className:"toolbar-image-button fbInternational",
+                        command:FBL.bindFixed(this.toggleRecord, this)
+                    },
+                    "-",
+                    {
+                        tooltiptext:Locale.$STR("spa_eye.refresh"),
+                        image:"chrome://firebug/skin/rerun.svg",
+                        className:"toolbar-image-button fbInternational",
                         command:FBL.bindFixed(this.selectChildPlate, this)
                     },
                     "-",
@@ -188,7 +201,6 @@ define([
                         tooltiptext:"spa_eye.views",
                         command:FBL.bindFixed(this.selectChildPlate, this, childPlate.VIEW)
                     });
-
                 return buttons;
             },
 
@@ -210,6 +222,16 @@ define([
 
                 listener.addListener(this.getCurrentPlate());
                 this.getCurrentPlate().render();
+            },
+
+            toggleRecord:function () {
+                var recordButton = Firebug.chrome.$('spa_eye_panel_button_record');
+                if (recordButton) {
+                    recordButton.image = recordButton.checked
+                        ? "chrome://firebug/skin/breakOn.svg"
+                        : "chrome://firebug/skin/continue.svg";
+                    this.context.spa_eyeObj.isRecord = recordButton.checked;
+                }
             },
 
             getCurrentPlate:function (plateName) {
