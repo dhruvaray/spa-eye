@@ -157,8 +157,9 @@ define([
                         },
                         "-",
                         {
-                            label:"spa_eye.refresh",
-                            className:"refresh",
+                            tooltiptext: Locale.$STR("spa_eye.refresh"),
+                            image: "chrome://firebug/skin/rerun.svg",
+                            className:"toolbar-image-button fbInternational",
                             command:FBL.bindFixed(this.selectChildPlate, this)
                         },
                         "-",
