@@ -161,7 +161,7 @@ define([
                 cid = model.cid;
 
                 // Pin this model
-                this._pinModel(model);
+                // this._pinModel(model);
 
                 // Select audit panel
                 Firebug.chrome.selectSidePanel("spa_eye:audit");

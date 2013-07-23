@@ -107,10 +107,11 @@ define([
                         };
 
                         self.recordSequenceEvent(win, {
-                            operation:Operation.VIEW,
-                            target:win.spa_eye.cv,
-                            args:arguments
+                            operation: Operation.VIEW,
+                            target: win.spa_eye.cv,
+                            args: arguments
                         });
+
                         Events.dispatch(self.listener.fbListeners, 'onViewRender', [win.spa_eye.cv]);
 
                         if (data) {
@@ -127,9 +128,9 @@ define([
                         if (win[proxiedTemplateRef]) {
                             win[proxiedTemplateRef].source = win[proxiedTemplateRef].source || source;
                             self.recordSequenceEvent(win, {
-                                operation:Operation.VIEW,
-                                target:win.spa_eye.cv,
-                                args:arguments
+                                operation: Operation.VIEW,
+                                target: win.spa_eye.cv,
+                                args: arguments
                             });
                             attachTemplatesToViews();
                             Events.dispatch(self.listener.fbListeners, 'onViewRender', [win.spa_eye.cv]);
@@ -150,11 +151,17 @@ define([
                         this.save = function () {
                             win.spa_eye.cm = this;
                             self.recordSequenceEvent(win, {
-                                operation:Operation.SAVE,
-                                target:win.spa_eye.cm,
-                                args:arguments
+                                operation: Operation.SAVE,
+                                target: win.spa_eye.cm,
+                                args: arguments
                             });
-                            self.writeModelAudit(this, "Saved attributes");
+
+                            // Record save on model
+                            self.recordModelAudit(this, {
+                                operation: Operation.SAVE,
+                                target: this,
+                                args: arguments
+                            });
                             var result = _saveProxy.apply(this, Array.slice(arguments));
                             if (win.spa_eye.cm === win.spa_eye.sr)
                                 win.spa_eye.sr = undefined;
@@ -169,11 +176,17 @@ define([
                         this.fetch = function () {
                             win.spa_eye.cm = this;
                             self.recordSequenceEvent(win, {
-                                operation:Operation.FETCH,
-                                target:win.spa_eye.cm,
-                                args:arguments
+                                operation: Operation.FETCH,
+                                target: win.spa_eye.cm,
+                                args: arguments
                             });
-                            self.writeModelAudit(this, "Fetched attributes");
+
+                            // Record fetch on model
+                            self.recordModelAudit(this, {
+                                operation: Operation.FETCH,
+                                target: this,
+                                args: arguments
+                            });
                             var result = _fetchProxy.apply(this, Array.slice(arguments));
                             if (win.spa_eye.cm === win.spa_eye.sr)
                                 win.spa_eye.sr = undefined;
@@ -183,17 +196,25 @@ define([
                         };
                         this.fetch._proxied = true;
                     }
+
                     win.spa_eye.cm = this;
                     self.recordSequenceEvent(win, {
-                        operation:Operation.SET,
-                        target:win.spa_eye.cm,
-                        args:arguments
+                        operation: Operation.SET,
+                        target: win.spa_eye.cm,
+                        args: arguments
                     });
+
+                    // Record set operation on model
+                    self.recordModelAudit(this, {
+                        operation: Operation.SET,
+                        target: win.spa_eye.cm,
+                        args: arguments
+                    });
+
                     var result = _setProxy.apply(this, Array.slice(arguments));
                     if (win.spa_eye.cm === win.spa_eye.sr)
                         win.spa_eye.sr = undefined;
                     win.spa_eye.cm = undefined;
-                    self.writeModelAudit(this, this);
                     Events.dispatch(self.listener.fbListeners, 'onModelSet', [this]);
                     return result;
                 }
@@ -217,11 +238,8 @@ define([
                 win.addEventListener("load", register);
             },
 
-            writeModelAudit: function (model, doc) {
-                var spa_eyeObj = this.context.spa_eyeObj;
-                if (model && model.cid && !(model.cid in spa_eyeObj._pinned_models)) {
-                    return;
-                }
+            recordModelAudit: function (model, doc) {
+                var spa_eyeObj = this.context.spa_eyeObj;                
                 Events.dispatch(this.listener.fbListeners, 'recordAudit', [model, doc]);
             },
 
