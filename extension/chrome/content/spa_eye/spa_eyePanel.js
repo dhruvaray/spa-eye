@@ -146,7 +146,17 @@ define([
                 var buttons = [];
 
                 if (this.context.spa_eyeObj && this.context.spa_eyeObj.hooked()) {
-                    buttons.push({
+                    buttons.push(
+                        {
+                            id: "spa_eye_panel_button_record",
+                            tooltiptext: Locale.$STR("spa_eye.record_events"),
+                            image: "chrome://firebug/skin/continue.svg",
+                            type: "checkbox",
+                            className: "toolbar-image-button fbInternational",
+                            command: FBL.bindFixed(this.toggleRecord, this)
+                        },
+                        "-",
+                        {
                             label:"spa_eye.refresh",
                             className:"refresh",
                             command:FBL.bindFixed(this.selectChildPlate, this)
@@ -199,6 +209,15 @@ define([
 
                 listener.addListener(this.getCurrentPlate());
                 this.getCurrentPlate().render();
+            },
+
+            toggleRecord: function() {
+                var recordButton = Firebug.chrome.$('spa_eye_panel_button_record');
+                if (recordButton) {
+                    recordButton.image = recordButton.checked
+                                        ? "chrome://firebug/skin/breakOn.svg"
+                                        : "chrome://firebug/skin/continue.svg";
+                }
             },
 
             getCurrentPlate:function (plateName) {
