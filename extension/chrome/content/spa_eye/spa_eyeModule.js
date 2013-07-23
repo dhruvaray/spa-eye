@@ -19,6 +19,7 @@ define([
                 // Add Listener
                 Firebug.NetMonitor.addListener(this);
                 Firebug.connection.addListener(this);
+
             },
 
             shutdown:function () {
@@ -41,6 +42,7 @@ define([
                     });
                     spObj._spaHook.cleanup();
                     spObj._spaHook.registerContentLoadedHook();
+
                 }
             },
 
@@ -58,24 +60,29 @@ define([
                 var win = context.window.wrappedJSObject;
                 var spObj = context.spa_eyeObj;
                 var hook = spObj._spaHook;
-                if (file.href) {
-                    win.spa_eye.cm = spObj._currentSynced[file.href];
-                    delete spObj._currentSynced[file.href];
-                }
-                if (win.spa_eye.cm) {
-                    if (FBTrace.DBG_SPA_EYE) {
-                        FBTrace.sysout("spa_eye; on response, current model", win.spa_eye.cm);
+                if (spObj.hooked()) {
+                    if (file.href) {
+                        win.spa_eye.cm = spObj._currentSynced[file.href];
+                        delete spObj._currentSynced[file.href];
                     }
-                    hook.writeModelAudit(URI.getEndPoint(win.location.href), win.spa_eye.cm, win.spa_eye.cm);
-                    Events.dispatch(hook.listener.fbListeners, 'onModelSave', [win.spa_eye.cm, file]);
+                    if (win.spa_eye.cm) {
+                        if (FBTrace.DBG_SPA_EYE) {
+                            FBTrace.sysout("spa_eye; on response, current model", win.spa_eye.cm);
+                        }
+                        hook.writeModelAudit(URI.getEndPoint(win.location.href), win.spa_eye.cm, win.spa_eye.cm);
+                        Events.dispatch(hook.listener.fbListeners, 'onModelSave', [win.spa_eye.cm, file]);
+                    }
                 }
             },
 
             onRequest:function (context, file) {
                 var win = context.window.wrappedJSObject;
-                if (win.spa_eye.cm) {
-                    context.spa_eyeObj._currentSynced[file.href] = win.spa_eye.cm;
-                    //BBHook.writeModelAudit(URI.getEndPoint(win.location.href),win.spa_eye.cm,win.spa_eye.cm);
+                var spObj = context.spa_eyeObj;
+                if (spObj.hooked()) {
+                    if (win.spa_eye.cm) {
+                        context.spa_eyeObj._currentSynced[file.href] = win.spa_eye.cm;
+                        //BBHook.writeModelAudit(URI.getEndPoint(win.location.href),win.spa_eye.cm,win.spa_eye.cm);
+                    }
                 }
             },
 

@@ -22,7 +22,6 @@ define([
         const bbhook_wp = "chrome://spa_eye/content/hooks/bb/bbhook_wp.js";
         const Operation = {SAVE:"save", FETCH:"fetch", SET:"set", VIEW:"render"};
 
-
 // ********************************************************************************************* //
 //  BBHook Class
 // ********************************************************************************************* //
@@ -30,6 +29,7 @@ define([
             this.hooked = false;
             this.context = null;
             this.listener = new Firebug.Listener();
+            this.registering = false;
             if (obj) {
                 for (var key in obj) {
                     this[key] = obj[key];
@@ -305,19 +305,23 @@ define([
 
             registerBBHooks:function (win) {
                 if (this.isBackboneInitialized(win)) {
-                    if (!this.hooked) {
+                    if (!this.hooked && !this.registering) {
                         try {
                             this.win = win;
-                            this.hooked = true;
+                            this.registering = true;
                             this.registerWPHooks(win);
                             this.registerHooks(win);
-
                             if (FBTrace.DBG_SPA_EYE) {
                                 FBTrace.sysout("spa_eye; Successfully registered Backbone hooks for spa-eye module");
                             }
+                            this.registering = false;
+                            this.hooked = true;
+                            Events.dispatch(this.listener.fbListeners, 'onBackboneLoaded', [this]);
+
 
                         } catch (e) {
                             this.hooked = false;
+                            this.registering = false;
                             if (FBTrace.DBG_ERRORS)
                                 FBTrace.sysout("Could not register Backbone hooks for spa_eye", e);
                         }

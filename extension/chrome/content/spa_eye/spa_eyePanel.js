@@ -58,6 +58,10 @@ define([
                 this.plates.collection = new CollectionPlate(this.context, this);
                 this.plates.view = new ViewPlate(this.context, this);
 
+                var listener = this.context.spa_eyeObj._spaHook.listener;
+                listener.addListener(this);
+
+
                 /*var listener = this.context.spa_eyeObj._spaHook.listener;
 
                  listener.addListener(this.context.getPanel("spa_eye:audit", true));
@@ -79,6 +83,10 @@ define([
                 }
             },
 
+            onBackboneLoaded:function () {
+                this.show();
+            },
+
             show:function (state) {
                 var enabled = this.isEnabled();
                 if (!enabled) return;
@@ -86,9 +94,13 @@ define([
 
                 var scriptPanel = this.context.getPanel('script');
                 var active = !this.showWarning() && !scriptPanel.showWarning();
+                this.toolbar = this.toolbar || Firebug.chrome.$("fbPanelToolbar");
 
                 if (active) {
+                    Firebug.chrome.$("fbPanelToolbar").style.visibility = "visible";
                     this.selectChildPlate();
+                } else {
+                    Firebug.chrome.$("fbPanelToolbar").style.visibility = "hidden";
                 }
             },
 
@@ -134,7 +146,7 @@ define([
 
                 var box = Firebug.ScriptPanel.WarningRep.tag.replace(args, this.panelNode);
                 var description = box.getElementsByClassName("disabledPanelDescription").item(0);
-                FirebugReps.Description.render(args.suggestion,
+                return FirebugReps.Description.render(args.suggestion,
                     description,
                     Obj.bindFixed(Firebug.TabWatcher.reloadPageFromMemory,
                         Firebug.TabWatcher,
@@ -144,40 +156,39 @@ define([
             getPanelToolbarButtons:function () {
 
                 var buttons = [];
+                buttons.push(
+                    {
+                        label:"spa_eye.refresh",
+                        className:"refresh",
+                        command:FBL.bindFixed(this.selectChildPlate, this)
+                    },
+                    "-",
+                    {
+                        id:"spa_eye_panel_button_model",
+                        label:"spa_eye.models",
+                        type:"radio",
+                        checked:true,
+                        className:"toolbar-text-button fbInternational",
+                        tooltiptext:"spa_eye.models",
+                        command:FBL.bindFixed(this.selectChildPlate, this, childPlate.MODEL)
+                    },
+                    {
+                        id:"spa_eye_panel_button_collection",
+                        label:"spa_eye.collections",
+                        type:"radio",
+                        className:"toolbar-text-button fbInternational",
+                        tooltiptext:"spa_eye.collections",
+                        command:FBL.bindFixed(this.selectChildPlate, this, childPlate.COLLECTION)
+                    },
+                    {
+                        id:"spa_eye_panel_button_view",
+                        label:"spa_eye.views",
+                        type:"radio",
+                        className:"toolbar-text-button fbInternational",
+                        tooltiptext:"spa_eye.views",
+                        command:FBL.bindFixed(this.selectChildPlate, this, childPlate.VIEW)
+                    });
 
-                if (this.context.spa_eyeObj && this.context.spa_eyeObj.hooked()) {
-                    buttons.push({
-                            label:"spa_eye.refresh",
-                            className:"refresh",
-                            command:FBL.bindFixed(this.selectChildPlate, this)
-                        },
-                        "-",
-                        {
-                            id:"spa_eye_panel_button_model",
-                            label:"spa_eye.models",
-                            type:"radio",
-                            checked:true,
-                            className:"toolbar-text-button fbInternational",
-                            tooltiptext:"spa_eye.models",
-                            command:FBL.bindFixed(this.selectChildPlate, this, childPlate.MODEL)
-                        },
-                        {
-                            id:"spa_eye_panel_button_collection",
-                            label:"spa_eye.collections",
-                            type:"radio",
-                            className:"toolbar-text-button fbInternational",
-                            tooltiptext:"spa_eye.collections",
-                            command:FBL.bindFixed(this.selectChildPlate, this, childPlate.COLLECTION)
-                        },
-                        {
-                            id:"spa_eye_panel_button_view",
-                            label:"spa_eye.views",
-                            type:"radio",
-                            className:"toolbar-text-button fbInternational",
-                            tooltiptext:"spa_eye.views",
-                            command:FBL.bindFixed(this.selectChildPlate, this, childPlate.VIEW)
-                        });
-                }
                 return buttons;
             },
 
