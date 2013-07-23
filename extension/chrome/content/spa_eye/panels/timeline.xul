@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+    <script type="application/x-javascript" src="chrome://spa_eye/content/lib/ext/underscore.js"/>
+    <script type="application/x-javascript" src="chrome://spa_eye/content/lib/ext/raphael.js"/>
+    <script type="application/x-javascript" src="chrome://spa_eye/content/lib/ext/sequence-diagram.js"/>
+
+    <div id="diagram"></div>
+    <script>
+        var diagram = Diagram.parse("A->B: Message");
+        diagram.drawSVG("diagram", {theme:'hand'});
+    </script>
+
+</overlay>
