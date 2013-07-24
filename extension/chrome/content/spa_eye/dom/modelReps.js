@@ -194,18 +194,8 @@ define([
                     }
                 }
 
-                if (!Css.hasClass(row, "0level")) {
-                    return;
-                }
-
-                var topLevelParent = Dom.getAncestorByClass(row, "0level");
-                if (topLevelParent && topLevelParent.parentNode) {
-                    var old = topLevelParent.parentNode.getElementsByClassName("row-selected").item(0);
-                    if (old) {
-                        Css.removeClass(old, "row-selected")
-                    }
-                }
-                Css.setClass(row, "row-selected");
+                // Let's select this row
+                selectRow(row);
             },
 
             toggleRow:function (row, callback, context) {
@@ -337,15 +327,48 @@ define([
             }
         });
 
+        // Highlight row
+        // @param row <domObject>
+        // @param type <string>
         var highlightRow = function (row, type) {
-                Css.setClass(row, type);
+            // Add class `type` to `row`
+            Css.setClass(row, type);
+
+            setTimeout(function () {
+                // Add class `fade-in` to `row`
+                Css.setClass(row, 'fade-in');
+
+                // Remove `type` class
+                Css.removeClass(row, type);
+
+                // Add timeout to get fade effect
                 setTimeout(function () {
-                    Css.setClass(row, 'fade-in');
-                    Css.removeClass(row, type);
-                    setTimeout(function () {
-                        Css.removeClass(row, 'fade-in');
-                    }, 2000);
-                }, 1000);
+                    // Remove `fade-in` class
+                    Css.removeClass(row, 'fade-in');
+                }, 2000);
+            }, 1000);
+        }
+
+        // Select row
+        // @param row <domObject>
+        var selectRow = function (row) {
+            // Ignore if row is not `level-0`
+            if (!Css.hasClass(row, "0level")) {
+                return;
+            }
+
+            // Find top level parent
+            var topLevelParent = Dom.getAncestorByClass(row, "0level");
+            if (topLevelParent && topLevelParent.parentNode) {
+                // Get old selection using `topLevelParent.parentNode`
+                var old = topLevelParent.parentNode.getElementsByClassName("row-selected").item(0);
+                if (old) {
+                    // Remove old selection in order to get new one
+                    Css.removeClass(old, "row-selected")
+                }
+            }
+            // Mark row as selected
+            Css.setClass(row, "row-selected");
         }
 
 // ********************************************************************************************* //
@@ -356,7 +379,8 @@ define([
             insertSliceSize: insertSliceSize,
             insertInterval: insertInterval,
 
-            highlightRow: highlightRow
+            highlightRow: highlightRow,
+            selectRow: selectRow
         };
 
 // ********************************************************************************************* //
