@@ -46,16 +46,19 @@ define([
             currentPlate:childPlate.MODEL,
             plates:null,
 
-
             initialize:function () {
                 this._super.apply(this, arguments);
                 Firebug.registerUIListener(this);
 
                 // Initialize plates
+                var args = {
+                    context: this.context,
+                    parent: this
+                }
                 this.plates = {};
-                this.plates.model = new ModelPlate(this.context, this);
-                this.plates.collection = new CollectionPlate(this.context, this);
-                this.plates.view = new ViewPlate(this.context, this);
+                this.plates.model = new ModelPlate(args);
+                this.plates.collection = new CollectionPlate(args);
+                this.plates.view = new ViewPlate(args);
             },
 
             destroy:function () {
@@ -70,7 +73,6 @@ define([
             show:function (state) {
                 var enabled = this.isEnabled();
                 if (!enabled) return;
-
 
                 var scriptPanel = this.context.getPanel('script');
                 var active = !this.showWarning() && !scriptPanel.showWarning();

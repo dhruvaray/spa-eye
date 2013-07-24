@@ -361,7 +361,7 @@ define([
             var section = Dom.getAncestorByClass(row, "modelSection");
             if (section && section.parentNode) {
                 // Get old selection using `section.parentNode`
-                var old = section.parentNode.getElementsByClassName("row-selected").item(0);
+                var old = getSelectedRow(section.parentNode);
                 if (old) {
                     // Remove old selection in order to get new one
                     Css.removeClass(old, "row-selected")
@@ -369,6 +369,13 @@ define([
             }
             // Mark row as selected
             Css.setClass(row, "row-selected");
+        }
+
+        // Get selected row
+        // @param target <domObject>
+        var getSelectedRow = function(target) {
+            if (!target) return;
+            return target.getElementsByClassName("row-selected").item(0);
         }
 
 // ********************************************************************************************* //
@@ -380,7 +387,8 @@ define([
             insertInterval: insertInterval,
 
             highlightRow: highlightRow,
-            selectRow: selectRow
+            selectRow: selectRow,
+            getSelectedRow: getSelectedRow
         };
 
 // ********************************************************************************************* //

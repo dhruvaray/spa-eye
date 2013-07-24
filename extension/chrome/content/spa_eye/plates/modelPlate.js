@@ -10,38 +10,19 @@ define([
     "firebug/lib/string",
     "firebug/lib/dom",
 
+    "spa_eye/plates/basePlate",
+
     "spa_eye/dom/section",
     "spa_eye/dom/modelReps",
     "spa_eye/dom/domEditor"
 
 ],
-    function (Firebug, Obj, FBTrace, Css, Str, Dom, ChildSection, ModelReps, DOMEditor) {
+    function (Firebug, Obj, FBTrace, Css, Str, Dom, BasePlate, ChildSection, ModelReps, DOMEditor) {
 
         var NetRequestEntry = Firebug.NetMonitor.NetRequestEntry;
-        var PANEL = function (context, parent) {
-            this.context = context;
-            this.parent = parent;
-            this.sections = this.createSections();
-        };
 
-        PANEL.prototype = Obj.extend(DOMEditor, {
-
-            constructor:PANEL,
+        var PANEL = BasePlate.extend({
             name:'model',
-
-            render:function () {
-
-                var args = {
-                    sections:this.sections.sort(function (a, b) {
-                        return a.order > b.order;
-                    }),
-                    mainPanel:this
-                };
-
-                ModelReps.DirTablePlate.tag.replace(args, this.parent.panelNode);
-
-            },
-
             createSections:function () {
                 var sections = [];
                 var pinned = new ChildSection({
@@ -260,11 +241,6 @@ define([
                 obj.set(key, value);
             },
 
-            refresh:function (row) {
-                ModelReps.DirTablePlate.toggleRow(row);
-                ModelReps.DirTablePlate.toggleRow(row);
-            },
-
 // ********************************************************************************************* //
 // OnModelSet and OnModelSave
 // ********************************************************************************************* //
@@ -335,28 +311,6 @@ define([
                     }, context ? context : this);
                 }
                 return cb && cb.apply(context ? context : this, args);
-            },
-
-            _bubbleUpRow:function (row) {
-                var tbody = row.parentNode;
-
-                var level = parseInt(row.getAttribute('level'), 10);
-                var model = row.domObject.value;
-
-                setTimeout(function () {
-                    var firstRow = row.previousSibling;
-                    while (firstRow) {
-                        var l = parseInt(firstRow.getAttribute("level", 10));
-                        if (isNaN(l)) break;
-                        if (l === level) {
-                            tbody.removeChild(row);
-                            tbody.insertBefore(row, firstRow);
-                            firstRow = row.previousSibling;
-                        } else {
-                            firstRow = firstRow.previousSibling;
-                        }
-                    }
-                }, 100);
             }
         });
 
