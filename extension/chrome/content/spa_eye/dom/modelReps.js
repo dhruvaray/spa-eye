@@ -358,10 +358,10 @@ define([
             }
 
             // Find top level parent
-            var topLevelParent = Dom.getAncestorByClass(row, "0level");
-            if (topLevelParent && topLevelParent.parentNode) {
-                // Get old selection using `topLevelParent.parentNode`
-                var old = topLevelParent.parentNode.getElementsByClassName("row-selected").item(0);
+            var section = Dom.getAncestorByClass(row, "modelSection");
+            if (section && section.parentNode) {
+                // Get old selection using `section.parentNode`
+                var old = section.parentNode.getElementsByClassName("row-selected").item(0);
                 if (old) {
                     // Remove old selection in order to get new one
                     Css.removeClass(old, "row-selected")

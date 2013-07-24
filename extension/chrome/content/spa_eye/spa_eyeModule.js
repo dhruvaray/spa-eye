@@ -78,10 +78,9 @@ define([
             onRequest:function (context, file) {
                 var win = context.window.wrappedJSObject;
                 var spObj = context.spa_eyeObj;
-                if (spObj.hooked()) {
+                if (spObj && spObj.hooked()) {
                     if (win.spa_eye.cm) {
                         context.spa_eyeObj._currentSynced[file.href] = win.spa_eye.cm;
-                        //BBHook.writeModelAudit(URI.getEndPoint(win.location.href),win.spa_eye.cm,win.spa_eye.cm);
                     }
                 }
             },

@@ -12,30 +12,17 @@ define([
 
     "spa_eye/panels/basePanel"
 ],
-    function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, FirebugReps, URI) {
+    function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, FirebugReps, URI, BasePanel) {
 
 // ********************************************************************************************* //
 
-        var auditPanel = Firebug.auditPanel = function () {}
-        auditPanel.prototype = Obj.extend(Firebug.Panel, {
+        var auditPanel = Firebug.auditPanel = BasePanel.extend({
             name:"spa_eye:audit",
             title:Locale.$STR("spa_eye.audit.title"),
 
             parentPanel:"spa_eye",
             tag:Firebug.DOMPanel.DirTable.tag,
             order:0,
-
-            initialize:function () {
-                //Firebug.registerUIListener(this);
-                Firebug.Panel.initialize.apply(this, arguments);
-                var listener = this.context.spa_eyeObj._spaHook.listener;
-                listener.addListener(this);
-            },
-
-            destroy:function (state) {
-                //Firebug.unRegisterUIListener(this);
-                Firebug.Panel.destroy.apply(this, arguments);
-            },
 
             _zeroFill:function (n, p, c) {
                 var pad_char = typeof c !== 'undefined' ? c : '0';

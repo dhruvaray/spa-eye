@@ -11,6 +11,8 @@ define([
     "firebug/lib/string",
     "firebug/dom/domEditor",
 
+    "spa_eye/panels/basePanel",
+
     "spa_eye/plates/modelPlate",
     "spa_eye/plates/collectionPlate",
     "spa_eye/plates/viewPlate",
@@ -21,17 +23,14 @@ define([
     "spa_eye/panels/auditPanel",
     "spa_eye/panels/eventPanel"
 ],
-    function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, DOMEditor, ModelPlate, CollectionPlate, ViewPlate) {
+    function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, DOMEditor, BasePanel, ModelPlate, CollectionPlate, ViewPlate) {
 
-        var spa_eyePanel = Firebug.spa_eyePanel = function spa_eyePanel() {
-        };
-        var childPlate = Firebug.spa_eyePanel.childPlate = {
+        var childPlate = {
             MODEL:'model',
             COLLECTION:'collection',
             VIEW:'view'
         };
-
-        Firebug.spa_eyePanel.prototype = Obj.extend(Firebug.ActivablePanel, {
+        var spa_eyePanel = Firebug.spa_eyePanel = BasePanel.extend(Obj.extend(Firebug.ActivablePanel, {
             name:"spa_eye",
             title:Locale.$STR("spa_eye.title"),
             searchable:true,
@@ -49,24 +48,17 @@ define([
 
 
             initialize:function () {
-                this.plates = {};
                 Firebug.registerUIListener(this);
                 Firebug.Panel.initialize.apply(this, arguments);
 
                 // Initialize plates
+                this.plates = {};
                 this.plates.model = new ModelPlate(this.context, this);
                 this.plates.collection = new CollectionPlate(this.context, this);
                 this.plates.view = new ViewPlate(this.context, this);
 
                 var listener = this.context.spa_eyeObj._spaHook.listener;
                 listener.addListener(this);
-
-
-                /*var listener = this.context.spa_eyeObj._spaHook.listener;
-
-                 listener.addListener(this.context.getPanel("spa_eye:audit", true));
-                 listener.addListener(this.context.getPanel("spa_eye:event", true));
-                 listener.addListener(this.context.getPanel("spa_eye:script.view", true));*/
             },
 
             destroy:function () {
@@ -310,7 +302,7 @@ define([
                 return p && p.setPropertyValue && p.setPropertyValue.apply(p, arguments);
             }
 
-        });
+        }));
 
 // ********************************************************************************************* //
 // Panel UI (Domplate)
@@ -336,7 +328,6 @@ define([
 // Registration
 
         Firebug.registerPanel(Firebug.spa_eyePanel);
-
         return Firebug.spa_eyePanel;
 
 // ********************************************************************************************* //
