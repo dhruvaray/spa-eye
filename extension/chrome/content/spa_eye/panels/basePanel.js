@@ -22,6 +22,7 @@ function (Firebug, Obj, FBTrace, _) {
     // class properties to be extended.
     var extend = function(protoProps, staticProps) {
         var parent = this,
+            _super = parent.prototype,
             child,
             fnTest = /xyz/.test(function(){xyz;}) ? /\b_super\b/ : /.*/;
 
@@ -82,6 +83,7 @@ function (Firebug, Obj, FBTrace, _) {
     BasePanel.extend = extend;
     BasePanel.prototype = Obj.extend(Firebug.Panel, {
         constructor: BasePanel,
+
         initialize: function() {
             Firebug.Panel.initialize.apply(this, arguments);
             var listener = this.context.spa_eyeObj._spaHook.listener;
@@ -89,10 +91,10 @@ function (Firebug, Obj, FBTrace, _) {
         },
 
         destroy: function () {
-            try{
+            try {
                 var listener = this.context.spa_eyeObj._spaHook.listener;
                 listener.removeListener(this);
-            } catch(e){
+            } catch(e) {
                 if (FBTrace.DBG_SPA_EYE) {
                     FBTrace.sysout("Error while removing listener", e);
                 }

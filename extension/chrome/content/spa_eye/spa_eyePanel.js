@@ -48,31 +48,19 @@ define([
 
 
             initialize:function () {
+                this._super.apply(this, arguments);
                 Firebug.registerUIListener(this);
-                Firebug.Panel.initialize.apply(this, arguments);
 
                 // Initialize plates
                 this.plates = {};
                 this.plates.model = new ModelPlate(this.context, this);
                 this.plates.collection = new CollectionPlate(this.context, this);
                 this.plates.view = new ViewPlate(this.context, this);
-
-                var listener = this.context.spa_eyeObj._spaHook.listener;
-                listener.addListener(this);
             },
 
             destroy:function () {
                 Firebug.unregisterUIListener(this);
-                Firebug.Panel.destroy.apply(this, arguments);
-
-                this.removeListener(this);
-
-                if (this.context.spa_eyeObj) {
-                    try {
-                        this.context.spa_eyeObj._spaHook.listener.removeListener(this);
-                    } catch (e) {
-                    }
-                }
+                this._super.apply(this, arguments);
             },
 
             onBackboneLoaded:function () {
