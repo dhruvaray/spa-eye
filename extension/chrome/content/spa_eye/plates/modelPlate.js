@@ -296,24 +296,8 @@ define([
                     ModelReps.highlightRow(result[0], type ? type : 'row-warning');
                     this._bubbleUpRow(result[0]);
                 }
-            },
-
-// ********************************************************************************************* //
-// Bubble up and highlight row
-// ********************************************************************************************* //
-
-            _foldRow:function (row, cb, context, otherArgs) {
-                var args = [row];
-                otherArgs && args.push.apply(args, otherArgs);
-                if (row && Css.hasClass(row, 'opened')) {
-                    return ModelReps.DirTablePlate.toggleRow(row, function () {
-                        cb && cb.apply(this, args);
-                    }, context ? context : this);
-                }
-                return cb && cb.apply(context ? context : this, args);
             }
         });
 
         return PANEL;
-
     });

@@ -2,6 +2,8 @@ define([
     "firebug/firebug",
     "firebug/lib/object",
     "firebug/lib/trace",
+    "firebug/lib/dom",
+    "firebug/lib/css",
 
     "spa_eye/lib/underscore",
 
@@ -9,7 +11,7 @@ define([
     "spa_eye/dom/modelReps",
     "spa_eye/dom/domEditor"
 ],
-function (Firebug, Obj, FBTrace, _, BasePanel, ModelReps, DOMEditor) {
+function (Firebug, Obj, FBTrace, Dom, Css, _, BasePanel, ModelReps, DOMEditor) {
 
     var BasePlate = function(options) {
         this.initialize && this.initialize(options);
@@ -66,6 +68,17 @@ function (Firebug, Obj, FBTrace, _, BasePanel, ModelReps, DOMEditor) {
                     }
                 }
             }, 100);
+        },
+
+        _foldRow:function (row, cb, context, otherArgs) {
+            var args = [row];
+            otherArgs && args.push.apply(args, otherArgs);
+            if (row && Css.hasClass(row, 'opened')) {
+                return ModelReps.DirTablePlate.toggleRow(row, function () {
+                    cb && cb.apply(this, args);
+                }, context ? context : this);
+            }
+            return cb && cb.apply(context ? context : this, args);
         }
     });
 
