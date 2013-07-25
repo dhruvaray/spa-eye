@@ -53,6 +53,13 @@ define([
                 this.tag.replace({object: result || {}}, this.panelNode);
             },
 
+            onSelectRow: function(row) {
+                if (!row || !row.domObject.value) return;
+                var m = row.domObject.value;
+                if (!m || !m.cid) return;
+                this.showAudit(m);
+            },
+
             // Record audit for model
             recordAudit: function(model, doc) {
                 var spa_eyeObj = this.context.spa_eyeObj,

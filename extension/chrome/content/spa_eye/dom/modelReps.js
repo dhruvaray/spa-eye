@@ -369,6 +369,11 @@ define([
             }
             // Mark row as selected
             Css.setClass(row, "row-selected");
+            if (Firebug.currentContext.spa_eyeObj) {
+                Events.dispatch(Firebug.currentContext.spa_eyeObj._spaHook.listener.fbListeners,
+                        'onSelectRow',
+                        [row]);
+            }
         }
 
         // Get selected row
