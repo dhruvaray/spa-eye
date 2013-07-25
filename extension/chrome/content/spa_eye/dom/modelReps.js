@@ -352,8 +352,8 @@ define([
         // Select row
         // @param row <domObject>
         var selectRow = function (row) {
-            // Ignore if row is not `level-0`
-            if (!Css.hasClass(row, "0level")) {
+            // Ignore if row is not `level-0` or row is `null`
+            if (!row || !Css.hasClass(row, "0level")) {
                 return;
             }
 

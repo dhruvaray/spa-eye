@@ -3,9 +3,11 @@ define([
     "firebug/lib/object",
     "firebug/lib/trace",
 
-    "spa_eye/lib/underscore"
+    "spa_eye/lib/underscore",
+
+    "spa_eye/dom/keyPanel"
 ],
-function (Firebug, Obj, FBTrace, _) {
+function (Firebug, Obj, FBTrace, _, KeyPanel) {
 
     Firebug.registerStringBundle("chrome://spa_eye/locale/spa_eye.properties");
     Firebug.registerStylesheet("chrome://spa_eye/skin/spa_eye.css");
@@ -81,17 +83,27 @@ function (Firebug, Obj, FBTrace, _) {
 
     var BasePanel = function() {};
     BasePanel.extend = extend;
-    BasePanel.prototype = Obj.extend(Firebug.Panel, {
+    BasePanel.prototype = Obj.extend(
+            Firebug.Panel,
+            KeyPanel,
+
+    {
         constructor: BasePanel,
 
         initialize: function() {
             Firebug.Panel.initialize.apply(this, arguments);
             var listener = this.context.spa_eyeObj._spaHook.listener;
             listener.addListener(this);
+
+            // Attach key listeners
+            this.attachKeyListeners();
         },
 
         destroy: function () {
             try {
+                // Detach key listeners
+                this.detachKeyListeners();
+
                 var listener = this.context.spa_eyeObj._spaHook.listener;
                 listener.removeListener(this);
             } catch(e) {

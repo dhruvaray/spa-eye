@@ -27,7 +27,6 @@ function (Firebug, Obj, FBTrace, _, BasePanel, ModelReps, DOMEditor) {
         },
 
         render: function() {
-            FBTrace.sysout("this in render", this);
             var args = {
                 sections:this.sections.sort(function (a, b) {
                     return a.order > b.order;
