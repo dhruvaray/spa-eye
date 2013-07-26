@@ -10,38 +10,19 @@ define([
     "firebug/lib/string",
     "firebug/lib/dom",
 
+    "spa_eye/plates/basePlate",
+
     "spa_eye/dom/section",
     "spa_eye/dom/modelReps",
     "spa_eye/dom/domEditor"
 
 ],
-    function (Firebug, Obj, FBTrace, Css, Str, Dom, ChildSection, ModelReps, DOMEditor) {
+    function (Firebug, Obj, FBTrace, Css, Str, Dom, BasePlate, ChildSection, ModelReps, DOMEditor) {
 
         var NetRequestEntry = Firebug.NetMonitor.NetRequestEntry;
-        var PANEL = function (context, parent) {
-            this.context = context;
-            this.parent = parent;
-            this.sections = this.createSections();
-        };
 
-        PANEL.prototype = Obj.extend(DOMEditor, {
-
-            constructor:PANEL,
+        var PANEL = BasePlate.extend({
             name:'model',
-
-            render:function () {
-
-                var args = {
-                    sections:this.sections.sort(function (a, b) {
-                        return a.order > b.order;
-                    }),
-                    mainPanel:this
-                };
-
-                ModelReps.DirTablePlate.tag.replace(args, this.parent.panelNode);
-
-            },
-
             createSections:function () {
                 var sections = [];
                 var pinned = new ChildSection({
@@ -161,7 +142,7 @@ define([
                 cid = model.cid;
 
                 // Pin this model
-                this._pinModel(model);
+                // this._pinModel(model);
 
                 // Select audit panel
                 Firebug.chrome.selectSidePanel("spa_eye:audit");
@@ -188,7 +169,7 @@ define([
                 }
             },
 
-            _pinModel: function (model) {
+            _pinModel:function (model) {
                 if (this.context.spa_eyeObj._pinned_models[model.cid]) { // Already Pinned
                     return;
                 }
@@ -248,8 +229,8 @@ define([
 
             showRelatedEvents:function (row) {
                 Firebug.chrome.selectSidePanel("spa_eye:event");
-                var eventPanel = this.context.getPanel('spa_eye:event', true);
-                eventPanel.showEvents(row.domObject.value, this.context);
+                var eventPanel = this.context.getPanel('event', true);
+                eventPanel.onSelectRow(row);
             },
 
 // ********************************************************************************************* //
@@ -258,11 +239,6 @@ define([
 
             setValue:function (obj, key, value) {
                 obj.set(key, value);
-            },
-
-            refresh:function (row) {
-                ModelReps.DirTablePlate.toggleRow(row);
-                ModelReps.DirTablePlate.toggleRow(row);
             },
 
 // ********************************************************************************************* //
@@ -304,7 +280,7 @@ define([
                         if (model.cid == m.cid) {
                             found = true;
                             this._foldRow(row, function (r) {
-                                this._highlightRow(r, type ? type : 'row-warning');
+                                ModelReps.highlightRow(r, type ? type : 'row-warning');
                                 this._bubbleUpRow(r);
                             }, this);
                             break;
@@ -317,62 +293,11 @@ define([
                     obj[model.cid] = model;
                     var members = ModelReps.DirTablePlate.memberIterator(obj);
                     var result = ModelReps.DirTablePlate.rowTag.insertRows({members:members}, tbody);
-                    this._highlightRow(result[0], type ? type : 'row-warning');
+                    ModelReps.highlightRow(result[0], type ? type : 'row-warning');
                     this._bubbleUpRow(result[0]);
                 }
-            },
-
-// ********************************************************************************************* //
-// Bubble up and highlight row
-// ********************************************************************************************* //
-
-            _foldRow:function (row, cb, context, otherArgs) {
-                var args = [row];
-                otherArgs && args.push.apply(args, otherArgs);
-                if (row && Css.hasClass(row, 'opened')) {
-                    return ModelReps.DirTablePlate.toggleRow(row, function () {
-                        cb && cb.apply(this, args);
-                    }, context ? context : this);
-                }
-                return cb && cb.apply(context ? context : this, args);
-            },
-
-            _bubbleUpRow:function (row) {
-                var tbody = row.parentNode;
-
-                var level = parseInt(row.getAttribute('level'), 10);
-                var model = row.domObject.value;
-
-                setTimeout(function () {
-                    var firstRow = row.previousSibling;
-                    while (firstRow) {
-                        var l = parseInt(firstRow.getAttribute("level", 10));
-                        if (isNaN(l)) break;
-                        if (l === level) {
-                            tbody.removeChild(row);
-                            tbody.insertBefore(row, firstRow);
-                            firstRow = row.previousSibling;
-                        } else {
-                            firstRow = firstRow.previousSibling;
-                        }
-                    }
-                }, 100);
-            },
-
-            _highlightRow:function (row, type) {
-                Css.setClass(row, type);
-                setTimeout(function () {
-                    Css.setClass(row, 'fade-in');
-                    Css.removeClass(row, type);
-                    setTimeout(function () {
-                        Css.removeClass(row, 'fade-in');
-                    }, 2000);
-                }, 1000);
             }
         });
 
         return PANEL;
-
     });
-
-

@@ -352,16 +352,16 @@ define([
         // Select row
         // @param row <domObject>
         var selectRow = function (row) {
-            // Ignore if row is not `level-0`
-            if (!Css.hasClass(row, "0level")) {
+            // Ignore if row is not `level-0` or row is `null`
+            if (!row || !Css.hasClass(row, "0level")) {
                 return;
             }
 
             // Find top level parent
-            var topLevelParent = Dom.getAncestorByClass(row, "0level");
-            if (topLevelParent && topLevelParent.parentNode) {
-                // Get old selection using `topLevelParent.parentNode`
-                var old = topLevelParent.parentNode.getElementsByClassName("row-selected").item(0);
+            var section = Dom.getAncestorByClass(row, "modelSection");
+            if (section && section.parentNode) {
+                // Get old selection using `section.parentNode`
+                var old = getSelectedRow(section.parentNode);
                 if (old) {
                     // Remove old selection in order to get new one
                     Css.removeClass(old, "row-selected")
@@ -369,6 +369,18 @@ define([
             }
             // Mark row as selected
             Css.setClass(row, "row-selected");
+            if (Firebug.currentContext.spa_eyeObj) {
+                Events.dispatch(Firebug.currentContext.spa_eyeObj._spaHook.listener.fbListeners,
+                        'onSelectRow',
+                        [row]);
+            }
+        }
+
+        // Get selected row
+        // @param target <domObject>
+        var getSelectedRow = function(target) {
+            if (!target) return;
+            return target.getElementsByClassName("row-selected").item(0);
         }
 
 // ********************************************************************************************* //
@@ -380,7 +392,8 @@ define([
             insertInterval: insertInterval,
 
             highlightRow: highlightRow,
-            selectRow: selectRow
+            selectRow: selectRow,
+            getSelectedRow: getSelectedRow
         };
 
 // ********************************************************************************************* //

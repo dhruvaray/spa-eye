@@ -1,24 +1,26 @@
 .green {
     color: green;
 }
-.show{
+
+.show {
     display: block;
 }
-.hide{
+
+.hide {
     display: none;
 }
 
-.modelRow td{
+.modelRow td {
     border-top: 1px solid #EFEFEF !important;
 }
 
-.modelRow:hover{
+.modelRow:hover {
     background-color: #F5F5F5;
     border-top: 1px solid #EEEEEE;
     border-bottom: 1px solid #EEEEEE;
 }
 
-.headerRow{
+.headerRow {
     background-color: #EEEEEE;
     color: #727272;
     font-weight: bold;
@@ -29,30 +31,31 @@
     line-height: 25px;
 }
 
-.headerContent{
+.headerContent {
     padding: 2px 0 2px 5px;
     vertical-align: top;
 }
 
-.headerImage{
+.headerImage {
     background-repeat: no-repeat;
     background-position: 6px;
     background-image: url(chrome://firebug/skin/mac/twistyOpen.svg);
 }
 
-.headerRow.headerImage.opened{
+.headerRow.headerImage.opened {
     background-repeat: no-repeat;
     background-position: 6px;
     background-image: url(chrome://firebug/skin/mac/twistyClosed.svg);
 }
 
-.row-success{
+.row-success {
     color: #468847;
     background-color: #dff0d8;
-    border-color: #d6e9c6;:
+    border-color: #d6e9c6;
+:
 }
 
-.row-error{
+.row-error {
     color: #b94a48;
     background-color: #f2dede;
     border-color: #eed3d7;
@@ -68,9 +71,13 @@
     background-color: #ffe167;
 }
 
-.fade-in {   
-   transition: background-color 1s linear; 
-   -moz-transition: background-color 1s linear;  
-   -webkit-transition: background-color 1s linear; 
-   -ms-transition: background-color 1s linear; 
+.fade-in {
+    transition: background-color 1s linear;
+    -moz-transition: background-color 1s linear;
+    -webkit-transition: background-color 1s linear;
+    -ms-transition: background-color 1s linear;
+}
+
+.row-selected {
+    background-color: #DDD;
 }

@@ -9,30 +9,15 @@ define([
     "firebug/lib/string",
     "firebug/lib/dom",
 
+    "spa_eye/plates/basePlate",
+
     "spa_eye/dom/section",
     "spa_eye/dom/modelReps"
-
 ],
-function (Firebug, FBTrace, Css, Str, Dom, ChildSection, ModelReps) {
+function (Firebug, FBTrace, Css, Str, Dom, BasePlate, ChildSection, ModelReps) {
 
-    var PANEL = function (context, parent) {
-        this.context = context;
-        this.parent = parent;
-        this.sections = this.createSections();
-    };
-
-    PANEL.prototype = {
-        constructor: PANEL,
+    var PANEL = BasePlate.extend({
         name: 'collection',
-        render: function () {
-            var args = {
-                sections: this.sections.sort(function (a, b) {
-                    return a.order > b.order;
-                }),
-                mainPanel: this
-            };
-            ModelReps.DirTablePlate.tag.replace(args, this.parent.panelNode);
-        },
 
         createSections: function () {
             var sections = [];
@@ -50,7 +35,7 @@ function (Firebug, FBTrace, Css, Str, Dom, ChildSection, ModelReps) {
             sections.push(allCollections);
             return sections;
         }
-    };
+    });
 
     return PANEL;
 });
