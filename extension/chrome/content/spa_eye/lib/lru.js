@@ -1,9 +1,25 @@
 define([], function(){
 
+    // Least Recently Used (LRU)
+    // -------------------------
+    //
+    // var lru = new LRU({limit: 4});
+    // lru.add("c1", "model1"); // NodeObject({key: c1, value: model1})
+    // lru.add("c2", "model2");
+    // lru.add("c3", "model3");
+    // lru.add("c4", "model4");
+    // lru.toString(); // c1 <- c2 <- c3 <- c4
+    // lru.get("c3");  // "model3"
+    // lru.toString(); // c1 <- c2 <- c4 <- c3
+    // lru.add("c5", "model5");
+    // lru.toString(); // c2 <- c4 <- c3 <- c5
+
+
     // each node for LRU
     var Node = function(key, value) {
         this.key = key;
         this.value = value;
+        this.hit = -1;
 
         this.prev = null;
         this.next = null;
@@ -48,21 +64,26 @@ define([], function(){
         },
 
         _add: function(node) {
-            node.prev = this.tail;
-            this.tail = node;
-
             // First element
             if (!this.head) {
                 this.head = node;
             }
 
-            if (this.limit > this.size && this.head) {
+            node.prev = this.tail;
+            if (this.tail) {
+                this.tail.next = node;
+            }
+
+            // set tail to node
+            this.tail = node;
+
+            if (this.limit < this.size && this.head) {
                 // remove head
                 var rn = this.remove(this.head.key);
 
                 // call options.purge for outside world
-                this.options.purge 
-                    && this.options.purge.call(this, rn, this);
+                this.options.onPurge
+                    && this.options.onPurge.call(this, rn.value, rn.key, this);
             }
             return node;
         },
@@ -78,6 +99,8 @@ define([], function(){
             if (this.size === 1) return node;
             this._remove(node);
             this._add(node);
+            this.options.onHit
+                && this.options.onHit.call(this, node.value, node.key, this);
             return node;
         },
 
@@ -149,9 +172,9 @@ define([], function(){
             var result = null;
             this.forEach(function(value, key, lruObject){
                 if (result) {
-                    result += "<-";
+                    result = " <- " + result;
                 }
-                result += key;
+                result = key + (result ? result : "");
             });
             return result;
         }
