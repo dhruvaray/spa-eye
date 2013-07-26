@@ -2,48 +2,47 @@
 
 <?xml-stylesheet href="chrome://global/skin/global.css"?>
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-        id="firebug.spa_eye.timeline"
-        title="Timeline"
-        width="800" height="600"
         persist="screenX,screenY,width,height,sizemode"
-        onload="draw([])" onunload="">
+        >
 
     <script type="application/x-javascript" src="chrome://spa_eye/content/lib/ext/underscore.js"/>
     <script type="application/x-javascript" src="chrome://spa_eye/content/lib/ext/raphael.js"/>
     <script type="application/x-javascript" src="chrome://spa_eye/content/lib/ext/sequence-diagram.js"/>
 
-    <div id="sequence"/>
+    <hbox flex="1" style="overflow:scroll;">
+        <div id="sequence"/>
+    </hbox>
+
     <script>
 
         var sequenceDiagram = undefined;
         var sequence = "Title: Select a model to view it's interaction flow";
 
 
-        function genFlows(val, idx, list){
+        function genFlows(val, idx, list) {
             list[idx].forEach(genSequenceString);
         };
 
 
-        function genSequenceString(val, idx, list){
-            sequence=sequence+"\n"+((list[idx].source ? list[idx].source.cid : "App") +"->"+list[idx].target.cid+": "+list[idx].operation);
+        function genSequenceString(val, idx, list) {
+            sequence = sequence + "\n" + ((list[idx].source ? list[idx].source.cid : "App") + "->" + list[idx].target.cid + ": " + list[idx].operation);
 
         };
 
         /*function genBackPath(val, idx, list){
-            return list[idx-1] ? "\n"+ list[idx].target.cid +"-->>"+ list[idx-1].target.cid + genBackPath(list[idx-1],idx-1,list) : ""
-        }*/
+         return list[idx-1] ? "\n"+ list[idx].target.cid +"-->>"+ list[idx-1].target.cid + genBackPath(list[idx-1],idx-1,list) : ""
+         }*/
 
-        function draw(flows){
-            if (flows.length){
-                sequence="Title: Interaction flow for model : "+flows[0][0].target.cid;
+        function draw(flows) {
+            if (flows.length) {
+                sequence = "Title: Interaction flow for model : " + flows[0][0].target.cid;
                 flows.forEach(genFlows);
             }
-            document.getElementById("sequence").innerHTML="";
+            document.getElementById("sequence").innerHTML = "";
             sequenceDiagram = Diagram.parse(sequence);
             sequenceDiagram.drawSVG("sequence", {theme:'simple'});
 
         }
-
 
 
     </script>

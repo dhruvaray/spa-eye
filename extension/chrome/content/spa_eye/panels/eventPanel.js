@@ -26,7 +26,8 @@ define([
                 var listener = this.context.spa_eyeObj._spaHook.listener;
                 listener.addListener(this);
                 this.timeline.TIMELINE.replace({object:[]}, this.panelNode);
-                this.sequenceEditor = this.panelNode.firstChild.firstChild.contentWindow;
+                this.timeline.tag.append({object:[]}, this.panelNode);
+                this.sequenceEditor = this.panelNode.firstChild.contentWindow;
             },
 
             destroy:function (state) {
@@ -47,10 +48,11 @@ define([
             },
 
             show:function () {
-                this.timeline.tag.replace({object:this.sequenceData || []}, this.panelNode.firstChild.lastChild);
+
                 if (this.sequenceEditor) {
                     this.sequenceEditor.draw(this.sequenceData);
                 }
+                this.timeline.tag.replace({object:this.sequenceData || []}, this.panelNode.lastChild);
 
             },
 
@@ -65,16 +67,13 @@ define([
 
         with (Domplate) {
             eventPanel.prototype.timeline = domplate(DOMReps.DirTablePlate, {
-                TIMELINE:DIV({height:"100%", width:"100%"},
-                    IFRAME({src:"chrome://spa_eye/content/panels/timeline.xul",
-                            width:"100%",
-                            name:"timeline",
-                            id:"timeline",
-                            height:"500px",
-                            frameborder:"0"}
-                    ),
-                    HR()
-                )
+                TIMELINE:IFRAME({src:"chrome://spa_eye/content/panels/timeline.xul",
+                    width:"100%",
+                    name:"timeline",
+                    id:"timeline",
+                    height:"60%",
+                    frameborder:"0"
+                })
             });
         }
 
