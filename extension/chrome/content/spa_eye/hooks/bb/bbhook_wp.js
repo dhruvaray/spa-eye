@@ -1,6 +1,7 @@
 if (window.Backbone) {
     window.spa_eye = {};
     window.spa_eye.sequence = {};
+    window.spa_eye.path = [];
     var _ModelProxy = window.Backbone.Model;
     if (_ModelProxy) {
         var _ModelProxyProto = window.Backbone.Model.prototype;
@@ -34,7 +35,9 @@ if (window.Backbone) {
             this.render = function () {
                 window.spa_eye.cv = this;
                 this.inferredTemplates = this.inferredTemplates || [];
+                window.spa_eye.path.push(this);
                 var result = renderProxy.apply(this, arguments);
+                window.spa_eye.path.pop();
                 window.spa_eye.cv = undefined;
                 return result;
             };

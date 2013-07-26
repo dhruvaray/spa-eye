@@ -106,17 +106,18 @@ define([
                             }
                         };
 
+
                         self.recordSequenceEvent(win, {
-                            operation:Operation.VIEW,
-                            target:win.spa_eye.cv,
-                            args:arguments
+                            operation: Operation.VIEW,
+                            target: win.spa_eye.cv,
+                            args: arguments
                         });
-                        Events.dispatch(self.listener.fbListeners, 'onViewRender', [win.spa_eye.cv]);
 
                         if (data) {
                             attachTemplatesToViews();
                             return compiledTemplate(data, _);
                         }
+                        Events.dispatch(self.listener.fbListeners, 'onViewRender', [win.spa_eye.cv]);
 
                     } catch (e) {
                         if (FBTrace.DBG_ERRORS)
@@ -127,11 +128,12 @@ define([
                         if (win[proxiedTemplateRef]) {
                             win[proxiedTemplateRef].source = win[proxiedTemplateRef].source || source;
                             self.recordSequenceEvent(win, {
-                                operation:Operation.VIEW,
-                                target:win.spa_eye.cv,
-                                args:arguments
+                                operation: Operation.VIEW,
+                                target: win.spa_eye.cv,
+                                args: arguments
                             });
                             attachTemplatesToViews();
+
                             Events.dispatch(self.listener.fbListeners, 'onViewRender', [win.spa_eye.cv]);
                             return win[proxiedTemplateRef].call(this, data, _);
                         }
@@ -149,16 +151,28 @@ define([
                         var _saveProxy = this.save;
                         this.save = function () {
                             win.spa_eye.cm = this;
+                            win.spa_eye.path.push(this);
+
                             self.recordSequenceEvent(win, {
-                                operation:Operation.SAVE,
-                                target:win.spa_eye.cm,
-                                args:arguments
+                                operation: Operation.SAVE,
+                                target: win.spa_eye.cm,
+                                args: arguments
                             });
-                            self.writeModelAudit(this, "Saved attributes");
+
+                            // Record save on model
+                            self.recordModelAudit(this, {
+                                operation: Operation.SAVE,
+                                target: this,
+                                args: arguments
+                            });
+
                             var result = _saveProxy.apply(this, Array.slice(arguments));
+
                             if (win.spa_eye.cm === win.spa_eye.sr)
                                 win.spa_eye.sr = undefined;
                             win.spa_eye.cm = undefined;
+
+                            win.spa_eye.path.pop();
                             return result;
                         };
                         this.save._proxied = true;
@@ -168,32 +182,58 @@ define([
                         var _fetchProxy = this.fetch;
                         this.fetch = function () {
                             win.spa_eye.cm = this;
+                            win.spa_eye.path.push(this);
+
                             self.recordSequenceEvent(win, {
-                                operation:Operation.FETCH,
-                                target:win.spa_eye.cm,
-                                args:arguments
+                                operation: Operation.FETCH,
+                                target: win.spa_eye.cm,
+                                args: arguments
                             });
-                            self.writeModelAudit(this, "Fetched attributes");
+
+                            // Record fetch on model
+                            self.recordModelAudit(this, {
+                                operation: Operation.FETCH,
+                                target: this,
+                                args: arguments
+                            });
+
                             var result = _fetchProxy.apply(this, Array.slice(arguments));
+
                             if (win.spa_eye.cm === win.spa_eye.sr)
                                 win.spa_eye.sr = undefined;
                             win.spa_eye.cm = undefined;
+
+                            win.spa_eye.path.pop();
 
                             return result;
                         };
                         this.fetch._proxied = true;
                     }
+
                     win.spa_eye.cm = this;
+
+                    win.spa_eye.path.push(this);
+
                     self.recordSequenceEvent(win, {
-                        operation:Operation.SET,
-                        target:win.spa_eye.cm,
-                        args:arguments
+                        operation: Operation.SET,
+                        target: win.spa_eye.cm,
+                        args: arguments
                     });
+
+                    // Record set operation on model
+                    self.recordModelAudit(this, {
+                        operation: Operation.SET,
+                        target: win.spa_eye.cm,
+                        args: arguments
+                    });
+
                     var result = _setProxy.apply(this, Array.slice(arguments));
+
                     if (win.spa_eye.cm === win.spa_eye.sr)
                         win.spa_eye.sr = undefined;
                     win.spa_eye.cm = undefined;
-                    self.writeModelAudit(this, this);
+
+                    win.spa_eye.path.pop();
                     Events.dispatch(self.listener.fbListeners, 'onModelSet', [this]);
                     return result;
                 }
@@ -217,11 +257,8 @@ define([
                 win.addEventListener("load", register);
             },
 
-            writeModelAudit: function (model, doc) {
-                var spa_eyeObj = this.context.spa_eyeObj;
-                if (model && model.cid && !(model.cid in spa_eyeObj._pinned_models)) {
-                    return;
-                }
+            recordModelAudit: function (model, doc) {
+                var spa_eyeObj = this.context.spa_eyeObj;                
                 Events.dispatch(this.listener.fbListeners, 'recordAudit', [model, doc]);
             },
 
@@ -260,12 +297,22 @@ define([
                 return win.Backbone && major > 3 && minor >= 3;
             },
 
+
+            _execute : function(fn){
+
+            },
+
             recordSequenceEvent:function (win, record) {
+                var isNewInteraction = !win.spa_eye.sr;
+                record.source = win.spa_eye.path[win.spa_eye.path.length-2];
                 win.spa_eye.sr = win.spa_eye.sr || win.spa_eye.cm;
                 if (win.spa_eye.sr && win.spa_eye.sr.cid) {
                     win.spa_eye.sequence[win.spa_eye.sr.cid] = win.spa_eye.sequence[win.spa_eye.sr.cid] || [];
-                    win.spa_eye.sequence[win.spa_eye.sr.cid].push(record);
-                    Events.dispatch(this.listener.fbListeners, 'onSequenceRecordCreated', record);
+                    var flows =
+                        (win.spa_eye.sequence[win.spa_eye.sr.cid].flows =
+                            win.spa_eye.sequence[win.spa_eye.sr.cid].flows || []);
+                    isNewInteraction ? flows.push([record]) : flows[flows.length-1].push(record);
+
                 }
             },
 
