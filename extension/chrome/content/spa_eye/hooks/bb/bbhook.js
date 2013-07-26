@@ -289,6 +289,11 @@ define([
                 return [];
             },
 
+            removeModel: function(model){
+                return this._removeElement(this.win && this.win.spa_eye.models,
+                        model);
+            },
+
             views:function () {
                 if (this.win) {
                     return this.win.spa_eye.views;
@@ -296,11 +301,30 @@ define([
                 return [];
             },
 
+            removeView: function(view) {
+                return this._removeElement(this.win && this.win.spa_eye.views,
+                        view);
+            },
+
             collections:function () {
                 if (this.win) {
                     return this.win.spa_eye.collections;
                 }
                 return [];
+            },
+
+            removeCollection: function(col){
+                return this._removeElement(this.win && this.win.spa_eye.collections,
+                        col);
+            },
+
+            _removeElement: function(list, model) {
+                if(!list || !model) return;
+                var index = list.indexOf(model);
+                if (index !== -1) {
+                    return list.splice(index, 1);
+                }
+                return null;
             }
         };
 

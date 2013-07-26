@@ -25,7 +25,6 @@ function(FBL, FBTrace, Locale, Events) {
     spa_eyeObj.prototype = {
         constructor: spa_eyeObj,
 
-
         getHook: function() {
             return this._spaHook;
         },
@@ -38,12 +37,24 @@ function(FBL, FBTrace, Locale, Events) {
             return this._spaHook ? this._spaHook.models() : [];
         },
 
+        removeModel: function(model) {
+            return this._spaHook && this._spaHook.removeModel(model);
+        },
+
         getViews : function(){
             return this._spaHook ? this._spaHook.views() : [];
         },
 
+        removeView: function(view) {
+            return this._spaHook && this._spaHook.removeView(view);
+        },
+
         getCollections : function(){
             return this._spaHook ? this._spaHook.collections() : [];
+        },
+
+        removeCollection: function(col) {
+            return this._spaHook && this._spaHook.removeCollection(col);
         }
     };
 

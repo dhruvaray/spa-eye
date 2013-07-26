@@ -32,6 +32,9 @@ define([
                 return [];
             },
 
+            // onRemoveModel
+            onRemoveModel: null,
+
             // Other default property for its data
             autoAdd:true,
             highlight:true,

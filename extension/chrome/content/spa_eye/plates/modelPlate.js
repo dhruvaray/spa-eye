@@ -10,6 +10,7 @@ define([
     "firebug/lib/string",
     "firebug/lib/dom",
 
+    "spa_eye/lib/lru",
     "spa_eye/plates/basePlate",
 
     "spa_eye/dom/section",
@@ -17,42 +18,72 @@ define([
     "spa_eye/dom/domEditor"
 
 ],
-    function (Firebug, Obj, FBTrace, Css, Str, Dom, BasePlate, ChildSection, ModelReps, DOMEditor) {
+    function (Firebug, Obj, FBTrace, Css, Str, Dom, LRU, BasePlate, ChildSection, ModelReps, DOMEditor) {
 
         var NetRequestEntry = Firebug.NetMonitor.NetRequestEntry;
 
         var PANEL = BasePlate.extend({
             name:'model',
+
+            initialize: function(options) {
+                var spa_eyeObj = options.context.spa_eyeObj,
+                    self = this;
+
+                spa_eyeObj._mostused_models = spa_eyeObj._mostused_models ||
+                        new LRU({
+                            limit: 10,
+                            onPurge: function(value, key, lru){
+                                self.onRemoveModel(value, self.sections[1]);
+                            }
+                        });
+                this._super.apply(this, arguments);
+            },
+
             createSections:function () {
-                var sections = [];
+                var sections = [],
+                    spa_eyeObj = this.context.spa_eyeObj;
+
                 var pinned = new ChildSection({
-                    name:'pinned_models',
-                    title:'Pinned Models',
-                    parent:this.parent.panelNode,
-                    order:0,
-                    container:'pinnedModelsDiv',
-                    body:'pinnedModelsDivBody',
+                    name: 'pinned_models',
+                    title: 'Pinned Models',
+                    parent: this.parent.panelNode,
+                    order: 0,
+                    container: 'pinnedModelsDiv',
+                    body: 'pinnedModelsDivBody',
                     autoAdd:false,
-                    data:this.context.spa_eyeObj._pinned_models
+                    data: spa_eyeObj._pinned_models,
+                    onRemoveModel: function(model) {
+                        if (!model || !model.cid) return;
+                        delete spa_eyeObj._pinned_models[model.cid];
+                    }
                 });
 
                 var mostUsed = new ChildSection({
-                    name:'most_used_models',
-                    title:'Most Used',
-                    parent:this.parent.panelNode,
-                    order:1,
-                    container:'mostUsedModelsDiv',
-                    body:'mostUsedModelsDivBody'
+                    name: 'most_used_models',
+                    title: 'Most Used',
+                    parent: this.parent.panelNode,
+                    order: 1,
+                    container: 'mostUsedModelsDiv',
+                    body: 'mostUsedModelsDivBody',
+                    data: spa_eyeObj._mostused_models.values(),
+                    onRemoveModel: function(model) {
+                        if (!model || !model.cid) return;
+                        delete spa_eyeObj._mostused_models.remove(model.cid);
+                    }
                 });
 
                 var allModels = new ChildSection({
-                    name:'all_models',
-                    title:'All Models',
-                    parent:this.parent.panelNode,
-                    order:2,
-                    container:'allModelsDiv',
-                    body:'allModelsDivBody',
-                    data:FBL.bindFixed(this.context.spa_eyeObj.getModels, this.context.spa_eyeObj)
+                    name: 'all_models',
+                    title: 'All Models',
+                    parent: this.parent.panelNode,
+                    order: 2,
+                    container: 'allModelsDiv',
+                    body: 'allModelsDivBody',
+                    data: FBL.bindFixed(spa_eyeObj.getModels, spa_eyeObj),
+                    onRemoveModel: function(model) {
+                        if (!model || !model.cid) return;
+                        return spa_eyeObj.removeModel(model);
+                    }
                 });
 
                 sections.push(pinned, mostUsed, allModels);
@@ -196,35 +227,7 @@ define([
             },
 
             _unPinModel:function (model) {
-                if (!model) return;
-                try {
-                    var tbody = Dom.getElementByClass(this.parent.panelNode, 'pinnedModelsDivBody');
-                    var rows = tbody.getElementsByClassName("0level");
-
-                    for (var i = 0; i < rows.length; i++) {
-                        var row = rows[i];
-                        if (row.domObject.value.cid === model.cid) {
-
-                            this._foldRow(row, function (r) {
-                                tbody.removeChild(r);
-                                var rs = tbody.getElementsByClassName("0level");
-                                if (!rs || rs.length === 0) {
-                                    var noObj = Dom.getChildByClass(tbody, 'noMemberRow');
-                                    noObj && Css.removeClass(noObj, 'hide');
-                                }
-                            }, this);
-
-                            break;
-                        }
-                    }
-
-
-                } catch (e) {
-                    if (FBTrace.DBG_SPA_EYE) {
-                        FBTrace.sysout("Error:  model.cid - " + model.cid, e);
-                    }
-                }
-                delete this.context.spa_eyeObj._pinned_models[model.cid];
+                this.onRemoveModel(model, this.sections[0]);
             },
 
             showRelatedEvents:function (row) {
@@ -242,10 +245,12 @@ define([
             },
 
 // ********************************************************************************************* //
-// OnModelSet and OnModelSave
+// onModelSet and onModelSave
 // ********************************************************************************************* //
 
             onModelSet:function (model, type) {
+                this.context.spa_eyeObj._mostused_models.add(model.cid, model);
+
                 this.sections.forEach(function (p) {
                     this._onModelSet(p, model, type);
                 }, this);

@@ -48,6 +48,52 @@ function (Firebug, Obj, FBTrace, Dom, Css, _, BasePanel, ModelReps, DOMEditor) {
             ModelReps.DirTablePlate.toggleRow(row);
         },
 
+        onRemoveModel: function(model, section) {
+            if (!model) return;
+
+            // Iterate over section if section is not null,
+            // else iterate over all sections.
+            var sections = section
+                ? ((this.sections.indexOf(section) !== -1) ? [section] : [])
+                : this.sections;
+
+            sections.forEach(function(section) {
+                // Get section body
+                var tbody = section.getBody();
+
+                // All rows from this section
+                var rows = tbody.getElementsByClassName("0level");
+
+                try {
+                    for (var i = 0; i < rows.length; i++) {
+                        var row = rows[i];
+
+                        // If model's cid is same as row object's cid,
+                        // fold and remove this `row`
+                        if (row.domObject.value.cid === model.cid) {
+                            this._foldRow(row, function (r) {
+                                tbody.removeChild(r);
+                                var rs = tbody.getElementsByClassName("0level");
+                                if (!rs || rs.length === 0) {
+                                    var noObj = Dom.getChildByClass(tbody, 'noMemberRow');
+                                    noObj && Css.removeClass(noObj, 'hide');
+                                }
+                            }, this);
+                            break;
+                        }
+                    }
+                } catch (e) {
+                    if (FBTrace.DBG_SPA_EYE) {
+                        FBTrace.sysout("Error:  model.cid - " + model.cid, e);
+                    }
+                }
+
+                // Remove model from section
+                section.onRemoveModel && section.onRemoveModel(model);
+            }, this);
+            return model;
+        },
+
         _bubbleUpRow:function (row) {
             var tbody = row.parentNode;
 
