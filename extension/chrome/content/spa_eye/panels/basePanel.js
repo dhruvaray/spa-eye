@@ -3,7 +3,7 @@ define([
     "firebug/lib/object",
     "firebug/lib/trace",
 
-    "spa_eye/lib/underscore",
+    "spa_eye/lib/require/underscore",
 
     "spa_eye/dom/keyPanel"
 ],

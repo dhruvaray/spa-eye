@@ -217,12 +217,7 @@ define([
             },
 
             isBackboneInitialized:function (win) {
-                if (win._ && win._.VERSION) {
-                    var uscore = win._.VERSION.split('.');
-                    var major = parseInt(uscore[1]);
-                    var minor = parseInt(uscore[2]);
-                }
-                return win.Backbone && major > 3 && minor >= 3;
+                return win.Backbone;
             },
 
             modelFnWomb:function (win, model, type, fn, fnargs) {

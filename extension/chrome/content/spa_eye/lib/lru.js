@@ -1,4 +1,6 @@
-define([], function(){
+define([
+    'firebug/lib/trace'
+], function(FBTrace){
 
     // Least Recently Used (LRU)
     // -------------------------
@@ -59,31 +61,31 @@ define([], function(){
             node = new Node(key, value);
             this.dataMap[node.key] = node;
             this.size++;
-
-            return this._add(node);
+            this._add(node);
+            return node;
         },
 
         _add: function(node) {
             // First element
             if (!this.head) {
                 this.head = node;
-            }
-
-            node.prev = this.tail;
-            if (this.tail) {
+            } else {
+                node.prev = this.tail;
                 this.tail.next = node;
             }
 
             // set tail to node
             this.tail = node;
 
-            if (this.limit < this.size && this.head) {
+            if (this.limit < this.size) {
                 // remove head
-                var rn = this.remove(this.head.key);
+                var rn = this.head;
+                this.remove(rn.key);
 
                 // call options.purge for outside world
-                this.options.onPurge
-                    && this.options.onPurge.call(this, rn.value, rn.key, this);
+                try {
+                    this.options.onPurge && this.options.onPurge.call(this, rn.value, rn.key, this);
+                } catch(e){}
             }
             return node;
         },
@@ -110,29 +112,27 @@ define([], function(){
                 return;
             }
             // Delete node from dataMap
+            this._remove(node);
             delete this.dataMap[node.key];
             this.size--;
-            return this._remove(node);
+            return node;
         },
 
         _remove: function(node) {
-            // Relink previous pointer for node
-            if (node.prev) { 
+            // Relink pointer for node
+            if (node.prev && node.next) {
                 node.prev.next = node.next;
-            } else {
-                // If node.prev is null, node was a head.
-                // so, reset head
+                node.next.prev = node.prev;
+            } else if (node.next) {
+                node.next.prev = node.prev;
                 this.head = node.next;
+            } else if (node.prev) {
+                node.prev.next = node.next;
+                this.tail = node.prev;
+            } else {
+                this.head = this.tail = null;
             }
 
-            // Relink next pointer for node
-            if (node.next) {
-                node.next.prev = node.prev;
-            } else {
-                // If node.next is null, node was a tail.
-                // so, reset tail
-                this.tail = node.prev;
-            }
             return node;
         },
 

@@ -5,7 +5,7 @@ define([
     "firebug/lib/dom",
     "firebug/lib/css",
 
-    "spa_eye/lib/underscore",
+    "spa_eye/lib/require/underscore",
 
     "spa_eye/panels/basePanel",
     "spa_eye/dom/modelReps",
@@ -58,6 +58,9 @@ function (Firebug, Obj, FBTrace, Dom, Css, _, BasePanel, ModelReps, DOMEditor) {
                 : this.sections;
 
             sections.forEach(function(section) {
+                // Remove model from section
+                section.onRemoveModel && section.onRemoveModel(model);
+
                 // Get section body
                 var tbody = section.getBody();
 
@@ -87,9 +90,6 @@ function (Firebug, Obj, FBTrace, Dom, Css, _, BasePanel, ModelReps, DOMEditor) {
                         FBTrace.sysout("Error:  model.cid - " + model.cid, e);
                     }
                 }
-
-                // Remove model from section
-                section.onRemoveModel && section.onRemoveModel(model);
             }, this);
             return model;
         },
