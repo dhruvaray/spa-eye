@@ -18,7 +18,7 @@ define([
     "spa_eye/dom/domEditor"
 
 ],
-    function (Firebug, Obj, FBTrace, Css, Str, Dom, LRU, BasePlate, ChildSection, ModelReps, DOMEditor) {
+    function (Firebug, Obj, FBTrace, Css, Str, Dom, MostUsed, BasePlate, ChildSection, ModelReps, DOMEditor) {
 
         var NetRequestEntry = Firebug.NetMonitor.NetRequestEntry;
 
@@ -30,10 +30,15 @@ define([
                     self = this;
 
                 spa_eyeObj._mostused_models = spa_eyeObj._mostused_models ||
-                        new LRU({
+                        new MostUsed({
                             limit: 10,
-                            onPurge: function(value, key, lru){
-                                self.onRemoveModel(value, self.sections[1]);
+                            onPurge: function(node){
+                                self.onRemoveModel(node.value, self.sections[1]);
+                            },
+                            onAdd: function(node) {
+                                self.onAddModel(node.value, self.sections[1], {
+                                        autoAdd: true
+                                    });
                             }
                         });
                 this._super.apply(this, arguments);
@@ -65,10 +70,11 @@ define([
                     order: 1,
                     container: 'mostUsedModelsDiv',
                     body: 'mostUsedModelsDivBody',
-                    data: spa_eyeObj._mostused_models.values(),
+                    autoAdd: false,
+                    data: FBL.bindFixed(spa_eyeObj._mostused_models.values, spa_eyeObj._mostused_models),
                     onRemoveModel: function(model) {
                         if (!model || !model.cid) return;
-                        delete spa_eyeObj._mostused_models.remove(model.cid);
+                        spa_eyeObj._mostused_models.remove(model.cid);
                     }
                 });
 
@@ -249,58 +255,20 @@ define([
 // ********************************************************************************************* //
 
             onModelSet:function (model, type) {
-                this.context.spa_eyeObj._mostused_models.add(model.cid, model);
+                this.context.spa_eyeObj._mostused_models.add(model.cid, model, 'set');
 
                 this.sections.forEach(function (p) {
-                    this._onModelSet(p, model, type);
+                    this.onAddModel(model, p, type);
                 }, this);
             },
 
             onModelSave:function (model, file) {
                 var isError = NetRequestEntry.isError(file);
                 var type = isError ? 'row-error' : 'row-success';
-                this.onModelSet(model, type);
-            },
-
-            _onModelSet:function (section, model, type) {
-                var tbody = section.getBody();
-
-                if (!model || !model.cid || !tbody) return;
-
-                if (section.autoAdd) {
-                    var noObjectRow = Dom.getChildByClass(tbody, 'noMemberRow');
-
-                    if (noObjectRow) {
-                        Css.removeClass(noObjectRow, 'hide');
-                        Css.setClass(noObjectRow, 'hide');
-                    }
-                }
-
-                var rows = tbody.getElementsByClassName('0level');
-                var found = false;
-                if (rows) {
-                    for (var i = 0; i < rows.length; i++) {
-                        var row = rows[i];
-                        var m = row.domObject.value;
-                        if (model.cid == m.cid) {
-                            found = true;
-                            this._foldRow(row, function (r) {
-                                ModelReps.highlightRow(r, type ? type : 'row-warning');
-                                this._bubbleUpRow(r);
-                            }, this);
-                            break;
-                        }
-                    }
-                }
-
-                if (!found && section.autoAdd) {
-                    var obj = {};
-                    obj[model.cid] = model;
-                    var members = ModelReps.DirTablePlate.memberIterator(obj);
-                    var result = ModelReps.DirTablePlate.rowTag.insertRows({members:members}, tbody);
-                    ModelReps.highlightRow(result[0], type ? type : 'row-warning');
-                    this._bubbleUpRow(result[0]);
-                }
+                this.context.spa_eyeObj._mostused_models.add(model.cid, model, 'save');
+                this.sections.forEach(function (p) {
+                    this.onAddModel(model, p, type);
+                }, this);
             }
         });
 
