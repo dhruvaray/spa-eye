@@ -46,22 +46,24 @@ define([
                 if (model && model.cid) {
                     var spa_eyeObj = this.context.spa_eyeObj;
                     result = spa_eyeObj
-                            && spa_eyeObj.auditRecords
-                            && spa_eyeObj.auditRecords[model.cid];
+                        && spa_eyeObj.auditRecords
+                        && spa_eyeObj.auditRecords[model.cid];
                 }
 
-                this.tag.replace({object: result || {}}, this.panelNode);
+                this.tag.replace({object:result || {}}, this.panelNode);
             },
 
-            onSelectRow: function(row) {
-                if (!row || !row.domObject.value) return;
-                var m = row.domObject.value;
-                if (!m || !m.cid) return;
-                this.showAudit(m);
+            onSelectRow:function (row, panel) {
+                if (panel !== this.panelNode) {
+                    if (!row || !row.domObject.value) return;
+                    var m = row.domObject.value;
+                    if (!m || !m.cid) return;
+                    this.showAudit(m);
+                }
             },
 
             // Record audit for model
-            recordAudit: function(model, doc) {
+            recordAudit:function (model, doc) {
                 var spa_eyeObj = this.context.spa_eyeObj,
                     t = this.getFormattedTime(new Date());
 
@@ -89,7 +91,8 @@ define([
                     {
                         label:"spa_eye.all",
                         tooltiptext:"spa_eye.all",
-                        command:function () {}
+                        command:function () {
+                        }
                     },
                     "-",
                     {
@@ -107,7 +110,7 @@ define([
                 }
             },
 
-            onCleanup: function(){
+            onCleanup:function () {
                 this.context.spa_eyeObj.auditRecords = undefined;
                 this.showAudit();
             }

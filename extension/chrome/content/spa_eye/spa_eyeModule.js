@@ -61,7 +61,7 @@ define([
                 var spObj = context.spa_eyeObj;
                 var hook = spObj._spaHook;
                 if (spObj.hooked()) {
-                    if (file.href) {
+                    if (file && file.href) {
                         win.spa_eye.cm = spObj._currentSynced[file.href];
                         delete spObj._currentSynced[file.href];
                     }
@@ -69,7 +69,7 @@ define([
                         if (FBTrace.DBG_SPA_EYE) {
                             FBTrace.sysout("spa_eye; on response, current model", win.spa_eye.cm);
                         }
-                        hook.writeModelAudit(URI.getEndPoint(win.location.href), win.spa_eye.cm, win.spa_eye.cm);
+                        hook.recordModelAudit(win.spa_eye.cm, win.spa_eye.cm);
                         Events.dispatch(hook.listener.fbListeners, 'onModelSave', [win.spa_eye.cm, file]);
                     }
                 }

@@ -469,13 +469,13 @@
         this.init(diagram)
     };
     _.extend(RaphaëlTheme.prototype, BaseTheme.prototype, {init_font:function () {
-        this._font = {"font-size":16, "font-family":"Andale Mono, monospace"}
+        this._font = {"font-size":10, "font-family":"Courier Mono, monospace"}
     }});
     var HandRaphaëlTheme = function (diagram) {
         this.init(diagram)
     };
     _.extend(HandRaphaëlTheme.prototype, BaseTheme.prototype, {init_font:function () {
-        this._font = {"font-size":16, "font-family":"daniel"}, this._font._obj = this._paper.getFont("daniel")
+        this._font = {"font-size":10, "font-family":"daniel"}, this._font._obj = this._paper.getFont("daniel")
     }, draw_line:function (x1, y1, x2, y2) {
         return this._paper.handLine(x1, y1, x2, y2)
     }, draw_rect:function (x, y, w, h) {

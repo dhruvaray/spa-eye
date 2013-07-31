@@ -236,11 +236,6 @@ define([
                 this.onRemoveModel(model, this.sections[0]);
             },
 
-            onSelectRow:function (row) {
-                Firebug.chrome.selectSidePanel("spa_eye:event");
-                var eventPanel = this.context.getPanel('event', true);
-                eventPanel && eventPanel.onModelSelected(row);
-            },
 
 // ********************************************************************************************* //
 // Editable

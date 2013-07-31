@@ -9,9 +9,11 @@ define([
 
     "spa_eye/lib/sha",
     "spa_eye/lib/dom",
-    "spa_eye/lib/uri"
+    "spa_eye/lib/uri",
+
+    "spa_eye/lib/require/underscore"
 ],
-    function (FBTrace, Http, Events, Dom, SHA, DOM, URI) {
+    function (FBTrace, Http, Events, Dom, SHA, DOM, URI, _) {
 
 // ********************************************************************************************* //
 // Constants
@@ -40,11 +42,8 @@ define([
         BBHook.prototype = {
             constructor:BBHook,
 
-            registerHooks:function (win) {
+            registerViewHooks:function (win) {
                 var self = this;
-
-                //Hook #1
-                this.registerSetHooks(win);
 
                 var _templateProxy = win._ && win._.template;
                 if (!_templateProxy) {
@@ -57,7 +56,6 @@ define([
 
                 win.spa_eye.templates = win.spa_eye.templates || {};
 
-                //Hook #2
                 win._.template = function (text, data, settings) {
 
                     try {
@@ -69,14 +67,14 @@ define([
                         }
                         var script = DOM.getMatchingNode(win, "script", text)
                         var script_id = (script && script.id) ? script.id : SHA.getTextHash(text);
-                        var compiledTemplate = win.spa_eye.templates[script_id];
+                        var proxiedTemplateRef = '_t' + script_id;
+                        var compiledTemplate = win[proxiedTemplateRef];
 
                         if (!compiledTemplate) {
                             compiledTemplate = _templateProxy.call(win._, text);
-                            var source = compiledTemplate.source;
+                            var source = compiledTemplate.source ?
+                                compiledTemplate.source : (_.template.call(_, text)).source;
                             if (source) {
-                                var proxiedTemplateRef = '_t' + script_id;
-
                                 var f = escape("window['" + proxiedTemplateRef + "']=" + source);
 
                                 // Attach to body
@@ -116,7 +114,7 @@ define([
 
                         if (data) {
                             attachTemplatesToViews();
-                            return compiledTemplate(data, _);
+                            return compiledTemplate.call(win._, data);
                         }
                         Events.dispatch(self.listener.fbListeners, 'onViewRender', [win.spa_eye.cv]);
 
@@ -125,7 +123,7 @@ define([
                             FBTrace.sysout("spa_eye; Unexpected error", e);
                     }
 
-                    return function (data, _) {
+                    return function (data) {
                         if (win[proxiedTemplateRef]) {
                             win[proxiedTemplateRef].source = win[proxiedTemplateRef].source || source;
                             self.recordSequenceEvent(win, {
@@ -137,7 +135,7 @@ define([
                             attachTemplatesToViews();
 
                             Events.dispatch(self.listener.fbListeners, 'onViewRender', [win.spa_eye.cv]);
-                            return win[proxiedTemplateRef].call(this, data, _);
+                            return win[proxiedTemplateRef].call(win._, data);
                         }
                         return undefined;
                     };
@@ -199,7 +197,8 @@ define([
                             this.win = win;
                             this.registering = true;
                             this.registerWPHooks(win);
-                            this.registerHooks(win);
+                            this.registerSetHooks(win);
+                            this.registerViewHooks(win);
                             if (FBTrace.DBG_SPA_EYE) {
                                 FBTrace.sysout("spa_eye; Successfully registered Backbone hooks for spa-eye module");
                             }
