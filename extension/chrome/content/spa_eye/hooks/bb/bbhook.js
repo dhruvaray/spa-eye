@@ -109,6 +109,7 @@ define([
 
                         self.recordSequenceEvent(win, {
                             operation:Operation.VIEW,
+                            cid:win.spa_eye.cv ? win.spa_eye.cv.cid : "",
                             target:win.spa_eye.cv,
                             args:arguments
                         });
@@ -129,6 +130,7 @@ define([
                             win[proxiedTemplateRef].source = win[proxiedTemplateRef].source || source;
                             self.recordSequenceEvent(win, {
                                 operation:Operation.VIEW,
+                                cid:win.spa_eye.cv ? win.spa_eye.cv.cid : "",
                                 target:win.spa_eye.cv,
                                 args:arguments
                             });
@@ -217,12 +219,7 @@ define([
             },
 
             isBackboneInitialized:function (win) {
-                if (win._ && win._.VERSION) {
-                    var uscore = win._.VERSION.split('.');
-                    var major = parseInt(uscore[1]);
-                    var minor = parseInt(uscore[2]);
-                }
-                return win.Backbone && major > 3 && minor >= 3;
+                return win.Backbone;
             },
 
             modelFnWomb:function (win, model, type, fn, fnargs) {
@@ -232,8 +229,9 @@ define([
                 win.spa_eye.path.push(model);
 
                 this.recordSequenceEvent(win, {
-                    operation:type,
+                    cid:model.cid,
                     target:model,
+                    operation:type,
                     args:fnargs
                 });
 
@@ -289,9 +287,9 @@ define([
                 return [];
             },
 
-            removeModel: function(model){
+            removeModel:function (model) {
                 return this._removeElement(this.win && this.win.spa_eye.models,
-                        model);
+                    model);
             },
 
             views:function () {
@@ -301,9 +299,9 @@ define([
                 return [];
             },
 
-            removeView: function(view) {
+            removeView:function (view) {
                 return this._removeElement(this.win && this.win.spa_eye.views,
-                        view);
+                    view);
             },
 
             collections:function () {
@@ -313,13 +311,13 @@ define([
                 return [];
             },
 
-            removeCollection: function(col){
+            removeCollection:function (col) {
                 return this._removeElement(this.win && this.win.spa_eye.collections,
-                        col);
+                    col);
             },
 
-            _removeElement: function(list, model) {
-                if(!list || !model) return;
+            _removeElement:function (list, model) {
+                if (!list || !model) return;
                 var index = list.indexOf(model);
                 if (index !== -1) {
                     return list.splice(index, 1);

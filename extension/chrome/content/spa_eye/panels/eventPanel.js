@@ -50,15 +50,18 @@ define([
 
             showEvents:function (value, context) {
                 var win = this.context.window.wrappedJSObject;
-                this.sequenceData = value.cid ? win.spa_eye.sequence[value.cid].flows : []
+                this.sequenceData = value.cid && win.spa_eye.sequence[value.cid] ?
+                    win.spa_eye.sequence[value.cid].flows : []
                 this.sequenceData && this.show();
             },
 
-            onSelectRow:function (row) {
-                if (!row || !row.domObject.value) return;
-                var m = row.domObject.value;
-                if (!m || !m.cid) return;
-                this.showEvents(m);
+            onSelectRow:function (row, panel) {
+                if (panel !== this.panelNode) {
+                    if (!row || !row.domObject.value) return;
+                    var m = row.domObject.value;
+                    if (!m || !m.cid) return;
+                    this.showEvents(m);
+                }
             },
 
             show:function () {

@@ -170,6 +170,8 @@ define([
                 var target = row.lastChild.firstChild;
                 var isString = Css.hasClass(target, "objectBox-string");
                 var inValueCell = (event.target === valueCell || event.target === target);
+                var table = Dom.getAncestorByClass(row, "domTable");
+                var mainPanel = table.mainPanel;
 
                 if (label && Css.hasClass(row, "hasChildren") && !(isString && inValueCell)) {
                     row = label.parentNode.parentNode;
@@ -180,8 +182,6 @@ define([
                         Firebug.chrome.select(object, "script");
                         Events.cancelEvent(event);
                     } else if (Events.isDoubleClick(event)) {
-                        var table = Dom.getAncestorByClass(row, "domTable");
-                        var mainPanel = table.mainPanel;
                         var member = row.domObject;
                         var rowValue = member.value;
 
@@ -195,7 +195,7 @@ define([
                 }
 
                 // Let's select this row
-                selectRow(row);
+                selectRow(row, mainPanel);
             },
 
             toggleRow:function (row, callback, context) {
@@ -242,14 +242,14 @@ define([
                         if (repObj) {
                             if (repObj.attributes) {
                                 repObj = repObj.attributes;
-                            } else if (repObj.models){
+                            } else if (repObj.models) {
                                 repObj = repObj.models;
                             } else if (repObj.el) {
                                 repObj = {
-                                    el: repObj.el,
-                                    $el: repObj.$el,
-                                    tagName: repObj.tagName,
-                                    inferredTemplates: repObj.inferredTemplates
+                                    el:repObj.el,
+                                    $el:repObj.$el,
+                                    tagName:repObj.tagName,
+                                    inferredTemplates:repObj.inferredTemplates
                                 };
                             }
                         }
@@ -351,7 +351,7 @@ define([
 
         // Select row
         // @param row <domObject>
-        var selectRow = function (row) {
+        var selectRow = function (row, panel) {
             // Ignore if row is not `level-0` or row is `null`
             if (!row || !Css.hasClass(row, "0level")) {
                 return;
@@ -371,14 +371,14 @@ define([
             Css.setClass(row, "row-selected");
             if (Firebug.currentContext.spa_eyeObj) {
                 Events.dispatch(Firebug.currentContext.spa_eyeObj._spaHook.listener.fbListeners,
-                        'onSelectRow',
-                        [row]);
+                    'onSelectRow',
+                    [row, panel]);
             }
         }
 
         // Get selected row
         // @param target <domObject>
-        var getSelectedRow = function(target) {
+        var getSelectedRow = function (target) {
             if (!target) return;
             return target.getElementsByClassName("row-selected").item(0);
         }
@@ -387,13 +387,13 @@ define([
 // Registration
 
         return {
-            DirTablePlate: DirTablePlate,
-            insertSliceSize: insertSliceSize,
-            insertInterval: insertInterval,
+            DirTablePlate:DirTablePlate,
+            insertSliceSize:insertSliceSize,
+            insertInterval:insertInterval,
 
-            highlightRow: highlightRow,
-            selectRow: selectRow,
-            getSelectedRow: getSelectedRow
+            highlightRow:highlightRow,
+            selectRow:selectRow,
+            getSelectedRow:getSelectedRow
         };
 
 // ********************************************************************************************* //

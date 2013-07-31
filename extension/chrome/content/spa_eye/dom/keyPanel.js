@@ -7,101 +7,101 @@ define([
 
     "spa_eye/dom/modelReps"
 ],
-function (FBL, Obj, Events, Dom, Css, ModelReps) {
-    // Panel keys
-    var KeyPanel = {
-        keyListeners: null,
-        smallJump: 10,
+    function (FBL, Obj, Events, Dom, Css, ModelReps) {
+        // Panel keys
+        var KeyPanel = {
+            keyListeners:null,
+            smallJump:10,
 
-        // Initialize key listeners
-        attachKeyListeners: function() {
-            var chrome = Firebug.chrome;
-            this.keyListeners = this.keyListeners || [];
+            // Initialize key listeners
+            attachKeyListeners:function () {
+                var chrome = Firebug.chrome;
+                this.keyListeners = this.keyListeners || [];
 
-            // navigation key handlers
-            this.keyListeners.push(
-                chrome.keyCodeListen("UP", null, Obj.bindFixed(this._navKeyHandler, this, -1)),
-                chrome.keyCodeListen("DOWN", null, Obj.bindFixed(this._navKeyHandler, this, 1)),
-                chrome.keyCodeListen("PAGE_UP", null, Obj.bindFixed(this._navKeyHandler, this, -this.smallJump)),
-                chrome.keyCodeListen("PAGE_DOWN", null, Obj.bindFixed(this._navKeyHandler, this, this.smallJump))
-            );
+                // navigation key handlers
+                this.keyListeners.push(
+                    chrome.keyCodeListen("UP", null, Obj.bindFixed(this._navKeyHandler, this, -1)),
+                    chrome.keyCodeListen("DOWN", null, Obj.bindFixed(this._navKeyHandler, this, 1)),
+                    chrome.keyCodeListen("PAGE_UP", null, Obj.bindFixed(this._navKeyHandler, this, -this.smallJump)),
+                    chrome.keyCodeListen("PAGE_DOWN", null, Obj.bindFixed(this._navKeyHandler, this, this.smallJump))
+                );
 
-            // expand-collapse key handlers
-            this.keyListeners.push(
-                chrome.keyCodeListen("RIGHT", null, Obj.bindFixed(this._expandKeyHandler, this, false)),
-                chrome.keyCodeListen("LEFT", null, Obj.bindFixed(this._expandKeyHandler, this, true))
-            );
+                // expand-collapse key handlers
+                this.keyListeners.push(
+                    chrome.keyCodeListen("RIGHT", null, Obj.bindFixed(this._expandKeyHandler, this, false)),
+                    chrome.keyCodeListen("LEFT", null, Obj.bindFixed(this._expandKeyHandler, this, true))
+                );
 
-            this.keyListeners.push(
-                chrome.keyCodeListen("RETURN", null, Obj.bindFixed(this._enterKeyHandler, this))
-            );
-        },
+                this.keyListeners.push(
+                    chrome.keyCodeListen("RETURN", null, Obj.bindFixed(this._enterKeyHandler, this))
+                );
+            },
 
-        // Detach key listeners
-        detachKeyListeners: function() {
-            if (!this.keyListeners)
-                return;
+            // Detach key listeners
+            detachKeyListeners:function () {
+                if (!this.keyListeners)
+                    return;
 
-            var chrome = Firebug.chrome;
-            if (chrome) {
-                for (var i = 0; i < this.keyListeners.length; i++) {
-                    chrome.keyIgnore(this.keyListeners[i]);
+                var chrome = Firebug.chrome;
+                if (chrome) {
+                    for (var i = 0; i < this.keyListeners.length; i++) {
+                        chrome.keyIgnore(this.keyListeners[i]);
+                    }
                 }
-            }
-        },
+            },
 
-        _expandKeyHandler: function(collapse) {
-            var selectedRow = ModelReps.getSelectedRow(this.panelNode);
-            if (!selectedRow) {
-                return;
-            }
-            var flag = Css.hasClass(selectedRow, 'opened') ^ collapse;
-            if (!flag) {
+            _expandKeyHandler:function (collapse) {
+                var selectedRow = ModelReps.getSelectedRow(this.panelNode);
+                if (!selectedRow) {
+                    return;
+                }
+                var flag = Css.hasClass(selectedRow, 'opened') ^ collapse;
+                if (!flag) {
+                    ModelReps.DirTablePlate.toggleRow(selectedRow);
+                }
+            },
+
+            _enterKeyHandler:function () {
+                var selectedRow = ModelReps.getSelectedRow(this.panelNode);
+                if (!selectedRow) {
+                    return;
+                }
                 ModelReps.DirTablePlate.toggleRow(selectedRow);
-            } 
-        },
+            },
 
-        _enterKeyHandler: function() {
-            var selectedRow = ModelReps.getSelectedRow(this.panelNode);
-            if (!selectedRow) {
-                return;
-            }
-            ModelReps.DirTablePlate.toggleRow(selectedRow);
-        },
-
-        _navKeyHandler: function(jump) {
-            var selectedRow = ModelReps.getSelectedRow(this.panelNode);
-            if (!selectedRow) {
-                var firstRow = this.panelNode.getElementsByClassName("0level").item(0);
-                return ModelReps.selectRow(firstRow);            
-            }
-            
-            var n = Math.abs(jump),
-                method = jump > 0 ? 'nextSibling' : 'previousSibling';
-                prev = null,
-                nr = null;
-
-            while(n > 0) {
-                nr = selectedRow[method];
-
-                // If `nr` is undefined, select previously visited `prev`
-                if (!nr || !Css.hasClass(nr, "memberRow")) {
-                    prev && ModelReps.selectRow(prev);
-                    break;
+            _navKeyHandler:function (jump) {
+                var selectedRow = ModelReps.getSelectedRow(this.panelNode);
+                if (!selectedRow) {
+                    var firstRow = this.panelNode.getElementsByClassName("0level").item(0);
+                    return ModelReps.selectRow(firstRow, this.panelNode);
                 }
 
-                if (parseInt(nr.getAttribute("level"), 10) === 0) {
-                    n--;
-                    if (n === 0) {
-                        ModelReps.selectRow(nr);
+                var n = Math.abs(jump),
+                    method = jump > 0 ? 'nextSibling' : 'previousSibling';
+                prev = null,
+                    nr = null;
+
+                while (n > 0) {
+                    nr = selectedRow[method];
+
+                    // If `nr` is undefined, select previously visited `prev`
+                    if (!nr || !Css.hasClass(nr, "memberRow")) {
+                        prev && ModelReps.selectRow(prev, this.panelNode);
                         break;
                     }
-                    prev = nr;
+
+                    if (parseInt(nr.getAttribute("level"), 10) === 0) {
+                        n--;
+                        if (n === 0) {
+                            ModelReps.selectRow(nr, this.panelNode);
+                            break;
+                        }
+                        prev = nr;
+                    }
+                    selectedRow = nr;
                 }
-                selectedRow = nr;
             }
         }
-    }
 
-    return KeyPanel;
-});
+        return KeyPanel;
+    });

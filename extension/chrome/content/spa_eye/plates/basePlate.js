@@ -5,7 +5,7 @@ define([
     "firebug/lib/dom",
     "firebug/lib/css",
 
-    "spa_eye/lib/underscore",
+    "spa_eye/lib/require/underscore",
 
     "spa_eye/panels/basePanel",
     "spa_eye/dom/modelReps",
@@ -48,6 +48,50 @@ function (Firebug, Obj, FBTrace, Dom, Css, _, BasePanel, ModelReps, DOMEditor) {
             ModelReps.DirTablePlate.toggleRow(row);
         },
 
+        onAddModel: function(model, section, options) {
+            options = options || {};
+            options.autoAdd = options.autoAdd || section.autoAdd;
+
+            var tbody = section.getBody();
+
+            if (!model || !model.cid || !tbody) return;
+
+            if (options.autoAdd) {
+                var noObjectRow = Dom.getChildByClass(tbody, 'noMemberRow');
+
+                if (noObjectRow) {
+                    Css.removeClass(noObjectRow, 'hide');
+                    Css.setClass(noObjectRow, 'hide');
+                }
+            }
+
+            var rows = tbody.getElementsByClassName('0level');
+            var found = false;
+            if (rows) {
+                for (var i = 0; i < rows.length; i++) {
+                    var row = rows[i];
+                    var m = row.domObject.value;
+                    if (model.cid == m.cid) {
+                        found = true;
+                        this._foldRow(row, function (r) {
+                            ModelReps.highlightRow(r, options.type || 'row-warning');
+                            this._bubbleUpRow(r);
+                        }, this);
+                        break;
+                    }
+                }
+            }
+
+            if (!found && options.autoAdd) {
+                var obj = {};
+                obj[model.cid] = model;
+                var members = ModelReps.DirTablePlate.memberIterator(obj);
+                var result = ModelReps.DirTablePlate.rowTag.insertRows({members:members}, tbody);
+                ModelReps.highlightRow(result[0], options.type || 'row-warning');
+                this._bubbleUpRow(result[0]);
+            }
+        },
+
         onRemoveModel: function(model, section) {
             if (!model) return;
 
@@ -58,6 +102,7 @@ function (Firebug, Obj, FBTrace, Dom, Css, _, BasePanel, ModelReps, DOMEditor) {
                 : this.sections;
 
             sections.forEach(function(section) {
+
                 // Get section body
                 var tbody = section.getBody();
 
@@ -86,10 +131,12 @@ function (Firebug, Obj, FBTrace, Dom, Css, _, BasePanel, ModelReps, DOMEditor) {
                     if (FBTrace.DBG_SPA_EYE) {
                         FBTrace.sysout("Error:  model.cid - " + model.cid, e);
                     }
+                } finally {
+                    // Remove model from section
+                    try{
+                        section.onRemoveModel && section.onRemoveModel(model);
+                    } catch(e){}
                 }
-
-                // Remove model from section
-                section.onRemoveModel && section.onRemoveModel(model);
             }, this);
             return model;
         },
