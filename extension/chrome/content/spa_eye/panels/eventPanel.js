@@ -7,11 +7,15 @@ define([
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/events",
+
+    "spa_eye/dom/section",
+    "spa_eye/dom/modelReps",
+
     "firebug/dom/domReps",
 
     "spa_eye/panels/basePanel"
 ],
-    function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, DOMReps, BasePanel) {
+    function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, ChildSection, ModelReps, DOMReps, BasePanel) {
 
         var eventPanel = Firebug.eventPanel = BasePanel.extend({
             name:"spa_eye:event",
@@ -25,8 +29,18 @@ define([
                 Firebug.Panel.initialize.apply(this, arguments);
                 var listener = this.context.spa_eyeObj._spaHook.listener;
                 listener.addListener(this);
+
+                //var splitter = Firebug.chrome.window.document.createElement("hr");
+                /*splitter.setAttribute("orient","horizontal");
+                 splitter.setAttribute("id","eventSplitter");
+                 splitter.setAttribute("collapse","none");
+                 splitter.setAttribute("tooltip","hello there");*/
+
                 this.timeline.TIMELINE.replace({object:[]}, this.panelNode);
-                this.timeline.tag.append({object:[]}, this.panelNode);
+                this.timeline.TABLE.append({}, this.panelNode);
+                this.timeline.tag.append({sections:[], mainPanel:this.panelNode}, this.panelNode.lastChild);
+                //this.panelNode.parentNode.insertBefore(splitter, this.panelNode.lastChild);
+
                 this.sequenceEditor = this.panelNode.firstChild.contentWindow;
             },
 
@@ -37,7 +51,7 @@ define([
             showEvents:function (value, context) {
                 var win = this.context.window.wrappedJSObject;
                 this.sequenceData = value.cid ? win.spa_eye.sequence[value.cid].flows : []
-                this.show();
+                this.sequenceData && this.show();
             },
 
             onSelectRow:function (row) {
@@ -49,16 +63,32 @@ define([
 
             show:function () {
 
-                if (this.sequenceEditor) {
-                    this.sequenceEditor.draw(this.sequenceData);
-                }
-                this.timeline.tag.replace({object:this.sequenceData || []}, this.panelNode.lastChild);
+                this.sequenceEditor && this.sequenceEditor.draw(this.sequenceData);
+                this.tabulateData();
+
 
             },
 
-            onSequenceRecordCreated:function (record) {
-                //this.sequenceData = value.cid?win.spa_eye.sequence[value.cid]:{}
-                //setTimeout(this.show, 2000, record);
+            tabulateData:function () {
+
+                if (this.sequenceData) {
+                    var sections = [];
+                    for (var i = this.sequenceData.length - 1; i >= 0; --i) {
+                        sections.push(new ChildSection({
+                            title:'t=' + i,
+                            parent:this.panelNode,
+                            autoAdd:false,
+                            data:this.sequenceData[i]
+                        }));
+                    }
+
+                    var args = {
+                        sections:sections,
+                        mainPanel:this.panelNode
+                    };
+
+                    this.timeline.tag.replace(args, this.panelNode.lastChild);
+                }
             }
         });
 
@@ -66,14 +96,16 @@ define([
 // Templates
 
         with (Domplate) {
-            eventPanel.prototype.timeline = domplate(DOMReps.DirTablePlate, {
+            eventPanel.prototype.timeline = domplate(ModelReps.DirTablePlate, {
                 TIMELINE:IFRAME({src:"chrome://spa_eye/content/panels/timeline.xul",
                     width:"100%",
                     name:"timeline",
                     id:"timeline",
                     height:"60%",
                     frameborder:"0"
-                })
+                }),
+
+                TABLE:DIV({width:"100%", height:"40%"})
             });
         }
 
