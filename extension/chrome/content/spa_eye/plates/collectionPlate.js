@@ -16,6 +16,7 @@ define([
 ],
 function (Firebug, FBTrace, Css, Str, Dom, BasePlate, ChildSection, ModelReps) {
 
+    var NetRequestEntry = Firebug.NetMonitor.NetRequestEntry;
     var PANEL = BasePlate.extend({
         name: 'collection',
 

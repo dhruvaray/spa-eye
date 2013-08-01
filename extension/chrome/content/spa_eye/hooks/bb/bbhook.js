@@ -161,6 +161,11 @@ define([
 
                     return self.modelFnWomb(win, this, Operation.SET, _setProxy, arguments);
                 }
+
+                var _colSetProxy = win.Backbone.Collection.prototype.set;
+                win.Backbone.Collection.prototype.set = function () {
+                    return self.modelFnWomb(win, this, Operation.SET, _colSetProxy, arguments);
+                }
             },
 
             registerWPHooks:function (win) {
