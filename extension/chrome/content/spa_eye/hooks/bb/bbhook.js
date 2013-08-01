@@ -137,7 +137,7 @@ define([
                             Events.dispatch(self.listener.fbListeners, 'onViewRender', [win.spa_eye.cv]);
                             return win[proxiedTemplateRef].call(win._, data);
                         }
-                        return undefined;
+                        return compiledTemplate.call(win._, data);
                     };
                 }
 
