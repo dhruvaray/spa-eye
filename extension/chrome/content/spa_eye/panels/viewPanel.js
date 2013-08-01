@@ -55,9 +55,9 @@ define([
             show:function () {
                 var source = ["obj", "__p"];
                 var attr = [
-                    "Data",
-                    "Transformed Template",
-                    "Source Template"
+                    Locale.$STR("spa_eye.script.view.template.data"),
+                    Locale.$STR("spa_eye.script.view.template.transform"),
+                    Locale.$STR("spa_eye.script.view.template.source")
                 ];
                 var data = {};
                 data[attr[0]] = Locale.$STR("spa_eye.script.view.nodata");

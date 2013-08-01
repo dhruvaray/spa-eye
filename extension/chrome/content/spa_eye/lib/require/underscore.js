@@ -1158,19 +1158,25 @@ define([], function () {
         var index = 0;
         var source = "__p+='";
         text.replace(matcher, function (match, escape, interpolate, evaluate, offset) {
+
+            /*Changes to make the debugger output attractive*/
+            var comment = "\n\n/*" + text.slice(index, offset + match.length) + "*/\n\n";
+            source = index ? (source + comment + "__p+='") : (comment + source);
+            /*End debugger output changes*/
+
             source += text.slice(index, offset)
                 .replace(escaper, function (match) {
                     return '\\' + escapes[match];
                 });
 
             if (escape) {
-                source += "'+\n\n/*" + match + "*/\n\n((__t=(" + escape + "))==null?'':_.escape(__t))+\n'";
+                source += "'+\n((__t=(" + escape + "))==null?'':_.escape(__t))\n";
             }
             if (interpolate) {
-                source += "'+\n\n/*" + match + "*/\n\n((__t=(" + interpolate + "))==null?'':__t)+\n'";
+                source += "'+\n((__t=(" + interpolate + "))==null?'':__t)\n";
             }
             if (evaluate) {
-                source += "';\n\n/*" + match + "*/\n\n" + evaluate + "\n__p+='";
+                source += "';\n" + evaluate + "\n";
             }
             index = offset + match.length;
             return match;
