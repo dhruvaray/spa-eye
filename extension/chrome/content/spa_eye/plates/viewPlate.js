@@ -50,7 +50,7 @@ function (Firebug, FBTrace, Css, Str, Dom, BasePlate, ChildSection, ModelReps) {
             var allViews = new ChildSection({
                 name: 'all_views',
                 title: 'All Views',
-                parent: this.panelNode,
+                parent: this.parent.panelNode,
                 order: 0,
 
                 container: 'allViewsDiv',

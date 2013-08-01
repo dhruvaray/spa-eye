@@ -24,7 +24,7 @@ function (Firebug, FBTrace, Css, Str, Dom, BasePlate, ChildSection, ModelReps) {
             var allCollections = new ChildSection({
                 name: 'all_collections',
                 title: 'All Collections',
-                parent: this.panelNode,
+                parent: this.parent.panelNode,
                 order: 0,
 
                 container: 'allCollectionsDiv',
@@ -34,6 +34,24 @@ function (Firebug, FBTrace, Css, Str, Dom, BasePlate, ChildSection, ModelReps) {
             });
             sections.push(allCollections);
             return sections;
+        },
+
+// ********************************************************************************************* //
+// onModelSet and onModelSave
+// ********************************************************************************************* //
+
+        onModelSet:function (model, type) {
+            this.sections.forEach(function (p) {
+                this.onAddModel(model, p, type);
+            }, this);
+        },
+
+        onModelSave:function (model, file) {
+            var isError = NetRequestEntry.isError(file);
+            var type = isError ? 'row-error' : 'row-success';
+            this.sections.forEach(function (p) {
+                this.onAddModel(model, p, type);
+            }, this);
         }
     });
 
