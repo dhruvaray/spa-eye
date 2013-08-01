@@ -250,20 +250,30 @@ define([
 // ********************************************************************************************* //
 
             onModelSet:function (model, type) {
-                this.context.spa_eyeObj._mostused_models.add(model.cid, model, 'set');
+                if (this.isCurrentPlate() && this.isModel(model)) {
+                    this.context.spa_eyeObj._mostused_models.add(model.cid, model, 'set');
 
-                this.sections.forEach(function (p) {
-                    this.onAddModel(model, p, type);
-                }, this);
+                    this.sections.forEach(function (p) {
+                        this.onAddModel(model, p, type);
+                    }, this);
+                }
             },
 
             onModelSave:function (model, file) {
-                var isError = NetRequestEntry.isError(file);
-                var type = isError ? 'row-error' : 'row-success';
-                this.context.spa_eyeObj._mostused_models.add(model.cid, model, 'save');
-                this.sections.forEach(function (p) {
-                    this.onAddModel(model, p, type);
-                }, this);
+                if (this.isCurrentPlate() && this.isModel(model)) {
+                    var isError = NetRequestEntry.isError(file);
+                    var type = isError ? 'row-error' : 'row-success';
+                    this.context.spa_eyeObj._mostused_models.add(model.cid, model, 'save');
+                    this.sections.forEach(function (p) {
+                        this.onAddModel(model, p, type);
+                    }, this);
+                }
+            },
+
+            isModel: function (model) {
+                if (!model || !model.cid) return false;
+                var models = this.context.spa_eyeObj.getModels() || [];
+                return models.indexOf(model) !== -1;
             }
         });
 

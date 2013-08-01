@@ -41,18 +41,28 @@ function (Firebug, FBTrace, Css, Str, Dom, BasePlate, ChildSection, ModelReps) {
 // onModelSet and onModelSave
 // ********************************************************************************************* //
 
-        onModelSet:function (model, type) {
-            this.sections.forEach(function (p) {
-                this.onAddModel(model, p, type);
-            }, this);
+        onModelSet:function (col, type) {
+            if (this.isCurrentPlate() && this.isCollection(col)) {
+                this.sections.forEach(function (p) {
+                    this.onAddModel(col, p, type);
+                }, this);
+            }
         },
 
-        onModelSave:function (model, file) {
-            var isError = NetRequestEntry.isError(file);
-            var type = isError ? 'row-error' : 'row-success';
-            this.sections.forEach(function (p) {
-                this.onAddModel(model, p, type);
-            }, this);
+        onModelSave:function (col, file) {
+            if (this.isCurrentPlate() && this.isCollection(col)) {
+                var isError = NetRequestEntry.isError(file);
+                var type = isError ? 'row-error' : 'row-success';
+                this.sections.forEach(function (p) {
+                    this.onAddModel(col, p, type);
+                }, this);
+            }
+        },
+
+        isCollection: function (col) {
+            if (!col || !col.cid) return false;
+            var collections = this.context.spa_eyeObj.getCollections() || [];
+            return collections.indexOf(col) !== -1;
         }
     });
 

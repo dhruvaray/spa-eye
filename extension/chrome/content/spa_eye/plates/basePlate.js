@@ -39,6 +39,11 @@ function (Firebug, Obj, FBTrace, Dom, Css, _, BasePanel, ModelReps, DOMEditor) {
             ModelReps.DirTablePlate.tag.replace(args, this.parent.panelNode);
         },
 
+        isCurrentPlate: function() {
+            if (!this.parent.isCurrentPanel()) return false;
+            return !!(this.parent.getCurrentPlate && (this.parent.getCurrentPlate() === this));
+        },
+
         createSections: function(){
             return [];                
         },

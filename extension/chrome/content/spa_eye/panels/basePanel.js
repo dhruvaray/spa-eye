@@ -113,6 +113,10 @@ function (Firebug, Obj, FBTrace, _, KeyPanel) {
             } finally {
                 Firebug.Panel.destroy.apply(this, arguments);
             }
+        },
+
+        isCurrentPanel: function() {
+            return Firebug.currentContext.panelName === this.name;
         }
     });
     return BasePanel;
