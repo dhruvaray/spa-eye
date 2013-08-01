@@ -92,13 +92,16 @@ define([
 
             headerTag:D.DIV({"class":"headerRow headerImage",
                     title:"$headerTitle",
+                    _domObject: "$section",
+                    _mainPanel: "$mainPanel",
                     onclick:"$onHeaderClick"},
                 D.SPAN({"class":"headerContext"}, "$headerTitle")
             ),
 
             sectionTag:D.DIV({"class":"modelSection $section.container"},
                 D.TAG("$headerTag", {
-                    //headerTitle: "Hello",
+                    section: "$section",
+                    mainPanel:"$mainPanel",
                     headerTitle:"$section.title",
                     onHeaderClick:"$toggleHeader"
                 }),
@@ -296,7 +299,10 @@ define([
 
             toggleHeader:function (event) {
                 var target = Dom.getAncestorByClass(event.target, "headerRow");
-                var table = target.nextSibling;
+                var table = target.nextSibling,
+                    section = target.domObject,
+                    panel = target.mainPanel;
+
                 if (Css.hasClass(table, "hide")) {
                     Css.removeClass(table, "hide");
                     Css.removeClass(target, "opened");
@@ -304,6 +310,9 @@ define([
                     Css.setClass(table, "hide");
                     Css.setClass(target, "opened");
                 }
+                Events.dispatch(Firebug.currentContext.spa_eyeObj._spaHook.listener.fbListeners,
+                    'onToggleHeader',
+                    [section, panel]);
             },
 
             onClickRowHeader:function (event) {
