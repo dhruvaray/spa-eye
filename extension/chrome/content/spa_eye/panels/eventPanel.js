@@ -26,10 +26,7 @@ define([
 
 
             initialize:function () {
-                Firebug.Panel.initialize.apply(this, arguments);
-                var listener = this.context.spa_eyeObj._spaHook.listener;
-                listener.addListener(this);
-
+                this._super.apply(this, arguments);
                 //var splitter = Firebug.chrome.window.document.createElement("hr");
                 /*splitter.setAttribute("orient","horizontal");
                  splitter.setAttribute("id","eventSplitter");
@@ -48,25 +45,44 @@ define([
                 Firebug.Panel.destroy.apply(this, arguments);
             },
 
-            showEvents:function (value, context) {
-                var win = this.context.window.wrappedJSObject;
-                this.sequenceData = value.cid && win.spa_eye.sequence[value.cid] ?
-                    win.spa_eye.sequence[value.cid].flows : []
-                this.sequenceData && this.show();
-            },
-
             onSelectRow:function (row, panel) {
+                if (!row || !row.domObject.value) return;
+                var m = row.domObject.value;
                 if (panel !== this.panelNode) {
-                    if (!row || !row.domObject.value) return;
-                    var m = row.domObject.value;
                     if (!m || !m.cid) return;
-                    this.showEvents(m);
+                    var win = this.context.window.wrappedJSObject;
+                    this.sequenceData = win.spa_eye.sequence[m.cid] ?
+                        win.spa_eye.sequence[m.cid].flows : [];
+                    this.show();
                 }
             },
 
+            onToggleHeader:function (section, panel) {
+
+                if (panel === this.panelNode) {
+                    var title = section.title;
+                    var idx = 0;
+                    if (title) {
+                        var matches = title.split('=');
+                        (matches.length === 2) && (idx = parseInt(matches[1]));
+                    }
+                    var data = section.data;
+                    var cid = data[0] && data[0].cid;
+                    var win = this.context.window.wrappedJSObject;
+                    this.sequenceData = win.spa_eye.sequence[cid] ?
+                        [win.spa_eye.sequence[cid].flows[idx]] : [];
+                    this.plotFlow();
+                }
+
+            },
+
             show:function () {
-                this.sequenceEditor && this.sequenceEditor.draw(this.sequenceData);
+                this.plotFlow();
                 this.tabulateData();
+            },
+
+            plotFlow:function () {
+                this.sequenceEditor && this.sequenceEditor.draw(this.sequenceData);
             },
 
             tabulateData:function () {
