@@ -72,8 +72,7 @@ define([
 
                         if (!compiledTemplate) {
                             compiledTemplate = _templateProxy.call(win._, text);
-                            var source = compiledTemplate.source ?
-                                compiledTemplate.source : (_.template.call(_, text)).source;
+                            var source = _.template.call(_, text).source;
                             if (source) {
                                 var f = escape("window['" + proxiedTemplateRef + "']=" + source);
 
@@ -124,20 +123,17 @@ define([
                     }
 
                     return function (data) {
-                        if (win[proxiedTemplateRef]) {
-                            win[proxiedTemplateRef].source = win[proxiedTemplateRef].source || source;
-                            self.recordSequenceEvent(win, {
-                                operation:Operation.VIEW,
-                                cid:win.spa_eye.cv ? win.spa_eye.cv.cid : "",
-                                target:win.spa_eye.cv,
-                                args:arguments
-                            });
-                            attachTemplatesToViews();
-
-                            Events.dispatch(self.listener.fbListeners, 'onViewRender', [win.spa_eye.cv]);
-                            return win[proxiedTemplateRef].call(win._, data);
-                        }
-                        return compiledTemplate.call(win._, data);
+                        var render = win[proxiedTemplateRef] ? win[proxiedTemplateRef] : compiledTemplate;
+                        render.source = render.source || source;
+                        self.recordSequenceEvent(win, {
+                            operation:Operation.VIEW,
+                            cid:win.spa_eye.cv ? win.spa_eye.cv.cid : "",
+                            target:win.spa_eye.cv,
+                            args:arguments
+                        });
+                        attachTemplatesToViews();
+                        Events.dispatch(self.listener.fbListeners, 'onViewRender', [win.spa_eye.cv]);
+                        return render.call(win._, data);
                     };
                 }
 

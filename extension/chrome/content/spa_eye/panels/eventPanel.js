@@ -65,11 +65,8 @@ define([
             },
 
             show:function () {
-
                 this.sequenceEditor && this.sequenceEditor.draw(this.sequenceData);
                 this.tabulateData();
-
-
             },
 
             tabulateData:function () {
@@ -100,15 +97,15 @@ define([
 
         with (Domplate) {
             eventPanel.prototype.timeline = domplate(ModelReps.DirTablePlate, {
-                TIMELINE:IFRAME({src:"chrome://spa_eye/content/panels/timeline.xul",
+                TIMELINE:IFRAME({src:"chrome://spa_eye/content/panels/eventPanel.xul",
                     width:"100%",
                     name:"timeline",
                     id:"timeline",
-                    height:"60%",
+                    height:"50%",
                     frameborder:"0"
                 }),
 
-                TABLE:DIV({width:"100%", height:"40%"})
+                TABLE:DIV({width:"100%", height:"50%"})
             });
         }
 
