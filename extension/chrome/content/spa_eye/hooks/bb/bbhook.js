@@ -81,7 +81,7 @@ define([
                                     "data:text/javascript;fileName=" + script_id + ";," + f);
 
                                 // Record using script_id
-                                win.spa_eye.templates[script_id] = source;
+                                win.spa_eye.templates[script_id] = text;
 
                             } else {
                                 if (FBTrace.DBG_ERRORS)
