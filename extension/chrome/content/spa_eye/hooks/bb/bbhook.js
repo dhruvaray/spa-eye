@@ -187,8 +187,17 @@ define([
             },
 
             recordModelAudit:function (model, doc) {
-                var spa_eyeObj = this.context.spa_eyeObj;
-                Events.dispatch(this.listener.fbListeners, 'recordAudit', [model, doc]);
+                var spa_eyeObj = this.context.spa_eyeObj,
+                    t = this.getFormattedTime(new Date());
+
+                // return if `record` is off
+                if (!spa_eyeObj.isRecord) {
+                    return;
+                }
+
+                var records = spa_eyeObj.auditRecords = spa_eyeObj.auditRecords || {};
+                records[model.cid] = records[model.cid] || {};
+                records[model.cid][t] = doc;
             },
 
             registerBBHooks:function (win) {

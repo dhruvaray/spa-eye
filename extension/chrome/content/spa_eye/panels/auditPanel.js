@@ -62,21 +62,6 @@ define([
                 }
             },
 
-            // Record audit for model
-            recordAudit:function (model, doc) {
-                var spa_eyeObj = this.context.spa_eyeObj,
-                    t = this.getFormattedTime(new Date());
-
-                // return if `record` is off
-                if (!spa_eyeObj.isRecord) {
-                    return;
-                }
-
-                spa_eyeObj.auditRecords = spa_eyeObj.auditRecords || {};
-                spa_eyeObj.auditRecords[model.cid] = spa_eyeObj.auditRecords[model.cid] || {};
-                spa_eyeObj.auditRecords[model.cid][t] = doc;
-            },
-
             show:function () {
                 var cm = this.context.spa_eyeObj.currentAuditModel;
                 if (!cm) {
