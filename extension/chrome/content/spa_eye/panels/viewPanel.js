@@ -5,11 +5,12 @@ define([
     "firebug/lib/locale",
     "firebug/lib/domplate",
     "firebug/dom/domEditor",
+    "firebug/chrome/reps",
     "firebug/dom/domReps",
 
     "spa_eye/panels/basePanel"
 ],
-    function (Firebug, Obj, FBTrace, Locale, Domplate, DOMEditor, DOMReps) {
+    function (Firebug, Obj, FBTrace, Locale, Domplate, DOMEditor, FirebugReps, DOMReps) {
 
         var viewPanel = Firebug.viewPanel = function () {
         };
@@ -80,11 +81,12 @@ define([
                         );
 
                     data[attr[2]] = win.spa_eye.templates[this.templateName];
+                    DOMReps.DirTablePlate.tag.replace({object:data}, this.panelNode);
                 } else {
-                    data[attr[2]] = Locale.$STR("spa_eye.script.view.noviewselected");
+                    FirebugReps.Warning.tag.replace({object:"spa_eye.script.view.noviewselected"}, this.panelNode);
                 }
                 //ModelReps.DirTablePlate.tag.replace(args, this.panelNode);
-                DOMReps.DirTablePlate.tag.replace({object:data}, this.panelNode);
+
 
             },
 

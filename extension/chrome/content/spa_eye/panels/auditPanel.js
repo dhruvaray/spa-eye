@@ -40,31 +40,25 @@ define([
                 this.show();
             },
 
+            onTrackingDataCleared:function () {
+                this.show();
+            },
+
 
             show:function () {
                 var spa_eyeObj = this.context.spa_eyeObj;
                 var moi = spa_eyeObj && spa_eyeObj._moi;
                 if (moi) {
                     var result = spa_eyeObj.auditRecords && spa_eyeObj.auditRecords[moi.cid];
-                    this.tag.replace({object:result || {}}, this.panelNode);
+                    if (result)
+                        this.tag.replace({object:result || {}}, this.panelNode);
+                    else
+                        FirebugReps.Warning.tag.replace({object:"spa_eye.audit.nomodelselected"}, this.panelNode);
                 } else {
                     FirebugReps.Warning.tag.replace({object:"spa_eye.audit.nomodelselected"}, this.panelNode);
                 }
-            },
-
-            getOptionsMenuItems:function (context) {
-                return [
-                    {
-                        label:"spa_eye.refresh",
-                        tooltiptext:"spa_eye.refresh",
-                        command:Obj.bindFixed(this.refresh, this)
-                    }
-                ];
-            },
-
-            refresh:function () {
-                this.show();
             }
+
 
         });
 

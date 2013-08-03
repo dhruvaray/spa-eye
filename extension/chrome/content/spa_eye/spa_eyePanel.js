@@ -223,6 +223,7 @@ define([
                 var win = this.context.window.wrappedJSObject;
                 win.spa_eye.sequence = {};
                 spa_eyeObj.auditRecords = {};
+                Events.dispatch(spa_eyeObj._spaHook.listener.fbListeners, 'onTrackingDataCleared');
             },
 
             getCurrentPlate:function (plateName) {

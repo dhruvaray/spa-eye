@@ -7,7 +7,7 @@ define([
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/events",
-
+    "firebug/chrome/reps",
     "spa_eye/dom/section",
     "spa_eye/dom/modelReps",
 
@@ -15,7 +15,7 @@ define([
 
     "spa_eye/panels/basePanel"
 ],
-    function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, ChildSection, ModelReps, DOMReps, BasePanel) {
+    function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, FirebugReps, ChildSection, ModelReps, DOMReps, BasePanel) {
 
         var eventPanel = Firebug.eventPanel = BasePanel.extend({
             name:"spa_eye:event",
@@ -63,6 +63,10 @@ define([
             },
 
             onModelSave:function () {
+                this.show();
+            },
+
+            onTrackingDataCleared:function () {
                 this.show();
             },
 
