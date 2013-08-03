@@ -52,8 +52,8 @@ define([
 
                 // Initialize plates
                 var args = {
-                    context: this.context,
-                    parent: this
+                    context:this.context,
+                    parent:this
                 }
                 this.plates = {};
                 this.plates.model = new ModelPlate(args);
@@ -184,7 +184,7 @@ define([
                 return buttons;
             },
 
-            selectChildPlate: function (cpName) {
+            selectChildPlate:function (cpName) {
                 cpName = cpName || this.currentPlate;
                 if (!cpName) return false;
 
@@ -204,7 +204,7 @@ define([
                 this.getCurrentPlate().render();
             },
 
-            toggleRecord: function () {
+            toggleRecord:function () {
                 var recordButton = Firebug.chrome.$('spa_eye_panel_button_record');
                 var spa_eyeObj = this.context.spa_eyeObj;
                 if (recordButton) {
@@ -212,13 +212,10 @@ define([
                         ? "chrome://firebug/skin/breakOn.svg"
                         : "chrome://firebug/skin/continue.svg";
                     spa_eyeObj.isRecord = recordButton.checked;
-                    if (!spa_eyeObj.isRecord) {
-                        Events.dispatch(spa_eyeObj._spaHook.listener.fbListeners, 'onCleanup');
-                    }
                 }
             },
 
-            getCurrentPlate: function (plateName) {
+            getCurrentPlate:function (plateName) {
                 return this.plates[plateName || this.currentPlate];
             },
 
@@ -261,13 +258,8 @@ define([
                                 label:(model
                                     && model.cid
                                     && this.context.spa_eyeObj._pinned_models[model.cid])
-                                    ? "Unpin_this_model" : "Pin_this_model",
+                                    ? "Un_Pin_Model" : "Pin_Model",
                                 command:Obj.bindFixed(cp.pinOptionChange, cp, row)
-                            },
-                            {
-                                label:"spa_eye.event.title",
-                                tooltiptext:"spa_eye.event.title",
-                                command:Obj.bindFixed(cp.showRelatedEvents, cp, row)
                             }
                         );
                     }

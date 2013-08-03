@@ -24,22 +24,6 @@ define([
             tag:Firebug.DOMPanel.DirTable.tag,
             order:0,
 
-            _zeroFill:function (n, p, c) {
-                var pad_char = typeof c !== 'undefined' ? c : '0';
-                var pad = new Array(1 + p).join(pad_char);
-                return (pad + n).slice(-pad.length);
-            },
-
-            getFormattedTime:function (d) {
-                return this._zeroFill(d.getMonth() + 1, 2) + "/"
-                    + this._zeroFill(d.getDate(), 2) + "/"
-                    + (1900 + d.getYear()) + " "
-                    + this._zeroFill(d.getHours(), 2) + ":"
-                    + this._zeroFill(d.getMinutes(), 2) + ":"
-                    + this._zeroFill(d.getSeconds(), 2) + ":"
-                    + this._zeroFill(d.getMilliseconds(), 4);
-            },
-
             // Show model audit
             showAudit:function (model) {
                 var result = null;
@@ -93,12 +77,8 @@ define([
                 if (cm) {
                     this.showAudit(cm);
                 }
-            },
-
-            onCleanup:function () {
-                this.context.spa_eyeObj.auditRecords = undefined;
-                this.showAudit();
             }
+
         });
 
 // ********************************************************************************************* //

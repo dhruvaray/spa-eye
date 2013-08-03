@@ -10,10 +10,12 @@ define([
     "spa_eye/lib/sha",
     "spa_eye/lib/dom",
     "spa_eye/lib/uri",
+    "spa_eye/lib/date",
+
 
     "spa_eye/lib/require/underscore"
 ],
-    function (FBTrace, Http, Events, Dom, SHA, DOM, URI, _) {
+    function (FBTrace, Http, Events, Dom, SHA, DOM, URI, DateUtil, _) {
 
 // ********************************************************************************************* //
 // Constants
@@ -186,20 +188,6 @@ define([
                 win.addEventListener("load", register);
             },
 
-            recordModelAudit:function (model, doc) {
-                var spa_eyeObj = this.context.spa_eyeObj,
-                    t = this.getFormattedTime(new Date());
-
-                // return if `record` is off
-                if (!spa_eyeObj.isRecord) {
-                    return;
-                }
-
-                var records = spa_eyeObj.auditRecords = spa_eyeObj.auditRecords || {};
-                records[model.cid] = records[model.cid] || {};
-                records[model.cid][t] = doc;
-            },
-
             registerBBHooks:function (win) {
                 if (this.isBackboneInitialized(win)) {
                     if (!this.hooked && !this.registering) {
@@ -266,6 +254,11 @@ define([
             },
 
             recordSequenceEvent:function (win, record) {
+
+                if (!this.context.spa_eyeObj.isRecord) {
+                    return;
+                }
+
                 var isNewInteraction = !win.spa_eye.sr;
                 record.source = win.spa_eye.path[win.spa_eye.path.length - 2];
                 win.spa_eye.sr = win.spa_eye.sr || win.spa_eye.cm;
@@ -277,6 +270,19 @@ define([
                     isNewInteraction ? flows.push([record]) : flows[flows.length - 1].push(record);
 
                 }
+            },
+
+            recordModelAudit:function (model, doc) {
+                // return if `record` is off
+                var spa_eyeObj = this.context.spa_eyeObj;
+
+                if (!spa_eyeObj.isRecord) {
+                    return;
+                }
+                t = DateUtil.getFormattedTime(new Date());
+                var records = spa_eyeObj.auditRecords = spa_eyeObj.auditRecords || {};
+                records[model.cid] = records[model.cid] || {};
+                records[model.cid][t] = doc;
             },
 
             cleanup:function () {
