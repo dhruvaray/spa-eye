@@ -22,7 +22,7 @@ define([
 
             parentPanel:"spa_eye",
             tag:Firebug.DOMPanel.DirTable.tag,
-            order:0,
+            order:1,
 
             onModelOfInterestChange:function (m) {
                 this.show();

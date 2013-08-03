@@ -22,7 +22,7 @@ define([
             title:Locale.$STR("spa_eye.event.title"),
 
             parentPanel:"spa_eye",
-            order:1,
+            order:0,
 
 
             initialize:function () {
@@ -97,7 +97,7 @@ define([
             },
 
             plotFlow:function () {
-                this.sequenceEditor && this.sequenceEditor.draw(this.sequenceData);
+                this.sequenceEditor && this.sequenceEditor.draw && this.sequenceEditor.draw(this.sequenceData);
             },
 
             tabulateData:function () {
