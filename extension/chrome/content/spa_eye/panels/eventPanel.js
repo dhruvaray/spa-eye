@@ -39,6 +39,7 @@ define([
                 //this.panelNode.parentNode.insertBefore(splitter, this.panelNode.lastChild);
 
                 this.sequenceEditor = this.panelNode.firstChild.contentWindow;
+
             },
 
             destroy:function (state) {
@@ -46,6 +47,18 @@ define([
             },
 
             onModelOfInterestChange:function (m) {
+                this.show();
+            },
+
+            onModelSet:function () {
+                this.show();
+            },
+
+            onModelFetch:function () {
+                this.show();
+            },
+
+            onModelSave:function () {
                 this.show();
             },
 
@@ -75,9 +88,12 @@ define([
                     var win = this.context.window.wrappedJSObject;
                     this.sequenceData = win.spa_eye.sequence[moi.cid] ?
                         win.spa_eye.sequence[moi.cid].flows : [];
-                    this.plotFlow();
-                    this.tabulateData();
+                } else {
+                    this.sequenceData = [];
                 }
+                this.plotFlow();
+                this.tabulateData();
+
             },
 
             plotFlow:function () {

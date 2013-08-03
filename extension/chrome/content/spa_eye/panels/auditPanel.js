@@ -28,6 +28,19 @@ define([
                 this.show();
             },
 
+            onModelSet:function () {
+                this.show();
+            },
+
+            onModelFetch:function () {
+                this.show();
+            },
+
+            onModelSave:function () {
+                this.show();
+            },
+
+
             show:function () {
                 var spa_eyeObj = this.context.spa_eyeObj;
                 var moi = spa_eyeObj && spa_eyeObj._moi;
