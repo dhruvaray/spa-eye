@@ -45,16 +45,8 @@ define([
                 Firebug.Panel.destroy.apply(this, arguments);
             },
 
-            onSelectRow:function (row, panel) {
-                if (!row || !row.domObject.value) return;
-                var m = row.domObject.value;
-                if (panel !== this.panelNode) {
-                    if (!m || !m.cid) return;
-                    var win = this.context.window.wrappedJSObject;
-                    this.sequenceData = win.spa_eye.sequence[m.cid] ?
-                        win.spa_eye.sequence[m.cid].flows : [];
-                    this.show();
-                }
+            onModelOfInterestChange:function (m) {
+                this.show();
             },
 
             onToggleHeader:function (section, panel) {
@@ -77,8 +69,15 @@ define([
             },
 
             show:function () {
-                this.plotFlow();
-                this.tabulateData();
+                var spa_eyeObj = this.context.spa_eyeObj;
+                var moi = spa_eyeObj && spa_eyeObj._moi;
+                if (moi && moi.cid) {
+                    var win = this.context.window.wrappedJSObject;
+                    this.sequenceData = win.spa_eye.sequence[moi.cid] ?
+                        win.spa_eye.sequence[moi.cid].flows : [];
+                    this.plotFlow();
+                    this.tabulateData();
+                }
             },
 
             plotFlow:function () {

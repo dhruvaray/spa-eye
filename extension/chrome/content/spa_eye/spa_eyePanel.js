@@ -153,7 +153,7 @@ define([
                         tooltiptext:Locale.$STR("spa_eye.refresh"),
                         image:"chrome://firebug/skin/rerun.svg",
                         className:"toolbar-image-button fbInternational",
-                        command:FBL.bindFixed(this.selectChildPlate, this)
+                        command:FBL.bindFixed(this.resetTrackingData, this)
                     },
                     "-",
                     {
@@ -215,6 +215,11 @@ define([
                 }
             },
 
+            resetTrackingData:function () {
+                window.spa_eye.sequence = {};
+                spa_eyeObj.auditRecords = {};
+            },
+
             getCurrentPlate:function (plateName) {
                 return this.plates[plateName || this.currentPlate];
             },
@@ -249,11 +254,6 @@ define([
 
                         items.push(
                             "-",
-                            {
-                                label:"Audit_Model",
-                                tooltiptext:"spa_eye.audit.title",
-                                command:Obj.bindFixed(cp.renderAuditForModel, cp, row)
-                            },
                             {
                                 label:(model
                                     && model.cid

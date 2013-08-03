@@ -92,15 +92,15 @@ define([
 
             headerTag:D.DIV({"class":"headerRow headerImage",
                     title:"$headerTitle",
-                    _domObject: "$section",
-                    _mainPanel: "$mainPanel",
+                    _domObject:"$section",
+                    _mainPanel:"$mainPanel",
                     onclick:"$onHeaderClick"},
                 D.SPAN({"class":"headerContext"}, "$headerTitle")
             ),
 
             sectionTag:D.DIV({"class":"modelSection $section.container"},
                 D.TAG("$headerTag", {
-                    section: "$section",
+                    section:"$section",
                     mainPanel:"$mainPanel",
                     headerTitle:"$section.title",
                     onHeaderClick:"$toggleHeader"
@@ -378,11 +378,7 @@ define([
             }
             // Mark row as selected
             Css.setClass(row, "row-selected");
-            if (Firebug.currentContext.spa_eyeObj) {
-                Events.dispatch(Firebug.currentContext.spa_eyeObj._spaHook.listener.fbListeners,
-                    'onSelectRow',
-                    [row, panel]);
-            }
+            Events.dispatch([panel], 'onSelectRow', [row]);
         }
 
         // Get selected row

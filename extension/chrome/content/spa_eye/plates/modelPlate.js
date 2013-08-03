@@ -6,6 +6,7 @@ define([
     "firebug/firebug",
     "firebug/lib/object",
     "firebug/lib/trace",
+    "firebug/lib/events",
     "firebug/lib/css",
     "firebug/lib/string",
     "firebug/lib/dom",
@@ -18,7 +19,7 @@ define([
     "spa_eye/dom/domEditor"
 
 ],
-    function (Firebug, Obj, FBTrace, Css, Str, Dom, MostUsed, BasePlate, ChildSection, ModelReps, DOMEditor) {
+    function (Firebug, Obj, FBTrace, Events, Css, Str, Dom, MostUsed, BasePlate, ChildSection, ModelReps, DOMEditor) {
 
         var NetRequestEntry = Firebug.NetMonitor.NetRequestEntry;
 
@@ -166,26 +167,13 @@ define([
                 }
             },
 
-// ********************************************************************************************* //
-// Audit Model
-// ********************************************************************************************* //
-
-            renderAuditForModel:function (row) {
-                var model = row.domObject.value,
-                    cid = null,
-                    auditPanel = null;
-
-                if (!model || !model.cid) return;
-                cid = model.cid;
-
-                // Pin this model
-                // this._pinModel(model);
-
-                // Select audit panel
-                Firebug.chrome.selectSidePanel("spa_eye:audit");
-                // Show audit
-                auditPanel = this.context.getPanel('spa_eye:audit', true);
-                auditPanel.showAudit(row.domObject.value, this.context);
+            onSelectRow:function (row) {
+                var spa_eyeObj = this.context.spa_eyeObj;
+                if (!row || !row.domObject.value) return;
+                var m = row.domObject.value;
+                if (!m || !m.cid) return;
+                spa_eyeObj._moi = m;
+                Events.dispatch(spa_eyeObj._spaHook.listener.fbListeners, 'onModelOfInterestChange', [m]);
             },
 
 // ********************************************************************************************* //
@@ -270,7 +258,7 @@ define([
                 }
             },
 
-            isModel: function (model) {
+            isModel:function (model) {
                 if (!model || !model.cid) return false;
                 var models = this.context.spa_eyeObj.getModels() || [];
                 return models.indexOf(model) !== -1;

@@ -24,46 +24,23 @@ define([
             tag:Firebug.DOMPanel.DirTable.tag,
             order:0,
 
-            // Show model audit
-            showAudit:function (model) {
-                var result = null;
-                if (model && model.cid) {
-                    var spa_eyeObj = this.context.spa_eyeObj;
-                    result = spa_eyeObj
-                        && spa_eyeObj.auditRecords
-                        && spa_eyeObj.auditRecords[model.cid];
-                }
-
-                this.tag.replace({object:result || {}}, this.panelNode);
-            },
-
-            onSelectRow:function (row, panel) {
-                if (panel !== this.panelNode) {
-                    if (!row || !row.domObject.value) return;
-                    var m = row.domObject.value;
-                    if (!m || !m.cid) return;
-                    this.showAudit(m);
-                }
+            onModelOfInterestChange:function (m) {
+                this.show();
             },
 
             show:function () {
-                var cm = this.context.spa_eyeObj.currentAuditModel;
-                if (!cm) {
-                    FirebugReps.Warning.tag.replace({object:"spa_eye.audit.nomodelselected"}, this.panelNode);
+                var spa_eyeObj = this.context.spa_eyeObj;
+                var moi = spa_eyeObj && spa_eyeObj._moi;
+                if (moi) {
+                    var result = spa_eyeObj.auditRecords && spa_eyeObj.auditRecords[moi.cid];
+                    this.tag.replace({object:result || {}}, this.panelNode);
                 } else {
-                    this.showAudit(cm, this.context);
+                    FirebugReps.Warning.tag.replace({object:"spa_eye.audit.nomodelselected"}, this.panelNode);
                 }
             },
 
             getOptionsMenuItems:function (context) {
                 return [
-                    {
-                        label:"spa_eye.all",
-                        tooltiptext:"spa_eye.all",
-                        command:function () {
-                        }
-                    },
-                    "-",
                     {
                         label:"spa_eye.refresh",
                         tooltiptext:"spa_eye.refresh",
@@ -73,10 +50,7 @@ define([
             },
 
             refresh:function () {
-                var cm = this.context.spa_eyeObj.currentAuditModel;
-                if (cm) {
-                    this.showAudit(cm);
-                }
+                this.show();
             }
 
         });

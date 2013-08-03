@@ -16,7 +16,7 @@
     <script>
 
         var sequenceDiagram = undefined;
-        var sequence = "Title: Select a model to view it's interaction flow";
+        var sequence = "";
 
 
         function genFlows(val, idx, list) {
@@ -37,6 +37,8 @@
             if (flows.length) {
                 sequence = "Title: Interaction flow for model : " + flows[0][0].target.cid;
                 flows.forEach(genFlows);
+            } else {
+                sequence = "Title: No interaction flow data available for selected model";
             }
             document.getElementById("sequence").innerHTML = "";
             sequenceDiagram = Diagram.parse(sequence);
