@@ -40,7 +40,7 @@ define([
 
                 if (!this.context.spa_eyeObj._moi) {
                     var firstRow = this.parent.panelNode.getElementsByClassName("0level").item(0);
-                    return ModelReps.selectRow(firstRow, this.parent);
+                    return ModelReps.selectRow(firstRow, this);
                 }
             },
 

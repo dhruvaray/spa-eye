@@ -25,12 +25,9 @@
 
         function genSequenceString(val, idx, list) {
             sequence = sequence + "\n" + ((list[idx].source ? list[idx].source.cid : "App") + "->" + list[idx].target.cid + ": " + list[idx].operation);
+            sequence = sequence + "\n" + (list[idx].target.cid + "-->" + (list[idx].source ? list[idx].source.cid : "App") + ": ");
 
         };
-
-        /*function genBackPath(val, idx, list){
-         return list[idx-1] ? "\n"+ list[idx].target.cid +"-->>"+ list[idx-1].target.cid + genBackPath(list[idx-1],idx-1,list) : ""
-         }*/
 
         function draw(flows) {
             if (flows.length) {
@@ -39,6 +36,7 @@
             } else {
                 sequence = "Title: No interaction flow data available for selected model";
             }
+
             try {
                 document.getElementById("sequence").innerHTML = "";
                 sequenceDiagram = Diagram.parse(sequence);
