@@ -82,10 +82,10 @@ define([
 
                     data[attr[2]] = win.spa_eye.templates[this.templateName];
                     DOMReps.DirTablePlate.tag.replace({object:data}, this.panelNode);
-                } else {
+                }
+                if (data[attr[1]] === Locale.$STR("spa_eye.script.view.noviewselected")) {
                     FirebugReps.Warning.tag.replace({object:"spa_eye.script.view.noviewselected"}, this.panelNode);
                 }
-                //ModelReps.DirTablePlate.tag.replace(args, this.panelNode);
 
 
             },
