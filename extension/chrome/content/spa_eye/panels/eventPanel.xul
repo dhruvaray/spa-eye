@@ -8,10 +8,6 @@
     <script type="application/x-javascript" src="chrome://spa_eye/content/lib/ext/raphael.js"/>
     <script type="application/x-javascript" src="chrome://spa_eye/content/lib/ext/sequence-diagram.js"/>
 
-    <hbox flex="1" style="overflow:scroll;">
-        <div id="sequence"/>
-    </hbox>
-
     <script>
 
         var sequenceDiagram = undefined;
@@ -49,5 +45,9 @@
 
 
     </script>
+
+    <hbox flex="1" style="overflow:scroll;">
+        <div id="sequence"/>
+    </hbox>
 
 </window>

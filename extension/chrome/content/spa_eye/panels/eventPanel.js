@@ -39,6 +39,7 @@ define([
                 //this.panelNode.parentNode.insertBefore(splitter, this.panelNode.lastChild);
 
                 this.sequenceEditor = this.panelNode.firstChild.contentWindow;
+                this.sequenceEditor.addEventListener("load", this.show);
 
             },
 

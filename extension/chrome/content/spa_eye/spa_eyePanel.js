@@ -142,7 +142,9 @@ define([
                     {
                         id:"spa_eye_panel_button_record",
                         tooltiptext:Locale.$STR("spa_eye.record_events"),
-                        image:"chrome://spa_eye/skin/recordon.svg",
+                        image:isRecord
+                            ? "chrome://spa_eye/skin/recording.svg"
+                            : "chrome://spa_eye/skin/recordon.svg",
                         type:"checkbox",
                         checked:isRecord,
                         className:"toolbar-image-button fbInternational",
@@ -210,8 +212,8 @@ define([
                 var spa_eyeObj = this.context.spa_eyeObj;
                 if (recordButton) {
                     recordButton.image = recordButton.checked
-                        ? "chrome://spa_eye/skin/recordon.svg"
-                        : "chrome://firebug/skin/breakOn.svg";
+                        ? "chrome://spa_eye/skin/recording.svg"
+                        : "chrome://spa_eye/skin/recordon.svg";
                     spa_eyeObj.isRecord = recordButton.checked;
                 }
             },
