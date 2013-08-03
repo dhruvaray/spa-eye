@@ -124,7 +124,7 @@ define([
                     suggestion:Locale.$STR("spa_eye.suggestion.inactive_during_page_load2")
                 };
 
-                var box = Firebug.ScriptPanel.WarningRep.tag.replace(args, this.panelNode);
+                var box = this.WarningRep.tag.replace(args, this.panelNode);
                 var description = box.getElementsByClassName("disabledPanelDescription").item(0);
                 return FirebugReps.Description.render(args.suggestion,
                     description,
@@ -296,18 +296,15 @@ define([
 // Panel UI (Domplate)
 // ********************************************************************************************* //
         with (Domplate) {
-            Firebug.spa_eyePanel.prototype.reload_template = domplate({
-                tag:DIV({onclick:"$handleClick", class:"$data|computeVisibility"}, Locale.$STR("spa_eye.reload")),
-
-                handleClick:function (event) {
-
-                    Firebug.Options.setPref("javascript", "enabled", true);
-                    Firebug.TabWatcher.reloadPageFromMemory(Firebug.currentContext);
-                },
-
-                computeVisibility:function (data) {
-                    return "show";//for now
-                }
+            spa_eyePanel.prototype.WarningRep = domplate(Firebug.ScriptPanel.WarningRep, {
+                tag:DIV({"class":"disabledSPA_EyePanelBox"},
+                    H1({"class":"disabledPanelHead"},
+                        SPAN("$pageTitle")
+                    ),
+                    P({"class":"disabledPanelDescription", style:"margin-top: 15px;"},
+                        SPAN("$suggestion")
+                    )
+                )
 
             });
         }
