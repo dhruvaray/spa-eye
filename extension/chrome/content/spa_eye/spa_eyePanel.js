@@ -22,9 +22,6 @@ define([
 
     "spa_eye/panels/basePanel"
 
-    /*"spa_eye/panels/viewPanel",
-     "spa_eye/panels/auditPanel",
-     "spa_eye/panels/eventPanel"*/
 ],
     function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, Toolbar, DOMEditor, _, BasePanel, ModelPlate, CollectionPlate, ViewPlate) {
 
@@ -105,6 +102,7 @@ define([
                         self.sidePanels.push(EventPanel);
                         Firebug.registerPanel(Firebug.viewPanel);
                         self.sidePanels.push(ViewPanel);
+                        Events.dispatch(Firebug.uiListeners, "updateSidePanels", [Firebug.spa_eyePanel]);
                     });
                 } else {
                     Dom.collapse(panelToolbar, true);
