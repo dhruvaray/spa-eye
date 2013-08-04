@@ -46,10 +46,6 @@ define([
 
             },
 
-            destroy:function (state) {
-                Firebug.Panel.destroy.apply(this, arguments);
-            },
-
             onModelOfInterestChange:function (m) {
                 this.show();
             },

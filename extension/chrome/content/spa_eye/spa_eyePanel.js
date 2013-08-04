@@ -12,6 +12,8 @@ define([
     "firebug/chrome/toolbar",
     "firebug/dom/domEditor",
 
+    "spa_eye/lib/require/underscore",
+
     "spa_eye/panels/basePanel",
 
     "spa_eye/plates/modelPlate",
@@ -24,7 +26,7 @@ define([
      "spa_eye/panels/auditPanel",
      "spa_eye/panels/eventPanel"*/
 ],
-    function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, Toolbar, DOMEditor, BasePanel, ModelPlate, CollectionPlate, ViewPlate) {
+    function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, Toolbar, DOMEditor, _, BasePanel, ModelPlate, CollectionPlate, ViewPlate) {
 
         var childPlate = {
             MODEL:'model',
@@ -63,7 +65,11 @@ define([
             },
 
             destroy:function () {
-                Firebug.unregisterUIListener(this);
+                /*_.each([Firebug.auditPanel,Firebug.viewPanel,Firebug.eventPanel],function(panel){
+                 panel && panel.destroy();
+                 });
+                 Firebug.auditPanel.destroy()
+                 //Firebug.unregisterUIListener(this);*/
                 this._super.apply(this, arguments);
             },
 
@@ -94,8 +100,6 @@ define([
                     ], function () {
                         Events.dispatch(Firebug.uiListeners, "updateSidePanels", [Firebug.spa_eyePanel]);
                     });
-
-
                 } else {
                     Dom.collapse(panelToolbar, true);
                 }

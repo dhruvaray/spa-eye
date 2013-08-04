@@ -1,6 +1,5 @@
 define([
     "firebug/firebug",
-    "firebug/lib/object",
     "firebug/lib/trace",
     "firebug/lib/locale",
     "firebug/lib/domplate",
@@ -10,31 +9,14 @@ define([
 
     "spa_eye/panels/basePanel"
 ],
-    function (Firebug, Obj, FBTrace, Locale, Domplate, DOMEditor, FirebugReps, DOMReps) {
+    function (Firebug, FBTrace, Locale, Domplate, DOMEditor, FirebugReps, DOMReps, BasePanel) {
 
-        var viewPanel = Firebug.viewPanel = function () {
-        };
-
-        viewPanel.prototype = Obj.extend(Firebug.Panel, {
+        var viewPanel = Firebug.viewPanel = BasePanel.extend({
             name:"spa_eye:script.view",
             title:Locale.$STR("spa_eye.script.view.title"),
 
             parentPanel:"script",
             order:4,
-            editable:true,
-
-
-            initialize:function () {
-                Firebug.Panel.initialize.apply(this, arguments);
-                var listener = this.context.spa_eyeObj._spaHook.listener;
-                listener.addListener(this);
-
-            },
-
-            destroy:function (state) {
-                Firebug.Panel.destroy.apply(this, arguments);
-            },
-
 
             updateSelection:function (frame) {
 
