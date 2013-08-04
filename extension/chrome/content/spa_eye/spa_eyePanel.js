@@ -9,6 +9,7 @@ define([
     "firebug/lib/css",
     "firebug/lib/events",
     "firebug/lib/string",
+    "firebug/chrome/toolbar",
     "firebug/dom/domEditor",
 
     "spa_eye/panels/basePanel",
@@ -17,13 +18,13 @@ define([
     "spa_eye/plates/collectionPlate",
     "spa_eye/plates/viewPlate",
 
-    "spa_eye/panels/basePanel",
+    "spa_eye/panels/basePanel"
 
-    "spa_eye/panels/viewPanel",
-    "spa_eye/panels/auditPanel",
-    "spa_eye/panels/eventPanel"
+    /*"spa_eye/panels/viewPanel",
+     "spa_eye/panels/auditPanel",
+     "spa_eye/panels/eventPanel"*/
 ],
-    function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, DOMEditor, BasePanel, ModelPlate, CollectionPlate, ViewPlate) {
+    function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, Toolbar, DOMEditor, BasePanel, ModelPlate, CollectionPlate, ViewPlate) {
 
         var childPlate = {
             MODEL:'model',
@@ -76,13 +77,27 @@ define([
 
                 var scriptPanel = this.context.getPanel('script');
                 var active = !this.showWarning() && !scriptPanel.showWarning();
-                this.toolbar = this.toolbar || Firebug.chrome.$("fbPanelToolbar");
+                var panelToolbar = Firebug.chrome.$("fbPanelToolbar");
 
                 if (active) {
-                    Firebug.chrome.$("fbPanelToolbar").style.visibility = "visible";
+                    var buttons = this.getSPA_EyeToolbar();
+                    for (var i = 0; i < buttons.length; ++i)
+                        Toolbar.createToolbarButton(panelToolbar, buttons[i]);
+
                     this.selectChildPlate();
+                    Dom.collapse(panelToolbar, false);
+
+                    define([
+                        "spa_eye/panels/viewPanel",
+                        "spa_eye/panels/auditPanel",
+                        "spa_eye/panels/eventPanel"
+                    ], function () {
+                        Events.dispatch(Firebug.uiListeners, "updateSidePanels", [Firebug.spa_eyePanel]);
+                    });
+
+
                 } else {
-                    Firebug.chrome.$("fbPanelToolbar").style.visibility = "hidden";
+                    Dom.collapse(panelToolbar, true);
                 }
             },
 
@@ -133,7 +148,7 @@ define([
                         Firebug.currentContext));
             },
 
-            getPanelToolbarButtons:function () {
+            getSPA_EyeToolbar:function () {
 
                 var buttons = [];
 
