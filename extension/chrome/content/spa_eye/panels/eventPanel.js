@@ -89,17 +89,19 @@ define([
                 var spa_eyeObj = this.context.spa_eyeObj;
                 var moi = spa_eyeObj && spa_eyeObj._moi;
                 var idx = 0;
+                var id = undefined;
                 if (moi && moi.cid) {
                     var win = this.context.window.wrappedJSObject;
                     var sequence = win.spa_eye.sequence[moi.cid];
                     this.sequenceData = (sequence && sequence.flows) ? sequence.flows : [];
                     idx = this.sequenceData.length - 1;
                     this.plotData = idx >= 0 ? [this.sequenceData[idx]] : [];
+                    id = moi.cid;
                 } else {
                     this.sequenceData = [];
                     this.plotData = []
                 }
-                this.plotFlow(moi.cid, idx);
+                this.plotFlow(id, idx);
                 this.tabulateData();
 
             },

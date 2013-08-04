@@ -30,7 +30,9 @@
                 sequence = "Title: Interaction flow for model : " + id + " at t=" + index;
                 flows.forEach(genFlows);
             } else {
-                sequence = "Title: No interaction flow data available for selected model";
+                sequence = id ?
+                        "Title: No interaction flow data available for model : " + id :
+                        "Title: No interaction flow data available for selected model";
             }
 
             try {

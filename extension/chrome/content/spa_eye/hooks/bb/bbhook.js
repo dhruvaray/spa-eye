@@ -24,7 +24,8 @@ define([
         const Ci = Components.interfaces;
         const Cr = Components.results;
         const bbhook_wp = "chrome://spa_eye/content/hooks/bb/bbhook_wp.js";
-        const Operation = {SAVE:"save", FETCH:"fetch", SET:"set", VIEW:"render"};
+        const Operation = {SAVE:"save", FETCH:"fetch", SET:"set", VIEW:"render", ADD:"add",
+            REMOVE:"remove", RESET:"reset", SORT:"sort", DESTROY:"destroy"};
 
 // ********************************************************************************************* //
 //  BBHook Class
@@ -163,11 +164,13 @@ define([
 
                     return self.modelFnWomb(win, this, Operation.SET, _setProxy, arguments);
                 }
-
-                /*var _colSetProxy = win.Backbone.Collection.prototype.set;
-                 win.Backbone.Collection.prototype.set = function () {
-                 return self.modelFnWomb(win, this, Operation.SET, _colSetProxy, arguments);
-                 }*/
+                _.each([Operation.SET, Operation.ADD, Operation.REMOVE, Operation.RESET, Operation.SORT],
+                    function (operation) {
+                        var _proxy = win.Backbone.Collection.prototype[operation];
+                        win.Backbone.Collection.prototype[operation] = function () {
+                            return self.collectionFnWomb(win, this, operation, _proxy, arguments);
+                        }
+                    });
             },
 
             registerWPHooks:function (win) {
@@ -240,8 +243,8 @@ define([
 
                 var result = fn.apply(model, Array.slice(fnargs));
 
-                if (win.spa_eye.cm === win.spa_eye.sr)
-                    win.spa_eye.sr = undefined;
+                if (win.spa_eye.cm === win.spa_eye.msr)
+                    win.spa_eye.msr = undefined;
 
                 win.spa_eye.cm = undefined;
 
@@ -253,22 +256,77 @@ define([
                 return result;
             },
 
+            collectionFnWomb:function (win, collection, type, fn, fnargs) {
+
+                win.spa_eye.cc = collection;
+
+                win.spa_eye.path.push(collection);
+
+                this.recordSequenceEvent(win, {
+                    cid:collection.cid,
+                    target:collection,
+                    operation:type,
+                    args:fnargs
+                });
+
+                this.recordModelAudit(collection, {
+                    operation:type,
+                    target:collection,
+                    args:fnargs
+                });
+
+                var result = fn.apply(collection, Array.slice(fnargs));
+
+                if (win.spa_eye.cc === win.spa_eye.csr)
+                    win.spa_eye.csr = undefined;
+
+                win.spa_eye.cc = undefined;
+
+                win.spa_eye.path.pop();
+
+                var cb = type.charAt(0).toUpperCase() + type.slice(1);
+                Events.dispatch(this.listener.fbListeners, 'onModel' + cb, [collection]);
+
+                return result;
+            },
+
             recordSequenceEvent:function (win, record) {
 
                 if (!this.context.spa_eyeObj.isRecord) {
                     return;
                 }
-
-                var isNewInteraction = !win.spa_eye.sr;
                 record.source = win.spa_eye.path[win.spa_eye.path.length - 2];
-                win.spa_eye.sr = win.spa_eye.sr || win.spa_eye.cm;
-                if (win.spa_eye.sr && win.spa_eye.sr.cid) {
-                    win.spa_eye.sequence[win.spa_eye.sr.cid] = win.spa_eye.sequence[win.spa_eye.sr.cid] || [];
-                    var flows =
-                        (win.spa_eye.sequence[win.spa_eye.sr.cid].flows =
-                            win.spa_eye.sequence[win.spa_eye.sr.cid].flows || []);
-                    isNewInteraction ? flows.push([record]) : flows[flows.length - 1].push(record);
 
+                var csr = win.spa_eye.csr;
+                var msr = win.spa_eye.msr;
+                var isNewInteractionModel = (!msr);
+                var isNewInteractionCollection = (!csr);
+                win.spa_eye.csr = csr || win.spa_eye.cc;
+                win.spa_eye.msr = msr || win.spa_eye.cm;
+
+                var process = [];
+                win.spa_eye.csr && (process.push(win.spa_eye.csr));
+                win.spa_eye.msr && (process.push(win.spa_eye.msr));
+
+
+                try {
+                    _.each(process, function (sr) {
+                        if (sr && sr.cid) {
+                            win.spa_eye.sequence[sr.cid] = win.spa_eye.sequence[sr.cid] || [];
+                            var flows =
+                                (win.spa_eye.sequence[sr.cid].flows =
+                                    win.spa_eye.sequence[sr.cid].flows || []);
+                            var isNewInteraction = sr instanceof win.Backbone.Model ?
+                                isNewInteractionModel :
+                                isNewInteractionCollection;
+
+                            isNewInteraction ? flows.push([record]) : flows[flows.length - 1].push(record);
+                        }
+
+                    }, self);
+                } catch (e) {
+                    if (FBTrace.DBG_ERRORS)
+                        FBTrace.sysout("spa_eye; Unexpected error", e);
                 }
             },
 
