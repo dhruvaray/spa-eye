@@ -78,9 +78,9 @@ define([
                     var data = section.data;
                     var cid = data[0] && data[0].cid;
                     var win = this.context.window.wrappedJSObject;
-                    this.sequenceData = win.spa_eye.sequence[cid] ?
+                    this.plotData = win.spa_eye.sequence[cid] ?
                         [win.spa_eye.sequence[cid].flows[idx]] : [];
-                    this.plotFlow();
+                    this.plotFlow(cid, idx);
                 }
 
             },
@@ -88,20 +88,24 @@ define([
             show:function () {
                 var spa_eyeObj = this.context.spa_eyeObj;
                 var moi = spa_eyeObj && spa_eyeObj._moi;
+                var idx = 0;
                 if (moi && moi.cid) {
                     var win = this.context.window.wrappedJSObject;
-                    this.sequenceData = win.spa_eye.sequence[moi.cid] ?
-                        win.spa_eye.sequence[moi.cid].flows : [];
+                    var sequence = win.spa_eye.sequence[moi.cid];
+                    this.sequenceData = (sequence && sequence.flows) ? sequence.flows : [];
+                    idx = this.sequenceData.length - 1;
+                    this.plotData = idx >= 0 ? [this.sequenceData[idx]] : [];
                 } else {
                     this.sequenceData = [];
+                    this.plotData = []
                 }
-                this.plotFlow();
+                this.plotFlow(moi.cid, idx);
                 this.tabulateData();
 
             },
 
-            plotFlow:function () {
-                this.sequenceEditor && this.sequenceEditor.draw && this.sequenceEditor.draw(this.sequenceData);
+            plotFlow:function (id, index) {
+                this.sequenceEditor && this.sequenceEditor.draw && this.sequenceEditor.draw(this.plotData, id, index);
             },
 
             tabulateData:function () {
