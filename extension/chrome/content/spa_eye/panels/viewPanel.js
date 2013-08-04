@@ -81,7 +81,6 @@ define([
 
         });
 
-        Firebug.registerPanel(Firebug.viewPanel);
         return Firebug.viewPanel;
 
     });

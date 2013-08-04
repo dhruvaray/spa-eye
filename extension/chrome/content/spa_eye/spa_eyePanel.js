@@ -48,6 +48,7 @@ define([
 
             currentPlate:childPlate.MODEL,
             plates:null,
+            sidePanels:[],
 
             initialize:function () {
                 this._super.apply(this, arguments);
@@ -65,11 +66,9 @@ define([
             },
 
             destroy:function () {
-                /*_.each([Firebug.auditPanel,Firebug.viewPanel,Firebug.eventPanel],function(panel){
-                 panel && panel.destroy();
-                 });
-                 Firebug.auditPanel.destroy()
-                 //Firebug.unregisterUIListener(this);*/
+                _.each(this.sidePanels, function (panel) {
+                    Firebug.unregisterPanel(panel);
+                });
                 this._super.apply(this, arguments);
             },
 
@@ -93,12 +92,19 @@ define([
                     this.selectChildPlate();
                     Dom.collapse(panelToolbar, false);
 
+                    var self = this;
+
                     define([
                         "spa_eye/panels/viewPanel",
                         "spa_eye/panels/auditPanel",
                         "spa_eye/panels/eventPanel"
-                    ], function () {
-                        Events.dispatch(Firebug.uiListeners, "updateSidePanels", [Firebug.spa_eyePanel]);
+                    ], function (ViewPanel, AuditPanel, EventPanel) {
+                        Firebug.registerPanel(Firebug.auditPanel);
+                        self.sidePanels.push(AuditPanel);
+                        Firebug.registerPanel(Firebug.eventPanel);
+                        self.sidePanels.push(EventPanel);
+                        Firebug.registerPanel(Firebug.viewPanel);
+                        self.sidePanels.push(ViewPanel);
                     });
                 } else {
                     Dom.collapse(panelToolbar, true);
