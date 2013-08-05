@@ -90,7 +90,7 @@ define([
                 D.TAG("$memberRowTag", {member:"$member"})
             ),
 
-            headerTag:D.DIV({"class":"headerRow headerImage",
+            headerTag:D.DIV({"class":"headerRow headerImage $section.collapse|_getCollapsedClass",
                     title:"$headerTitle",
                     _domObject:"$section",
                     _mainPanel:"$mainPanel",
@@ -105,7 +105,7 @@ define([
                     headerTitle:"$section.title",
                     onHeaderClick:"$toggleHeader"
                 }),
-                D.TABLE({"class":"domTable",
+                D.TABLE({"class":"domTable $section.collapse|_getHideClass",
                         cellpadding:0,
                         cellspacing:0,
                         onclick:"$onClick",
@@ -295,6 +295,14 @@ define([
                         row.insertTimeout = delay;
                     }
                 }
+            },
+
+            _getCollapsedClass:function (collapse) {
+                return collapse ? "opened" : "";
+            },
+
+            _getHideClass:function (hide) {
+                return hide ? "hide" : "";
             },
 
             toggleHeader:function (event) {

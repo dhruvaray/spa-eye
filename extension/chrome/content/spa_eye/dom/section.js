@@ -23,6 +23,9 @@ define([
 
             order:0,
 
+            // Default collapse behavior for section
+            collapse:true,
+
             // Element class
             container:null,
             body:null,
