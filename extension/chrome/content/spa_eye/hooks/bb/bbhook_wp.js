@@ -34,6 +34,7 @@ if (window.Backbone) {
         var _viewProxyProto = window.Backbone.View.prototype;
         window.Backbone.View = function (attributes, options) {
             var renderProxy = this.render;
+            var removeProxy = this.remove;
             this.render = function () {
                 window.spa_eye.cv = this;
                 this.inferredTemplates = this.inferredTemplates || [];
@@ -42,6 +43,11 @@ if (window.Backbone) {
                 window.spa_eye.path.pop();
                 window.spa_eye.cv = undefined;
                 return result;
+            };
+
+            this.remove = function () {
+                this.mfd = true;
+                return removeProxy.apply(this, arguments);
             };
 
             window.spa_eye.views = window.spa_eye.views || [];

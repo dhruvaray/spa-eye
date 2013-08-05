@@ -9,6 +9,7 @@ define([
     "firebug/lib/css",
     "firebug/lib/string",
     "firebug/lib/dom",
+    "spa_eye/lib/require/underscore",
 
     "spa_eye/plates/basePlate",
 
@@ -16,7 +17,7 @@ define([
     "spa_eye/dom/modelReps"
 
 ],
-    function (Firebug, FBTrace, Locale, Css, Str, Dom, BasePlate, ChildSection, ModelReps) {
+    function (Firebug, FBTrace, Locale, Css, Str, Dom, _, BasePlate, ChildSection, ModelReps) {
 
         var PANEL = BasePlate.extend({
             name:'view',
@@ -41,20 +42,25 @@ define([
 
             createSections:function () {
                 var sections = [];
+                //var data = this.getLiveViews();
                 var allViews = new ChildSection({
                     name:'all_views',
                     title:Locale.$STR('spa_eye.all'),
                     parent:this.parent.panelNode,
-                    order:0,
-
                     container:'allViewsDiv',
                     body:'allViewsDivBody',
-
+                    //data:FBL.bindFixed(this.getliveViews, this)
                     data:FBL.bindFixed(this.context.spa_eyeObj.getViews, this.context.spa_eyeObj)
                 });
 
                 sections.push(allViews);
                 return sections;
+            },
+
+            getliveViews:function () {
+                return _.filter(this.context.spa_eyeObj.getViews, function (view) {
+                    return view.mfd
+                });
             },
 
             onSelectRow:function (row) {

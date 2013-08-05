@@ -96,10 +96,10 @@ define([
                             "spa_eye/panels/auditPanel",
                             "spa_eye/panels/eventPanel"
                         ], function (ViewPanel, AuditPanel, EventPanel) {
-                            Firebug.registerPanel(Firebug.eventPanel);
-                            self.sidePanels.push(EventPanel);
                             Firebug.registerPanel(Firebug.auditPanel);
                             self.sidePanels.push(AuditPanel);
+                            Firebug.registerPanel(Firebug.eventPanel);
+                            self.sidePanels.push(EventPanel);
                             Firebug.registerPanel(Firebug.viewPanel);
                             self.sidePanels.push(ViewPanel);
                             Events.dispatch(Firebug.uiListeners, "updateSidePanels", [self]);

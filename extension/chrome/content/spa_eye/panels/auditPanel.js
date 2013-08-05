@@ -24,7 +24,7 @@ define([
 
             parentPanel:"spa_eye",
             tag:DOMReps.DirTablePlate.tag,
-            order:1,
+            order:0,
 
             onModelOfInterestChange:function (m) {
                 this.show();

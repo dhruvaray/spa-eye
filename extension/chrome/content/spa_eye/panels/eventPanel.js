@@ -22,7 +22,7 @@ define([
             title:Locale.$STR("spa_eye.event.title"),
 
             parentPanel:"spa_eye",
-            order:0,
+            order:1,
 
 
             initialize:function () {
