@@ -39,33 +39,36 @@ define([
                 var source = ["obj", "__p"];
                 var attr = [
                     Locale.$STR("spa_eye.script.view.template.data"),
-                    Locale.$STR("spa_eye.script.view.template.transform"),
-                    Locale.$STR("spa_eye.script.view.template.source")
+                    Locale.$STR("spa_eye.script.view.template.source"),
+                    Locale.$STR("spa_eye.script.view.template.transform")
                 ];
-                var data = {};
+                var context = this.context;
+                var win = context.window.wrappedJSObject;
+                var data = [];
                 data[attr[0]] = Locale.$STR("spa_eye.script.view.nodata");
-                data[attr[1]] = Locale.$STR("spa_eye.script.view.noviewselected");
+                data[attr[1]] = win.spa_eye.templates[this.templateName];
+                data[attr[2]] = Locale.$STR("spa_eye.script.view.noviewselected");
 
 
                 if (this.templateName) {
-                    var context = this.context;
-                    var win = context.window.wrappedJSObject;
-
-                    for (var i = 0; i < source.length; ++i)
+                    for (var i = 0; i < source.length; ++i) {
                         Firebug.CommandLine.evaluate(source[i], context, null, context.getCurrentGlobal(),
                             function success(result, context) {
-                                data[attr[i]] = result;
+                                source[i] = result;
                             },
                             function failed(result, context) {
                                 if (result.source !== source || result.name !== "ReferenceError")
-                                    data[attr[i]] = exc.message;
+                                    source[i] = exc.message;
                             }
                         );
+                    }
+                    data[attr[0]] = source[0];
+                    data[attr[2]] = source[1];
 
-                    data[attr[2]] = win.spa_eye.templates[this.templateName];
                     DOMReps.DirTablePlate.tag.replace({object:data}, this.panelNode);
                 }
-                if (data[attr[1]] === Locale.$STR("spa_eye.script.view.noviewselected")) {
+
+                if (data[attr[2]] === Locale.$STR("spa_eye.script.view.noviewselected")) {
                     FirebugReps.Warning.tag.replace({object:"spa_eye.script.view.noviewselected"}, this.panelNode);
                 }
 

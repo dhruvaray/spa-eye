@@ -339,8 +339,11 @@ define([
                 }
                 t = DateUtil.getFormattedTime(new Date());
                 var records = spa_eyeObj.auditRecords = spa_eyeObj.auditRecords || {};
-                records[model.cid] = records[model.cid] || {};
-                records[model.cid][t] = doc;
+
+                records[model.cid] || (records[model.cid] = []);
+                var record = {};
+                record[t] = doc;
+                records[model.cid].splice(0, 0, record);
             },
 
             cleanup:function () {
