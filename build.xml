@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 
-<project name="spa-eye" basedir="." default="build">
+<project name="spa_eye" basedir="." default="build">
 
     <!-- Directories -->
     <property name="extension.dir" value="./extension"/>
@@ -29,12 +29,12 @@
         <replace file="${build.dir}/install.rdf" token="@VERSION@" value="${VERSION}"/>
 
         <antcall target="createXPI">
-            <param name="file-name" value="spa-eye-${VERSION}.xpi"/>
+            <param name="file-name" value="spa_eye-${VERSION}.xpi"/>
             <param name="file-dir" value="${nightly.dir}"/>
         </antcall>
 
         <delete dir="${build.dir}"/>
-        <echo message="spa-eye version: ${VERSION} in ${nightly.dir}"/>
+        <echo message="spa_eye version: ${VERSION} in ${nightly.dir}"/>
     </target>
 
     <!-- Feature Build -->
@@ -45,12 +45,12 @@
         <replace file="${build.dir}/install.rdf" token="@VERSION@" value="${VERSION}"/>
 
         <antcall target="createXPI">
-            <param name="file-name" value="spa-eye-${VERSION}.xpi"/>
+            <param name="file-name" value="spa_eye-${VERSION}.xpi"/>
             <param name="file-dir" value="${release.dir}"/>
         </antcall>
 
         <delete dir="${build.dir}"/>
-        <echo message="spa-eye version: ${VERSION} in ${release.dir}"/>
+        <echo message="spa_eye version: ${VERSION} in ${release.dir}"/>
     </target>
 
     <!-- Prepare build files -->
@@ -94,7 +94,7 @@
         <!-- Copy update.rdf file with updated release version info -->
         <copy file="update.rdf.tpl.xml" tofile="${file-dir}/update.rdf"/>
         <replace file="${file-dir}/update.rdf" token="@VERSION@" value="${VERSION}"/>
-        <replace file="${file-dir}/update.rdf" token="@LEAF@" value="spa-eye-${VERSION}.xpi"/>
+        <replace file="${file-dir}/update.rdf" token="@LEAF@" value="spa_eye-${VERSION}.xpi"/>
     </target>
 
     <!-- Get version number from `git describe` -->

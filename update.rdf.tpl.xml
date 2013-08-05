@@ -2,7 +2,7 @@
 <r:RDF xmlns:r="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
        xmlns="http://www.mozilla.org/2004/em-rdf#">
 
-<r:Description about="urn:mozilla:extension:spa-eye@dhruvaray.github.io">
+<r:Description about="urn:mozilla:extension:spa_eye@dhruvaray.github.io">
   <updates>
     <r:Seq>
       <r:li>

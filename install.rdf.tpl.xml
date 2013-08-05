@@ -4,7 +4,7 @@
      xmlns:em="http://www.mozilla.org/2004/em-rdf#">
 
     <Description about="urn:mozilla:install-manifest">
-        <em:id>spa-eye@dhruvaray.github.io</em:id>
+        <em:id>spa_eye@dhruvaray.github.io</em:id>
         <em:version>@VERSION@</em:version>
         <em:type>2</em:type>
         <em:bootstrap>true</em:bootstrap>
