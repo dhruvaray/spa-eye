@@ -49,8 +49,7 @@ define([
                     parent:this.parent.panelNode,
                     container:'allViewsDiv',
                     body:'allViewsDivBody',
-                    //data:FBL.bindFixed(this.getliveViews, this)
-                    data:FBL.bindFixed(this.context.spa_eyeObj.getViews, this.context.spa_eyeObj)
+                    data:FBL.bindFixed(this.getliveViews, this)
                 });
 
                 sections.push(allViews);
@@ -58,8 +57,8 @@ define([
             },
 
             getliveViews:function () {
-                return _.filter(this.context.spa_eyeObj.getViews, function (view) {
-                    return view.mfd
+                return _.filter(this.context.spa_eyeObj.getViews(), function (view) {
+                    return !view.mfd;
                 });
             },
 
