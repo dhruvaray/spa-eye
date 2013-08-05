@@ -6,6 +6,7 @@ define([
     "firebug/firebug",
     "firebug/lib/object",
     "firebug/lib/trace",
+    "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/css",
     "firebug/lib/string",
@@ -19,7 +20,7 @@ define([
     "spa_eye/dom/domEditor"
 
 ],
-    function (Firebug, Obj, FBTrace, Events, Css, Str, Dom, MostUsed, BasePlate, ChildSection, ModelReps, DOMEditor) {
+    function (Firebug, Obj, FBTrace, Locale, Events, Css, Str, Dom, MostUsed, BasePlate, ChildSection, ModelReps, DOMEditor) {
 
         var NetRequestEntry = Firebug.NetMonitor.NetRequestEntry;
 
@@ -51,7 +52,7 @@ define([
 
                 var pinned = new ChildSection({
                     name:'pinned_models',
-                    title:'Pinned Models',
+                    title:Locale.$STR('spa_eye.models.pinned'),
                     parent:this.parent.panelNode,
                     order:0,
                     container:'pinnedModelsDiv',
@@ -66,7 +67,7 @@ define([
 
                 var mostUsed = new ChildSection({
                     name:'most_used_models',
-                    title:'Most Used',
+                    title:Locale.$STR('spa_eye.models.mostused'),
                     parent:this.parent.panelNode,
                     order:1,
                     container:'mostUsedModelsDiv',
@@ -81,7 +82,7 @@ define([
 
                 var allModels = new ChildSection({
                     name:'all_models',
-                    title:'All Models',
+                    title:Locale.$STR('spa_eye.all'),
                     parent:this.parent.panelNode,
                     order:2,
                     container:'allModelsDiv',

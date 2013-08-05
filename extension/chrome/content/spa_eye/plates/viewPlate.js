@@ -5,6 +5,7 @@
 define([
     "firebug/firebug",
     "firebug/lib/trace",
+    "firebug/lib/locale",
     "firebug/lib/css",
     "firebug/lib/string",
     "firebug/lib/dom",
@@ -15,7 +16,7 @@ define([
     "spa_eye/dom/modelReps"
 
 ],
-    function (Firebug, FBTrace, Css, Str, Dom, BasePlate, ChildSection, ModelReps) {
+    function (Firebug, FBTrace, Locale, Css, Str, Dom, BasePlate, ChildSection, ModelReps) {
 
         var PANEL = BasePlate.extend({
             name:'view',
@@ -42,7 +43,7 @@ define([
                 var sections = [];
                 var allViews = new ChildSection({
                     name:'all_views',
-                    title:'All Views',
+                    title:Locale.$STR('spa_eye.all'),
                     parent:this.parent.panelNode,
                     order:0,
 
@@ -51,6 +52,7 @@ define([
 
                     data:FBL.bindFixed(this.context.spa_eyeObj.getViews, this.context.spa_eyeObj)
                 });
+
                 sections.push(allViews);
                 return sections;
             },
