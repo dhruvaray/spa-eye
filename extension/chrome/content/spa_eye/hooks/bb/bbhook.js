@@ -40,6 +40,9 @@ define([
                     this[key] = obj[key];
                 }
             }
+
+            this._modelProxies = {};
+            this._collectionProxies = {};
         }
 
         BBHook.prototype = {
@@ -143,34 +146,25 @@ define([
             },
 
             registerSetHooks:function (win) {
-                var _setProxy = win.Backbone.Model.prototype.set;
                 var self = this;
-                win.Backbone.Model.prototype.set = function (attributes, options) {
-                    if (!this.save._proxied) {
-                        var _saveProxy = this.save;
-                        this.save = function () {
-                            return self.modelFnWomb(win, this, Operation.SAVE, _saveProxy, arguments);
-                        };
-                        this.save._proxied = true;
-                    }
+                var ModelProto = win.Backbone.Model.prototype;
+                var CollectionProto = win.Backbone.Collection.prototype;
 
-                    if (!this.fetch._proxied) {
-                        var _fetchProxy = this.fetch;
-                        this.fetch = function () {
-                            return self.modelFnWomb(win, this, Operation.FETCH, _fetchProxy, arguments);
-                        };
-                        this.fetch._proxied = true;
-                    }
-
-                    return self.modelFnWomb(win, this, Operation.SET, _setProxy, arguments);
-                }
-                _.each([Operation.SET, Operation.ADD, Operation.REMOVE, Operation.RESET, Operation.SORT],
-                    function (operation) {
-                        var _proxy = win.Backbone.Collection.prototype[operation];
-                        win.Backbone.Collection.prototype[operation] = function () {
-                            return self.collectionFnWomb(win, this, operation, _proxy, arguments);
+                _.each(Operation, function(key) {
+                    if (ModelProto[key]) {
+                        self._modelProxies[key] = ModelProto[key];
+                        ModelProto[key] = function () {
+                            return self.modelFnWomb(win, this, key, self._modelProxies[key], arguments);
                         }
-                    });
+                    }
+
+                    if (CollectionProto[key]) {
+                        self._collectionProxies[key] = CollectionProto[key];
+                        CollectionProto[key] = function () {
+                            return self.collectionFnWomb(win, this, key, self._collectionProxies[key], arguments);
+                        }
+                    }
+                });
             },
 
             registerWPHooks:function (win) {
