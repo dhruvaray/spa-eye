@@ -103,7 +103,7 @@ define([
                             self.sidePanels.push(AuditPanel);
                             Firebug.registerPanel(Firebug.viewPanel);
                             self.sidePanels.push(ViewPanel);
-                            Events.dispatch(Firebug.uiListeners, "updateSidePanels", [Firebug.spa_eyePanel]);
+                            Events.dispatch(Firebug.uiListeners, "updateSidePanels", [self]);
                         });
                         this.activated = true;
                     }
