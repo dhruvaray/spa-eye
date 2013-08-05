@@ -44,7 +44,7 @@ define([
                 ];
                 var context = this.context;
                 var win = context.window.wrappedJSObject;
-                var data = [];
+                var data = {};
                 data[attr[0]] = Locale.$STR("spa_eye.script.view.nodata");
                 data[attr[1]] = win.spa_eye.templates[this.templateName];
                 data[attr[2]] = Locale.$STR("spa_eye.script.view.noviewselected");

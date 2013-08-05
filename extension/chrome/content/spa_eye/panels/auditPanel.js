@@ -10,10 +10,11 @@ define([
     "firebug/chrome/reps",
     "spa_eye/lib/uri",
     "spa_eye/lib/require/underscore",
+    "firebug/dom/domReps",
 
     "spa_eye/panels/basePanel"
 ],
-    function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, FirebugReps, URI, _, BasePanel) {
+    function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, FirebugReps, URI, _, DOMReps, BasePanel) {
 
 // ********************************************************************************************* //
 
@@ -22,7 +23,7 @@ define([
             title:Locale.$STR("spa_eye.audit.title"),
 
             parentPanel:"spa_eye",
-            tag:Firebug.DOMPanel.DirTable.tag,
+            tag:DOMReps.DirTablePlate.tag,
             order:1,
 
             onModelOfInterestChange:function (m) {
