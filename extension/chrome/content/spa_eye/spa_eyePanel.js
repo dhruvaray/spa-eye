@@ -82,30 +82,35 @@ define([
                 var panelToolbar = Firebug.chrome.$("fbPanelToolbar");
 
                 if (active) {
-                    var buttons = this.getSPA_EyeToolbar();
-                    for (var i = 0; i < buttons.length; ++i)
-                        Toolbar.createToolbarButton(panelToolbar, buttons[i]);
+                    if (!this.activated) {
+                        var buttons = this.getSPA_EyeToolbar();
+                        for (var i = 0; i < buttons.length; ++i)
+                            Toolbar.createToolbarButton(panelToolbar, buttons[i]);
 
-                    this.selectChildPlate();
-                    Dom.collapse(panelToolbar, false);
+                        this.selectChildPlate();
+                        Dom.collapse(panelToolbar, false);
 
-                    var self = this;
+                        var self = this;
 
-                    define([
-                        "spa_eye/panels/viewPanel",
-                        "spa_eye/panels/auditPanel",
-                        "spa_eye/panels/eventPanel"
-                    ], function (ViewPanel, AuditPanel, EventPanel) {
-                        Firebug.registerPanel(Firebug.eventPanel);
-                        self.sidePanels.push(EventPanel);
-                        Firebug.registerPanel(Firebug.auditPanel);
-                        self.sidePanels.push(AuditPanel);
-                        Firebug.registerPanel(Firebug.viewPanel);
-                        self.sidePanels.push(ViewPanel);
-                        Events.dispatch(Firebug.uiListeners, "updateSidePanels", [Firebug.spa_eyePanel]);
-                    });
+                        define([
+                            "spa_eye/panels/viewPanel",
+                            "spa_eye/panels/auditPanel",
+                            "spa_eye/panels/eventPanel"
+                        ], function (ViewPanel, AuditPanel, EventPanel) {
+                            Firebug.registerPanel(Firebug.eventPanel);
+                            self.sidePanels.push(EventPanel);
+                            Firebug.registerPanel(Firebug.auditPanel);
+                            self.sidePanels.push(AuditPanel);
+                            Firebug.registerPanel(Firebug.viewPanel);
+                            self.sidePanels.push(ViewPanel);
+                            Events.dispatch(Firebug.uiListeners, "updateSidePanels", [Firebug.spa_eyePanel]);
+                        });
+                        this.activated = true;
+                    }
+
                 } else {
                     Dom.collapse(panelToolbar, true);
+                    this.activated = false;
                 }
             },
 

@@ -4,6 +4,10 @@
         persist="screenX,screenY,width,height,sizemode"
         >
 
+    <hbox flex="1" style="overflow:scroll;">
+        <div id="sequence">Loading...</div>
+    </hbox>
+
     <script type="application/x-javascript" src="chrome://spa_eye/content/lib/ext/underscore.js"/>
     <script type="application/x-javascript" src="chrome://spa_eye/content/lib/ext/raphael.js"/>
     <script type="application/x-javascript" src="chrome://spa_eye/content/lib/ext/sequence-diagram.js"/>
@@ -65,8 +69,5 @@
 
     </script>
 
-    <hbox flex="1" style="overflow:scroll;">
-        <div id="sequence"/>
-    </hbox>
 
 </window>
