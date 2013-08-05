@@ -66,6 +66,9 @@ define([
                     data[attr[2]] = source[1];
 
                     DOMReps.DirTablePlate.tag.replace({object:data}, this.panelNode);
+
+                    //var transformRow = this.panelNode.getElementsByClassName("memberRow").item(2);
+                    //transformRow && DOMReps.DirTablePlate.toggleRow(transformRow);
                 }
 
                 if (data[attr[2]] === Locale.$STR("spa_eye.script.view.noviewselected")) {
