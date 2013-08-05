@@ -22,7 +22,7 @@
     </target>
 
     <!-- Nightly Build -->
-    <target name="build" depends="clean, git.revision">
+    <target name="nightly" depends="clean, git.revision">
         <antcall target="prepare-build" />
 
         <!-- Copy install.rdf with updated release version info -->
@@ -38,7 +38,7 @@
     </target>
 
     <!-- Feature Build -->
-    <target name="release" depends="clean, git.revision">
+    <target name="build" depends="clean, git.revision">
         <antcall target="prepare-build" />
 
         <!-- Copy install.rdf with updated release version info -->
