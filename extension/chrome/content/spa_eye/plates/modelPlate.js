@@ -10,6 +10,7 @@ define([
     "firebug/lib/css",
     "firebug/lib/string",
     "firebug/lib/dom",
+    "firebug/lib/options",
 
     "spa_eye/lib/lru",
     "spa_eye/plates/basePlate",
@@ -19,7 +20,7 @@ define([
     "spa_eye/dom/domEditor"
 
 ],
-    function (Firebug, Obj, FBTrace, Events, Css, Str, Dom, MostUsed, BasePlate, ChildSection, ModelReps, DOMEditor) {
+    function (Firebug, Obj, FBTrace, Events, Css, Str, Dom, Options, MostUsed, BasePlate, ChildSection, ModelReps, DOMEditor) {
 
         var NetRequestEntry = Firebug.NetMonitor.NetRequestEntry;
 
@@ -98,7 +99,7 @@ define([
                 return sections;
             },
 
-            search:function (pattern) {
+            search:function (pattern, reverse) {
                 if (!pattern) {
                     this._filter(function (row) {
                         Css.removeClass(row, 'hide');
@@ -106,7 +107,9 @@ define([
                     return true;
                 }
 
-                var globalFound = false;
+                var globalFound = false,
+                    caseSensitive = !!Options.get("searchCaseSensitive");
+
                 this._filter(function (row) {
                     Css.setClass(row, 'hide');
                     if (row.domObject.value) {
@@ -131,8 +134,8 @@ define([
                             }
                         }
 
-                        rKey = new RegExp(kPattern),
-                            rValue = new RegExp(vPattern);
+                        rKey = new RegExp(kPattern, caseSensitive ? '' : 'i');
+                        rValue = new RegExp(vPattern, caseSensitive ? '' : 'i');
 
                         if (type === 'cid') {
                             if (rKey.test(cid)) {
