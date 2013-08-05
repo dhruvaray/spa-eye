@@ -27,19 +27,19 @@
         function genSequenceString(val, idx, list) {
             if (returnTo.length) {
                 var top = returnTo.length - 1;
-                if (list[top].target.cid !== list[idx].source.cid) {
+                if (list[top].cid !== list[idx].source.cid) {
                     var pid = returnTo.pop();
-                    sequence = sequence + "\n" + (list[pid].target.cid + "-->" + (list[pid].source ? list[pid].source.cid : "App") + ": ");
+                    sequence = sequence + "\n" + (list[pid].cid + "-->" + (list[pid].source ? list[pid].source.cid : "App") + ": ");
                 }
             }
-            sequence = sequence + "\n" + ((list[idx].source ? list[idx].source.cid : "App") + "->" + list[idx].target.cid + ": " + list[idx].operation);
+            sequence = sequence + "\n" + ((list[idx].source ? list[idx].source.cid : "App") + "->" + list[idx].cid + ": " + list[idx].operation);
             returnTo.push(idx);
             if (idx === list.length - 1) {
 
                 while (returnTo.length) {
                     var pid = returnTo.pop();
-                    if (!list[pid].source || (list[pid].source.cid !== list[pid].target.cid)) {
-                        sequence = sequence + "\n" + (list[pid].target.cid + "-->" + (list[pid].source ? list[pid].source.cid : "App") + ": ");
+                    if (!list[pid].source || (list[pid].source.cid !== list[pid].cid)) {
+                        sequence = sequence + "\n" + (list[pid].cid + "-->" + (list[pid].source ? list[pid].source.cid : "App") + ": ");
                     }
                 }
             }

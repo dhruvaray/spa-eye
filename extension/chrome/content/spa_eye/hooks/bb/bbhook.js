@@ -150,7 +150,7 @@ define([
                 var ModelProto = win.Backbone.Model.prototype;
                 var CollectionProto = win.Backbone.Collection.prototype;
 
-                _.each(Operation, function(key) {
+                _.each(Operation, function (key) {
                     if (ModelProto[key]) {
                         self._modelProxies[key] = ModelProto[key];
                         ModelProto[key] = function () {
@@ -224,14 +224,15 @@ define([
 
                 this.recordSequenceEvent(win, {
                     cid:model.cid,
-                    target:model,
+                    target:model.toJSON(),
                     operation:type,
                     args:fnargs
                 });
 
                 this.recordModelAudit(model, {
+                    cid:model.cid,
                     operation:type,
-                    target:model,
+                    target:model.toJSON(),
                     args:fnargs
                 });
 
@@ -258,14 +259,15 @@ define([
 
                 this.recordSequenceEvent(win, {
                     cid:collection.cid,
-                    target:collection,
+                    target:collection.toJSON(),
                     operation:type,
                     args:fnargs
                 });
 
                 this.recordModelAudit(collection, {
+                    cid:collection.cid,
                     operation:type,
-                    target:collection,
+                    target:collection.toJSON(),
                     args:fnargs
                 });
 
@@ -324,7 +326,7 @@ define([
                 }
             },
 
-            recordModelAudit:function (model, doc) {
+            recordModelAudit:function (model, record) {
                 // return if `record` is off
                 var spa_eyeObj = this.context.spa_eyeObj;
 
@@ -335,9 +337,9 @@ define([
                 var records = spa_eyeObj.auditRecords = spa_eyeObj.auditRecords || {};
 
                 records[model.cid] || (records[model.cid] = []);
-                var record = {};
-                record[t] = doc;
-                records[model.cid].splice(0, 0, record);
+                var rec = {};
+                rec[t] = record;
+                records[model.cid].splice(0, 0, rec);
             },
 
             cleanup:function () {
