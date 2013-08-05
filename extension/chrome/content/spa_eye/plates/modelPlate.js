@@ -10,7 +10,6 @@ define([
     "firebug/lib/css",
     "firebug/lib/string",
     "firebug/lib/dom",
-    "firebug/lib/options",
 
     "spa_eye/lib/lru",
     "spa_eye/plates/basePlate",
@@ -20,7 +19,7 @@ define([
     "spa_eye/dom/domEditor"
 
 ],
-    function (Firebug, Obj, FBTrace, Events, Css, Str, Dom, Options, MostUsed, BasePlate, ChildSection, ModelReps, DOMEditor) {
+    function (Firebug, Obj, FBTrace, Events, Css, Str, Dom, MostUsed, BasePlate, ChildSection, ModelReps, DOMEditor) {
 
         var NetRequestEntry = Firebug.NetMonitor.NetRequestEntry;
 
@@ -97,77 +96,6 @@ define([
                 sections.push(pinned, mostUsed, allModels);
 
                 return sections;
-            },
-
-            search:function (pattern, reverse) {
-                if (!pattern) {
-                    this._filter(function (row) {
-                        Css.removeClass(row, 'hide');
-                    }, this);
-                    return true;
-                }
-
-                var globalFound = false,
-                    caseSensitive = !!Options.get("searchCaseSensitive");
-
-                this._filter(function (row) {
-                    Css.setClass(row, 'hide');
-                    if (row.domObject.value) {
-                        var model = row.domObject.value,
-                            cid = row.domObject.name,
-                            type = 'attr',
-                            found = false,
-                            rKey = null,
-                            rValue = null,
-
-                            kPattern = pattern,
-                            vPattern = pattern;
-
-                        if (/^#/.test(pattern)) {
-                            kPattern = pattern.substr(1);
-                            type = 'cid';
-                        } else if (/:/.test(pattern)) {
-                            var match = /^([^:]*):(.*)$/.exec(pattern);
-                            if (pattern.trim() !== ':' && match) {
-                                kPattern = match[1].trim();
-                                vPattern = match[2].trim();
-                            }
-                        }
-
-                        rKey = new RegExp(kPattern, caseSensitive ? '' : 'i');
-                        rValue = new RegExp(vPattern, caseSensitive ? '' : 'i');
-
-                        if (type === 'cid') {
-                            if (rKey.test(cid)) {
-                                found = true;
-                            }
-                        } else {
-                            var attrs = model.attributes;
-                            for (var a in attrs) {
-                                if ((kPattern === vPattern && (rKey.test(a) || rKey.test(attrs[a])))
-                                    || (rKey.test(a) && rValue.test(attrs[a]))) {
-                                    found = true;
-                                    break;
-                                }
-                            }
-                        }
-                        found && Css.removeClass(row, 'hide');
-                        globalFound = globalFound || found;
-                    }
-                }, this);
-
-                return globalFound;
-            },
-
-            _filter:function (iterator, context) {
-                var rows = this.parent.panelNode.getElementsByClassName("0level");
-                for (var i = 0; i < rows.length; i++) {
-                    var row = rows[i];
-                    if (Css.hasClass(row, "opened")) {
-                        ModelReps.DirTablePlate.toggleRow(row);
-                    }
-                    iterator.call(context, row);
-                }
             },
 
             onSelectRow:function (row) {
