@@ -82,16 +82,15 @@ define([
                 var panelToolbar = Firebug.chrome.$("fbPanelToolbar");
 
                 if (active) {
+                    var buttons = this.getSPA_EyeToolbar();
+                    for (var i = 0; i < buttons.length; ++i)
+                        Toolbar.createToolbarButton(panelToolbar, buttons[i]);
+
+                    this.selectChildPlate();
+                    Dom.collapse(panelToolbar, false);
+
                     if (!this.activated) {
-                        var buttons = this.getSPA_EyeToolbar();
-                        for (var i = 0; i < buttons.length; ++i)
-                            Toolbar.createToolbarButton(panelToolbar, buttons[i]);
-
-                        this.selectChildPlate();
-                        Dom.collapse(panelToolbar, false);
-
                         var self = this;
-
                         define([
                             "spa_eye/panels/viewPanel",
                             "spa_eye/panels/auditPanel",
