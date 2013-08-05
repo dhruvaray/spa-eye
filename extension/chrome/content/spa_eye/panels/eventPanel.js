@@ -119,6 +119,7 @@ define([
                             title:'t=' + i,
                             parent:this.panelNode,
                             autoAdd:false,
+                            collapse:true,
                             data:this.sequenceData[i]
                         }));
                     }
