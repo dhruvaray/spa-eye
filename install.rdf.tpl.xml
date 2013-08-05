@@ -4,7 +4,7 @@
      xmlns:em="http://www.mozilla.org/2004/em-rdf#">
 
     <Description about="urn:mozilla:install-manifest">
-        <em:id>spa_eye@dhruvaray.github.io</em:id>
+        <em:id>spa-eye@dhruvaray.github.io</em:id>
         <em:version>@VERSION@</em:version>
         <em:type>2</em:type>
         <em:bootstrap>true</em:bootstrap>
@@ -20,8 +20,8 @@
 
         <em:name>SPA-eye</em:name>
         <em:description>Firebug Extension to spy on SPA applications</em:description>
-        <em:homepageURL>http://dhruvaray.github.io/spa_eye</em:homepageURL>
-        <!--<em:updateURL>http://dhruvaray.github.io/spa_eye/releases/@VERSION@/update.rdf</em:updateURL> -->
+        <em:homepageURL>http://dhruvaray.github.io/spa-eye</em:homepageURL>
+        <!--<em:updateURL>http://dhruvaray.github.io/spa-eye/releases/@VERSION@/update.rdf</em:updateURL> -->
 
         <em:creator>Dhruva Ray</em:creator>
         <em:creator>Jaynti Kanani</em:creator>        
