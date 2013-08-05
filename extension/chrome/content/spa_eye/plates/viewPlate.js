@@ -28,15 +28,8 @@ function (Firebug, FBTrace, Css, Str, Dom, BasePlate, ChildSection, ModelReps) {
                 if (!Css.hasClass(row, "opened")){
                     ModelReps.DirTablePlate.toggleRow(row);
                 }
-                Css.setClass(row, "row-success");
-                setTimeout(function () {
-                        Css.setClass(row, 'fade-in');
-                        Css.removeClass(row, "row-success");
-                        setTimeout(function () {
-                            Css.removeClass(row, 'fade-in');
-                        }, 6000);
-                }),
-                 node.scrollTop = row.offsetTop;
+                ModelReps.highlightRow(row, "row-warning");
+                node.scrollTop = row.offsetTop;
             }
             for (var i = 0; i<rows.length; i++){
                 if (Css.hasClass(rows[i], "opened") && index !== i){

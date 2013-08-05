@@ -179,8 +179,8 @@ define([
             },
 
             onModelSave:function (model, file) {
-                if (this.isCurrentPlate() && this.isModel(model) && file) {
-                    var isError = NetRequestEntry.isError(file);
+                if (this.isCurrentPlate() && this.isModel(model)) {
+                    var isError = file && NetRequestEntry.isError(file);
                     var type = isError ? 'row-error' : 'row-success';
                     this.context.spa_eyeObj._mostused_models.add(model.cid, model, 'save');
                     this.sections.forEach(function (p) {
