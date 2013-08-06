@@ -1,8 +1,8 @@
+// ********************************************************************************************* //
 
 var path = require("path");
 var fs = require("fs");
 var os = require("os");
-var spawn = require("child_process").spawn;
 var exec = require("child_process").exec;
 
 // ********************************************************************************************* //
@@ -58,6 +58,7 @@ function main () {
  */
 
 function build (destination) {    
+    console.log("Version: " + version);
     clean();
     prepareBuild();
 
@@ -73,6 +74,10 @@ function build (destination) {
     // Create XPI (zipping is asynchronous)
     var leaf = "spa_eye-" + version + ".xpi";
     var xpiPath = path.join(destination, leaf);
+
+    console.log("XPI Filename: " + leaf);
+    console.log("XPI Filepath: " + xpiPath);
+
     createFirebugXPI(xpiPath,
         function () {
             copy(
@@ -84,6 +89,7 @@ function build (destination) {
                     return result;
                 }
             );
+            clean();
             console.log("spa-eye version: " + version + " in "+ destination);
         }
     );
@@ -92,20 +98,19 @@ function build (destination) {
 // ********************************************************************************************* //
 // Create final xpi package
 
+
+function showError(err, stdout, stderr) {
+    err && console.log(err);
+}
+
 function createFirebugXPI (filename, callback) {
     // Create final XPI package.    
     var zip = null;
     rm(filename);
     if (os.platform() === "win32") {
-        var params = "a -tzip " + filename + " " + buildDir + "/*";
-        zip = spawn("7z.exe", params.split(" "), { cwd: "." });
+        zip = exec("7z.exe a -tzip " + filename + " " + buildDir + "/* ", showError);
     } else {
-        //zip = spawn("zip", ["-r", filename, buildDir + "/*"], {cwd: "."});
-        zip = exec("zip -r ../" + filename + " * ", { cwd: buildDir }, function (err, stdout, stderr) {
-            if (err) {
-                console.log(err);
-            }
-        });
+        zip = exec("zip -r ../" + filename + " * ", { cwd: buildDir }, showError);
     }
 
     if (zip) {
@@ -120,7 +125,7 @@ function createFirebugXPI (filename, callback) {
 // ********************************************************************************************* //
 
 function clean () {
-    rmdir(buildDir);
+    rmDir(buildDir);
 }
 
 function prepareBuild () {
@@ -148,7 +153,11 @@ function getGitRevision (callback) {
 function rm (path) {
     try {
         fs.unlinkSync(path);
-    } catch (e) {}
+    } catch (e) {
+        if (e.code != "ENOENT") {
+            throw e;
+        }
+    }
 }
 
 function mkdir (dir) {
@@ -161,10 +170,27 @@ function mkdir (dir) {
     }
 }
 
-function rmdir (dir) {
+function rmDir (dir) {
+    var files = [];
     try {
-        fs.rmdirSync(dir);
-    } catch (e) {}
+        files = fs.readdirSync(dir);
+    } catch (e) {
+        if (e.code != "ENOENT") {
+            throw e;
+        }
+        return;
+    }
+    if (files.length > 0) {
+        for (var i = 0; i < files.length; i++) {
+            var filePath = path.join(dir, files[i]);
+            if (fs.statSync(filePath).isFile()) {
+                fs.unlinkSync(filePath);
+            } else {
+                rmDir(filePath);
+            }
+        }
+    }
+    fs.rmdirSync(dir);
 }
 
 function copyDir (src, dest) {
