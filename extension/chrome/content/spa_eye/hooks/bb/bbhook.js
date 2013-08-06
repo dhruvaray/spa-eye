@@ -140,8 +140,9 @@ define([
 
             registerSetHooks:function (win) {
                 var self = this;
-                var ModelProto = win.Backbone.Model.prototype;
-                var CollectionProto = win.Backbone.Collection.prototype;
+                var spa_eyeObj = this.context.spa_eyeObj;
+                var ModelProto = spa_eyeObj.Backbone.Model.prototype;
+                var CollectionProto = spa_eyeObj.Backbone.Collection.prototype;
 
                 _.each(Operation, function (key) {
                     if (ModelProto[key]) {
@@ -179,7 +180,9 @@ define([
             },
 
             registerBBHooks:function (win) {
+                var spa_eyeObj = this.context.spa_eyeObj;
                 if (this.isBackboneInitialized(win)) {
+                    spa_eyeObj.Backbone = win.Backbone;
                     if (!this.hooked && !this.registering) {
                         try {
                             this.win = win;
@@ -305,14 +308,14 @@ define([
                             var flows =
                                 (win.spa_eye.sequence[sr.cid].flows =
                                     win.spa_eye.sequence[sr.cid].flows || []);
-                            var isNewInteraction = sr instanceof win.Backbone.Model ?
+                            var isNewInteraction = sr instanceof this.context.spa_eyeObj.Backbone.Model ?
                                 isNewInteractionModel :
                                 isNewInteractionCollection;
 
                             isNewInteraction ? flows.push([record]) : flows[flows.length - 1].push(record);
                         }
 
-                    }, self);
+                    }, this);
                 } catch (e) {
                     if (FBTrace.DBG_ERRORS)
                         FBTrace.sysout("spa_eye; Unexpected error", e);
