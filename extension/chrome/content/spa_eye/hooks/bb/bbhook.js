@@ -89,13 +89,6 @@ define([
                                 // Record using script_id
                                 win.spa_eye.templates[script_id] = text;
 
-                            } else {
-                                if (FBTrace.DBG_ERRORS)
-                                    FBTrace.sysout("spa_eye; No compiled template found for scriptid = " +
-                                        script_id +
-                                        " and template text = " +
-                                        text
-                                    );
                             }
                         }
 
