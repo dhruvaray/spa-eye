@@ -2,6 +2,11 @@ if (window.Backbone) {
     window.spa_eye = {};
     window.spa_eye.sequence = {};
     window.spa_eye.path = [];
+    window.spa_eye.idCounter = 0;
+    window.spa_eye.uniqueId = function (prefix) {
+        var id = ++this.idCounter + '';
+        return prefix ? prefix + id : id;
+    };
     var _ModelProxy = window.Backbone.Model;
     if (_ModelProxy) {
         var _ModelProxyProto = window.Backbone.Model.prototype;
@@ -24,7 +29,9 @@ if (window.Backbone) {
         var _colProxyProto = window.Backbone.Collection.prototype;
         window.Backbone.Collection = function (attributes, options) {
             try {
-                this.cid = this.cid || window._.uniqueId('c')
+                this.cid = this.cid || (typeof(window._) === "undefined")
+                    ? window.spa_eye.uniqueId('sc')
+                    : window._.uniqueId('c');
                 window.spa_eye.collections = window.spa_eye.collections || [];
                 window.spa_eye.collections.push(this);
             } catch (e) {
