@@ -30,8 +30,8 @@ if (window.Backbone) {
         window.Backbone.Collection = function (attributes, options) {
             try {
                 this.cid = this.cid || (typeof(window._) === "undefined")
-                    ? window.spa_eye.uniqueId('sc')
-                    : window._.uniqueId('c');
+                    ? window.spa_eye.uniqueId('col')
+                    : window._.uniqueId('col');
                 window.spa_eye.collections = window.spa_eye.collections || [];
                 window.spa_eye.collections.push(this);
             } catch (e) {
