@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Backbone-Eye - A debugger for Backbone applications</title>
+
+
+    <link href="./site/css/bootstrap.css" rel="stylesheet">
+    <link href="./site/css/jumbotron-narrow.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="jumbotron-narrow.css" rel="stylesheet">
+</head>
+
+<body>
+
+<div class="container-narrow">
+
+    <div class="jumbotron">
+        <h1>Backbone Eye</h1>
+        <p class="lead">Introspect your Backbone Applications</p>
+    </div>
+
+    <div class="row marketing">
+        <div class="col-lg-6">
+            <h4>Models & Collections List</h4>
+            <p>Shows a list of models which were created while Backbone-Eye was running. Each model shows application level attributes only. Quickly narrow down a model by searching for attribute values. Pin down models whose behavior needs further investigation. Or allow Backbone-Eye to present those models which have been accessed the most during introspection.</p>
+
+            <h4>View interaction trails and Journals</h4>
+            <p>Select a model or collection to see it's interaction trail and journal. The interaction trail shows the model (or collections) interaction with other Backbone entities. The journal logs activities which have happened on the selected model. Change an attribute value from the application (or Backbone-Eye) to see it's impact on other views and entities</p>
+
+        </div>
+
+        <div class="col-lg-6">
+            <h4>View List</h4>
+            <p>A list of views which were created while Backbone-Eye was running. Identify views by hovering over your application screens. The underlying Backbone Views will automatically be highlighted. Similarly, click on Backbone Views to see what application screen they correspond to. Backbone-Eye also attempts to associate templates with views. </p>
+
+            <h4>Debug Templates</h4>
+            <p>Backbone-Eye allows for debugging of view templates. The id of the template is used to set a breakpoint in the view. Data passed to the template as well as incremental generation of the HTML string can be observed while stepping through the generated template code.</p>
+        </div>
+    </div>
+
+</div> <!-- /container -->
+
+
+
+</body>
+</html>
