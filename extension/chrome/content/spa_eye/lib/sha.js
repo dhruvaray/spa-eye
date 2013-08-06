@@ -35,17 +35,8 @@ function(Xpcom, FBTrace) {
                 }
 
                 nsHashService.update(byteArray, byteArray.length);
-                var hash = nsHashService.finish(true);
-
-                if (FBTrace.DBG_SPA_EYE && text.length > 1){
-                    FBTrace.sysout("spa_eye; created hash for "+text.substr(30)+" is "+hash);
-                }
-            } catch (e) {
-                if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("SHA generation FAILS for " + text, e);
-            }
-
-            return hash;
+                return nsHashService.finish(true);
+            } catch (e) {}
         }
 // ********************************************************************************************* //
 // Registration
