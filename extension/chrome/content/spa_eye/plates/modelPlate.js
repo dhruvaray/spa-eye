@@ -22,8 +22,6 @@ define([
 ],
     function (Firebug, Obj, FBTrace, Locale, Events, Css, Str, Dom, MostUsed, BasePlate, ChildSection, ModelReps, DOMEditor) {
 
-        var NetRequestEntry = Firebug.NetMonitor.NetRequestEntry;
-
         var PANEL = BasePlate.extend({
             name:'model',
 
@@ -35,10 +33,12 @@ define([
                     new MostUsed({
                         limit:10,
                         onPurge:function (node) {
-                            self.onRemoveModel(node.value, self.sections[1]);
+                            var mSection = self.sections[1];
+                            mSection && mSection._onRowRemove(node.value);
                         },
                         onAdd:function (node) {
-                            self.onAddModel(node.value, self.sections[1], {
+                            var mSection = self.sections[1];
+                            mSection && mSection._onRowAdd(node.value, {
                                 autoAdd:true
                             });
                         }
@@ -59,7 +59,7 @@ define([
                     body:'pinnedModelsDivBody',
                     autoAdd:false,
                     data:spa_eyeObj._pinned_models,
-                    onRemoveModel:function (model) {
+                    onRowRemove:function (model) {
                         if (!model || !model.cid) return;
                         delete spa_eyeObj._pinned_models[model.cid];
                     }
@@ -74,7 +74,7 @@ define([
                     body:'mostUsedModelsDivBody',
                     autoAdd:false,
                     data:FBL.bindFixed(spa_eyeObj._mostused_models.values, spa_eyeObj._mostused_models),
-                    onRemoveModel:function (model) {
+                    onRowRemove:function (model) {
                         if (!model || !model.cid) return;
                         spa_eyeObj._mostused_models.remove(model.cid);
                     }
@@ -88,7 +88,7 @@ define([
                     container:'allModelsDiv',
                     body:'allModelsDivBody',
                     data:FBL.bindFixed(spa_eyeObj.getModels, spa_eyeObj),
-                    onRemoveModel:function (model) {
+                    onRowRemove:function (model) {
                         if (!model || !model.cid) return;
                         return spa_eyeObj.removeModel(model);
                     }
@@ -153,9 +153,9 @@ define([
             },
 
             _unPinModel:function (model) {
-                this.onRemoveModel(model, this.sections[0]);
+                var pinSection = this.sections[0];
+                pinSection._onRowRemove(model);
             },
-
 
 // ********************************************************************************************* //
 // Editable
@@ -169,31 +169,24 @@ define([
 // onModelSet and onModelSave
 // ********************************************************************************************* //
 
-            onModelSet:function (model, type) {
-                if (this.isCurrentPlate() && this.isModel(model)) {
-                    this.context.spa_eyeObj._mostused_models.add(model.cid, model, 'set');
-
-                    this.sections.forEach(function (p) {
-                        this.onAddModel(model, p, type);
-                    }, this);
-                }
-            },
-
-            onModelSave:function (model, file) {
-                if (this.isCurrentPlate() && this.isModel(model)) {
-                    var isError = file && NetRequestEntry.isError(file);
-                    var type = isError ? 'row-error' : 'row-success';
-                    this.context.spa_eyeObj._mostused_models.add(model.cid, model, 'save');
-                    this.sections.forEach(function (p) {
-                        this.onAddModel(model, p, type);
-                    }, this);
-                }
-            },
-
-            isModel:function (model) {
+            isValidValue:function(model) {
                 if (!model || !model.cid) return false;
                 var models = this.context.spa_eyeObj.getModels() || [];
                 return models.indexOf(model) !== -1;
+            },
+
+            onModelSet:function (model) {
+                if (this.isCurrentPlate() && this.isValidValue(model)) {
+                    this.context.spa_eyeObj._mostused_models.add(model.cid, model, 'set');
+                    this._super.apply(this, arguments);
+                }
+            },
+
+            onModelSave:function (model) {
+                if (this.isCurrentPlate() && this.isValidValue(model)) {
+                    this.context.spa_eyeObj._mostused_models.add(model.cid, model, 'save');
+                    this._super.apply(this, arguments);
+                }
             }
         });
 

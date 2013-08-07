@@ -18,7 +18,6 @@ define([
 ],
     function (Firebug, FBTrace, Locale, Events, Css, Str, Dom, BasePlate, ChildSection, ModelReps) {
 
-        var NetRequestEntry = Firebug.NetMonitor.NetRequestEntry;
         var PANEL = BasePlate.extend({
             name:'collection',
 
@@ -39,28 +38,6 @@ define([
                 return sections;
             },
 
-// ********************************************************************************************* //
-// onModelSet and onModelSave
-// ********************************************************************************************* //
-
-            onModelSet:function (col, type) {
-                if (this.isCurrentPlate() && this.isCollection(col)) {
-                    this.sections.forEach(function (p) {
-                        this.onAddModel(col, p, type);
-                    }, this);
-                }
-            },
-
-            onModelSave:function (col, file) {
-                if (this.isCurrentPlate() && this.isCollection(col)) {
-                    var isError = NetRequestEntry.isError(file);
-                    var type = isError ? 'row-error' : 'row-success';
-                    this.sections.forEach(function (p) {
-                        this.onAddModel(col, p, type);
-                    }, this);
-                }
-            },
-
             onSelectRow:function (row) {
                 var spa_eyeObj = this.context.spa_eyeObj;
                 if (!row || !row.domObject.value) return;
@@ -70,7 +47,7 @@ define([
                 Events.dispatch(spa_eyeObj._spaHook.listener.fbListeners, 'onModelOfInterestChange', [m]);
             },
 
-            isCollection:function (col) {
+            isValidValue:function(col) {
                 if (!col || !col.cid) return false;
                 var collections = this.context.spa_eyeObj.getCollections() || [];
                 return collections.indexOf(col) !== -1;

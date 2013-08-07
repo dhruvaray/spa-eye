@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/firebug",
     "firebug/lib/lib",
     "firebug/lib/trace",
     "firebug/lib/locale",
@@ -11,7 +12,9 @@ define([
 
     "spa_eye/spa_eyeObj"
 ],
-    function (FBL, FBTrace, Locale, Events, URI, BBHook, spa_eyeObj) {
+    function (Firebug, FBL, FBTrace, Locale, Events, URI, BBHook, spa_eyeObj) {
+
+        var NetRequestEntry = Firebug.NetMonitor.NetRequestEntry;
 
         Firebug.spa_eyeModule = FBL.extend(Firebug.ActivableModule, {
             initialize:function (prefDomain, prefNames) {
@@ -70,7 +73,8 @@ define([
                             FBTrace.sysout("spa_eye; on response, current model", win.spa_eye.cm);
                         }
                         hook.recordModelAudit(win.spa_eye.cm, win.spa_eye.cm);
-                        Events.dispatch(hook.listener.fbListeners, 'onModelSave', [win.spa_eye.cm, file]);
+                        Events.dispatch(hook.listener.fbListeners, 'onModelSave',
+                                [win.spa_eye.cm, NetRequestEntry.isError(file) ? 'row-error' : 'row-success']);
                     }
                 }
             },
