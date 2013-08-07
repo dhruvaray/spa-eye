@@ -46,7 +46,6 @@ define([
 
             currentPlate:childPlate.MODEL,
             plates:null,
-            sidePanels:[],
 
             initialize:function () {
                 this._super.apply(this, arguments);
@@ -61,13 +60,6 @@ define([
                 this.plates.model = new ModelPlate(args);
                 this.plates.collection = new CollectionPlate(args);
                 this.plates.view = new ViewPlate(args);
-            },
-
-            destroy:function () {
-                _.each(this.sidePanels, function (panel) {
-                    Firebug.unregisterPanel(panel);
-                });
-                this._super.apply(this, arguments);
             },
 
             onBackboneLoaded:function () {
@@ -92,19 +84,21 @@ define([
 
                     if (!this.activated) {
                         var self = this;
-                        define([
-                            "spa_eye/panels/viewPanel",
-                            "spa_eye/panels/auditPanel",
-                            "spa_eye/panels/eventPanel"
-                        ], function (ViewPanel, AuditPanel, EventPanel) {
-                            Firebug.registerPanel(Firebug.auditPanel);
-                            self.sidePanels.push(AuditPanel);
-                            Firebug.registerPanel(Firebug.eventPanel);
-                            self.sidePanels.push(EventPanel);
-                            Firebug.registerPanel(Firebug.viewPanel);
-                            self.sidePanels.push(ViewPanel);
-                            Events.dispatch(Firebug.uiListeners, "updateSidePanels", [self]);
-                        });
+
+                        var sidePanelsLoaded = Firebug.auditPanel || Firebug.viewPanel || Firebug.eventPanel;
+
+                        if (!sidePanelsLoaded) {
+                            define([
+                                "spa_eye/panels/viewPanel",
+                                "spa_eye/panels/auditPanel",
+                                "spa_eye/panels/eventPanel"
+                            ], function (ViewPanel, AuditPanel, EventPanel) {
+                                Firebug.registerPanel(Firebug.auditPanel);
+                                Firebug.registerPanel(Firebug.eventPanel);
+                                Firebug.registerPanel(Firebug.viewPanel);
+                                Events.dispatch(Firebug.uiListeners, "updateSidePanels", [self]);
+                            });
+                        }
                         this.activated = true;
                     }
 
