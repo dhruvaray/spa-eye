@@ -6,73 +6,80 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Backbone-Eye - A debugger for Backbone applications</title>
+    <title>Backbone Eye - A debugger for Backbone applications</title>
 
 
     <link href="./site/css/bootstrap.css" rel="stylesheet">
     <link href="./site/css/jumbotron-narrow.css" rel="stylesheet">
 
-    <!-- Custom styles for this template -->
-    <link href="jumbotron-narrow.css" rel="stylesheet">
+
 </head>
 
-<body data-spy="scroll" data-target="#navbar-header">
+<body data-spy="scroll" data-target="#bbeye-header">
 
-<div class="navbar navbar-fixed-top" id="navbar-header">
-    <a class="navbar-brand " href="#">Backbone Eye</a>
+<div class="container">
+
+<div class="navbar navbar-fixed-top navbar-inverse" id="bbeye-header">
+    <a class="navbar-brand " href="#home">Backbone Eye</a>
     <ul class="nav navbar-nav">
         <li class="active"><a href="#home">Home</a></li>
         <li><a href="#gs">Get Started</a></li>
         <li><a href="#models">Models</a></li>
         <li><a href="#collections">Collections</a></li>
-        <li><a href="#views">Views</a></li>
         <li><a href="#stream">Interaction Trails</a></li>
         <li><a href="#journals">Journals</a></li>
+        <li><a href="#views">Views</a></li>
     </ul>
+    <a href="https://github.com/dhruvaray/spa-eye"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_green_007200.png" alt="Fork me on GitHub"></a>
 </div>
 
-<div class="container-narrow" id="home">
 
-    <div class="jumbotron">
-        <h1>Backbone Eye</h1>
-        <p class="lead">Introspect Backbone Applications</p>
-        <p><a class="btn btn-primary btn-lg">Download</a></p>
-    </div>
-
-    <div class="row marketing">
-        <div class="col-lg-6">
-            <h4>Models & Collections List</h4>
-            <p>Shows a list of models which were created while Backbone-Eye was running. Each model shows application level attributes only. Quickly narrow down a model by searching for attribute values. Pin down models whose behavior needs further investigation. Or allow Backbone-Eye to present those models which have been accessed the most during introspection.</p>
-
-            <h4>View interaction trails and Journals</h4>
-            <p>Select a model or collection to see it's interaction trail and journal. The interaction trail shows the model (or collections) interaction with other Backbone entities. The journal logs activities which have happened on the selected model. Change an attribute value from the application (or Backbone-Eye) to see it's impact on other views and entities</p>
-
+<div id="home">
+    <br/><br/><br/>
+    <div class="container-narrow" >
+        <div class="jumbotron">
+            <h1>Backbone Eye</h1>
+            <p class="lead">Introspect Backbone Applications</p>
+            <p><a class="btn btn-primary btn-lg">Download</a></p>
         </div>
 
-        <div class="col-lg-6">
-            <h4>View List</h4>
-            <p>A list of views which were created while Backbone-Eye was running. Identify views by hovering over your application screens. The underlying Backbone Views will automatically be highlighted. Similarly, click on Backbone Views to see what application screen they correspond to. Backbone-Eye also attempts to associate templates with views. </p>
+        <div class="row marketing">
+            <div class="col-lg-6">
+                <h4>Models & Collections List</h4>
+                <p>Shows a list of models which were created while Backbone-Eye was running. Each model shows application level attributes only. Quickly narrow down a model by searching for attribute values. Pin down models whose behavior needs further investigation. Or allow Backbone-Eye to present those models which have been accessed the most during introspection.</p>
 
-            <h4>Debug Templates</h4>
-            <p>Backbone-Eye allows for debugging of view templates. The id of the template is used to set a breakpoint in the view. Data passed to the template as well as incremental generation of the HTML string can be observed while stepping through the generated template code.</p>
+                <h4>View interaction trails and Journals</h4>
+                <p>Select a model or collection to see it's interaction trail and journal. The interaction trail shows the model (or collections) interaction with other Backbone entities. The journal logs activities which have happened on the selected model. Change an attribute value from the application (or Backbone-Eye) to see it's impact on other views and entities</p>
+
+            </div>
+
+            <div class="col-lg-6">
+                <h4>View List</h4>
+                <p>A list of views which were created while Backbone-Eye was running. Identify views by hovering over your application screens. The underlying Backbone Views will automatically be highlighted. Similarly, click on Backbone Views to see what application screen they correspond to. Backbone-Eye also attempts to associate templates with views. </p>
+
+                <h4>Debug Templates</h4>
+                <p>Backbone-Eye allows for debugging of view templates. The id of the template is used to set a breakpoint in the view. Data passed to the template as well as incremental generation of the HTML string can be observed while stepping through the generated template code.</p>
+            </div>
         </div>
+
     </div>
+</div>
 
-</div> <!-- /container -->
-
-<div class="panel panel-primary" id="gs">
+<div id="gs">
+    <br/><br/><br/>
+    <div class="panel panel-primary" >
     <div class="panel-heading">Get Started</div>
-
     <div class="well-lg">
     Backbone Eye extends the popular <a href="https://addons.mozilla.org/en-US/firefox/addon/firebug/">Firebug</a> plugin for Firefox. Once installed successfully, a new tab called Backbone Eye will appear in Firebug.
         <img src="./site/img/virgin.png" alt="Getting started"></img><br/>Navigate to an URL to begin introspecting. To explain the various features of Backbone Eye, we will use the <a href="http://todomvc.com/architecture-examples/backbone/">Backbone TODO application</a> as our reference application.
     </div>
-
+    </div>
 </div>
 
-<div class="panel panel-primary" id="models">
+<div id="models">
+    <br/><br/><br/>
+    <div class="panel panel-primary">
     <div class="panel-heading">Models Section</div>
-
     <div class="well well-lg">
         This section lists out all the models which were discovered by Backbone Eye and is the starting point for discovering model behavior.<br/>
 
@@ -117,24 +124,26 @@
         Click on the model to view it's <a href="#journals">journal</a> or <a href="#stream">interaction stream</a>.
 
     </div>
-
+    </div>
 </div>
 
-<div id="collections" class="panel panel-primary">
+<div id="collections" >
+    <br/><br/><br/>
+    <div class="panel panel-primary">
     <div class="panel-heading">Collections Listing</div>
     Similar to the Models perspective, it shows all collections discovered by Backbone Eye so far.
     <br/>
     <img src="./site/img/coll_interaction.png" alt="Collection interaction trail"/><br/>
-
+    </div>
 </div>
-<div id="stream" class="panel panel-primary">
+
+<div id="stream" >
+    <br/><br/><br/>
+    <div class="panel panel-primary">
     <div class="panel-heading">Interaction Stream</div>
     This section shows a sequence of interactions which have occurred on the selected model or collection as a result of standard Backbone operations like save, fetch, set, destroy, reset and sort among others. There are two aspects to this section of the tool. One is the graphical plot - which shows the actors involved and the operations which flow between the actors. By default, the last interaction is shown.<br/>
-
     <img src="./site/img/interaction2.png" alt="Model interaction trail"/><br/>
-
     The other view is the tabular view - which is more detailed. It has a time listing of various interactions from t=n all the way down to t=0. Clicking on a discrete time slot will show the interaction view corresponding to that time slot. The state of the model, the various argument values passed in - all at that time instance - are preserved for inspection. This will give a perspective of how the model and other participants have interacted over time in response to various messages which were passed to them.
-
     <div id="clear">
         In complex applications, this data can grow. To reduce this, click on the clear button.<br/>
         <img src="./site/img/clear_it.png" alt="Clear interaction trail data"/><br/>
@@ -144,15 +153,21 @@
         To start recording, click on the record button again.<br/>
         <img src="./site/img/recordingyes.png" alt="Stop recording"/><br/>
     </div>
+    </div>
 
 </div>
-<div id="journals" class="panel panel-primary">
+<div id="journals" >
+    <br/><br/><br/>
+    <div class="panel panel-primary">
     <div class="panel-heading">Journal</div>
     Unlike the <a href="#stream">Interaction stream</a>, the journal perspective shows all the activities which have happened on that model or collection at various time slots. It therefore provides a quick way to see how the model state has evolved over a period of time and what actions were performed on that model or collection.<br/>
     <img src="./site/img/journal.png" alt="Journal data"/><br/>
-
+    </div>
 </div>
-<div id="views" class="panel panel-primary">
+
+<div id="views">
+    <br/><br/><br/>
+    <div class="panel panel-primary">
     <div class="panel-heading">Views</div>
     A simple listing of view objects discovered by Backbone Eye. Backbone Eye infers templates which may have been used to render the views. In case a template id was not specified in the application, a SHA is computed from the content of the template. This becomes the surrogate key of the template. Just like models and collections, views can be searched by it's attributes.
     <br/><img src="./site/img/view_listing.png" alt="View listing"/><br/>
@@ -160,7 +175,30 @@
     <br/><img src="./site/img/view_click.png" alt="Click on a view to see it in the application screen"/><br/>
     Alternatively, using the inspector, a screen in the application can be selected and the corresponding view will be highlighted. Will be useful to work down from the application screens to the corresponding Backbone View.
     <br/><img src="./site/img/view_iclick.png" alt="Click on inspector to see the application screen in the view section"/><br/>View templates can now be debugged! The list of templates discovered by Backbone Eye are now present in the source box of the script section of Firebug.<br/><img src="./site/img/view_templatelisting.png" alt="View Templates shown in the source box of Firebug script panel"/><br/>The Javascript code to transform the the template is shown in the source box. The source is commented with the template tags so it is easy to see what code transforms that template snippet. The script panel has a new side-panel : Views. When a SPA template is being debugged, this panel becomes active and shows the data being passed to the template, the source template and the incremental template string being populated with data as the debugger steps through the template building process.<br/><img src="./site/img/view_debug.png" alt="Debug a view template"/><br/>
+   </div>
 </div>
 
+<div class="navbar navbar-fixed-bottom">
+
+    <small>
+        Code licensed under <a href="https://github.com/dhruvaray/backbone-associations/blob/master/LICENSE.txt">MIT</a><br/>
+        <ul class="list-inline">
+            <li>
+                <a href="https://github.com/dhruvaray/backbone-associations/blob/master/CHANGELOG.md">Change log</a>
+            </li>
+            <li class="muted"> |</li>
+            <li>
+                <a href="https://github.com/dhruvaray/backbone-associations/issues?sort=created&state=open">Issues</a>
+            </li>
+            <li class="muted"> |</li>
+            <li>
+                <a href="https://github.com/dhruvaray/backbone-associations/contributors">Contributors</a>
+            </li>
+        </ul>
+    </small>
+</div>
+</div>
+<script src="http:////ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="./site/js/bootstrap.js" type="text/javascript"></script>
 </body>
 </html>
