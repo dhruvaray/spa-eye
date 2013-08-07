@@ -13,6 +13,7 @@ define([
         var viewPanel = Firebug.viewPanel = BasePanel.extend({
             name:"spa_eye:script.view",
             title:Locale.$STR("spa_eye.script.view.title"),
+            tooltip:Locale.$STR("spa_eye.script.view.tooltip"),
 
             parentPanel:"script",
             order:4,

@@ -21,6 +21,7 @@ define([
         var auditPanel = Firebug.auditPanel = BasePanel.extend({
             name:"spa_eye:audit",
             title:Locale.$STR("spa_eye.audit.title"),
+            tooltip:Locale.$STR("spa_eye.audit.tooltip"),
 
             parentPanel:"spa_eye",
             tag:DOMReps.DirTablePlate.tag,
