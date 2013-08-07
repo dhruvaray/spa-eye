@@ -89,23 +89,27 @@ define([
                     this.selectChildPlate();
                     Dom.collapse(panelToolbar, false);
 
-                    var self = this;
+                    if (!this.activated) {
+                        var self = this;
+                        define([
+                            "spa_eye/panels/viewPanel",
+                            "spa_eye/panels/auditPanel",
+                            "spa_eye/panels/eventPanel"
+                        ], function (ViewPanel, AuditPanel, EventPanel) {
+                            Firebug.registerPanel(Firebug.auditPanel);
+                            self.sidePanels.push(AuditPanel);
+                            Firebug.registerPanel(Firebug.eventPanel);
+                            self.sidePanels.push(EventPanel);
+                            Firebug.registerPanel(Firebug.viewPanel);
+                            self.sidePanels.push(ViewPanel);
+                            Events.dispatch(Firebug.uiListeners, "updateSidePanels", [self]);
+                        });
+                        this.activated = true;
+                    }
 
-                    define([
-                        "spa_eye/panels/viewPanel",
-                        "spa_eye/panels/auditPanel",
-                        "spa_eye/panels/eventPanel"
-                    ], function (ViewPanel, AuditPanel, EventPanel) {
-                        Firebug.registerPanel(Firebug.eventPanel);
-                        self.sidePanels.push(EventPanel);
-                        Firebug.registerPanel(Firebug.auditPanel);
-                        self.sidePanels.push(AuditPanel);
-                        Firebug.registerPanel(Firebug.viewPanel);
-                        self.sidePanels.push(ViewPanel);
-                        Events.dispatch(Firebug.uiListeners, "updateSidePanels", [Firebug.spa_eyePanel]);
-                    });
                 } else {
                     Dom.collapse(panelToolbar, true);
+                    this.activated = false;
                 }
             },
 

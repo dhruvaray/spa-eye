@@ -4,6 +4,7 @@ define([
     "firebug/lib/trace",
     "firebug/lib/dom",
     "firebug/lib/css",
+    "firebug/lib/options",
 
     "spa_eye/lib/require/underscore",
 
@@ -11,7 +12,7 @@ define([
     "spa_eye/dom/modelReps",
     "spa_eye/dom/domEditor"
 ],
-    function (Firebug, Obj, FBTrace, Dom, Css, _, BasePanel, ModelReps, DOMEditor) {
+    function (Firebug, Obj, FBTrace, Dom, Css, Options, _, BasePanel, ModelReps, DOMEditor) {
 
         var BasePlate = function (options) {
             this.initialize && this.initialize(options);
@@ -151,6 +152,94 @@ define([
                 }, this);
                 return model;
             },
+
+            search:function (pattern, reverse) {
+                if (!pattern) {
+                    this._filter(function (row) {
+                        Css.removeClass(row, 'hide');
+                    }, this);
+                    return true;
+                }
+
+                var globalFound = false,
+                    caseSensitive = !!Options.get("searchCaseSensitive");
+
+                this._filter(function (row) {
+                    Css.setClass(row, 'hide');
+                    if (row.domObject.value) {
+                        var entity = row.domObject.value,
+                            cid = row.domObject.name,
+                            type = 'attr',
+                            found = false,
+                            rKey = null,
+                            rValue = null,
+
+                            kPattern = pattern,
+                            vPattern = pattern;
+
+                        if (/^#/.test(pattern)) {
+                            kPattern = pattern.substr(1);
+                            type = 'cid';
+                        } else if (/:/.test(pattern)) {
+                            var match = /^([^:]*):(.*)$/.exec(pattern);
+                            if (pattern.trim() !== ':' && match) {
+                                kPattern = match[1].trim();
+                                vPattern = match[2].trim();
+                            }
+                        }
+
+                        rKey = new RegExp(kPattern, caseSensitive ? '' : 'i');
+                        rValue = new RegExp(vPattern, caseSensitive ? '' : 'i');
+
+                        if (type === 'cid') {
+                            if (rKey.test(cid)) {
+                                found = true;
+                            }
+                        } else {
+                            var repObj = entity;
+                            if (repObj) {
+                                if (repObj.el) {
+                                    repObj = {
+                                        el:repObj.el,
+                                        $el:repObj.$el,
+                                        tagName:repObj.tagName,
+                                        inferredTemplates:repObj.inferredTemplates
+                                    };
+                                } else if (repObj.toJSON) {
+                                    repObj = repObj.toJSON();
+                                }
+                            }
+
+                            function searchPattern(v, k) {
+                                if (_.isObject(v)) {
+                                    return !!_.find(v, searchPattern);
+                                } else if ((kPattern === vPattern && (rKey.test(k) || rKey.test(v)))
+                                    || (rKey.test(k) && rValue.test(v))) {
+                                    return true;
+                                }
+                            }
+
+                            found = !!_.find(repObj, searchPattern);
+                        }
+                        found && Css.removeClass(row, 'hide');
+                        globalFound = globalFound || found;
+                    }
+                }, this);
+
+                return globalFound;
+            },
+
+            _filter:function (iterator, context) {
+                var rows = this.parent.panelNode.getElementsByClassName("0level");
+                for (var i = 0; i < rows.length; i++) {
+                    var row = rows[i];
+                    if (Css.hasClass(row, "opened")) {
+                        ModelReps.DirTablePlate.toggleRow(row);
+                    }
+                    iterator.call(context, row);
+                }
+            },
+
 
             _bubbleUpRow:function (row) {
                 var tbody = row.parentNode;

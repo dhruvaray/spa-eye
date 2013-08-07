@@ -5,6 +5,7 @@
 define([
     "firebug/firebug",
     "firebug/lib/trace",
+    "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/css",
     "firebug/lib/string",
@@ -15,7 +16,7 @@ define([
     "spa_eye/dom/section",
     "spa_eye/dom/modelReps"
 ],
-    function (Firebug, FBTrace, Events, Css, Str, Dom, BasePlate, ChildSection, ModelReps) {
+    function (Firebug, FBTrace, Locale, Events, Css, Str, Dom, BasePlate, ChildSection, ModelReps) {
 
         var NetRequestEntry = Firebug.NetMonitor.NetRequestEntry;
         var PANEL = BasePlate.extend({
@@ -25,7 +26,7 @@ define([
                 var sections = [];
                 var allCollections = new ChildSection({
                     name:'all_collections',
-                    title:'All Collections',
+                    title:Locale.$STR('spa_eye.all'),
                     parent:this.parent.panelNode,
                     order:0,
 

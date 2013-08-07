@@ -4,6 +4,10 @@
         persist="screenX,screenY,width,height,sizemode"
         >
 
+    <hbox flex="1" style="overflow:scroll;">
+        <div id="sequence">Loading...</div>
+    </hbox>
+
     <script type="application/x-javascript" src="chrome://spa_eye/content/lib/ext/underscore.js"/>
     <script type="application/x-javascript" src="chrome://spa_eye/content/lib/ext/raphael.js"/>
     <script type="application/x-javascript" src="chrome://spa_eye/content/lib/ext/sequence-diagram.js"/>
@@ -12,6 +16,7 @@
 
         var sequenceDiagram = undefined;
         var sequence = "";
+        var returnTo = [];
 
 
         function genFlows(val, idx, list) {
@@ -20,14 +25,30 @@
 
 
         function genSequenceString(val, idx, list) {
-            sequence = sequence + "\n" + ((list[idx].source ? list[idx].source.cid : "App") + "->" + list[idx].target.cid + ": " + list[idx].operation);
-            sequence = sequence + "\n" + (list[idx].target.cid + "-->" + (list[idx].source ? list[idx].source.cid : "App") + ": ");
+            if (returnTo.length) {
+                var top = returnTo.length - 1;
+                if (list[top].cid !== list[idx].source.cid) {
+                    var pid = returnTo.pop();
+                    sequence = sequence + "\n" + (list[pid].cid + "-->" + (list[pid].source ? list[pid].source.cid : "App") + ": ");
+                }
+            }
+            sequence = sequence + "\n" + ((list[idx].source ? list[idx].source.cid : "App") + "->" + list[idx].cid + ": " + list[idx].operation);
+            returnTo.push(idx);
+            if (idx === list.length - 1) {
 
+                while (returnTo.length) {
+                    var pid = returnTo.pop();
+                    if (!list[pid].source || (list[pid].source.cid !== list[pid].cid)) {
+                        sequence = sequence + "\n" + (list[pid].cid + "-->" + (list[pid].source ? list[pid].source.cid : "App") + ": ");
+                    }
+                }
+            }
         };
 
         function draw(flows, id, index) {
             if (flows.length) {
                 sequence = "Title: Interaction flow for model : " + id + " at t=" + index;
+                returnTo = [];
                 flows.forEach(genFlows);
             } else {
                 sequence = id ?
@@ -48,8 +69,5 @@
 
     </script>
 
-    <hbox flex="1" style="overflow:scroll;">
-        <div id="sequence"/>
-    </hbox>
 
 </window>

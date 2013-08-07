@@ -22,7 +22,7 @@ define([
             title:Locale.$STR("spa_eye.event.title"),
 
             parentPanel:"spa_eye",
-            order:0,
+            order:1,
 
 
             initialize:function () {
@@ -119,6 +119,7 @@ define([
                             title:'t=' + i,
                             parent:this.panelNode,
                             autoAdd:false,
+                            collapse:true,
                             data:this.sequenceData[i]
                         }));
                     }

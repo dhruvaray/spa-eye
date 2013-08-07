@@ -1,0 +1,118 @@
+<?xml version="1.0" ?>
+
+<project name="spa_eye" basedir="." default="build">
+
+    <!-- Directories -->
+    <property name="extension.dir" value="./extension"/>
+
+    <property name="build.dir" value="./build"/>
+    <property name="nightly.dir" value="./nightly"/>
+    <property name="release.dir" value="./releases"/>
+
+    <!-- echo -->
+    <target name="echo">
+        <echo message="Build directory: ${build.dir}"/>
+        <echo message="Nightly directory: ${nightly.dir}"/>
+        <echo message="Release directory: ${release.dir}"/>
+    </target>
+
+    <!-- Clean -->
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+    </target>
+
+    <!-- Nightly Build -->
+    <target name="nightly" depends="clean, git.revision">
+        <antcall target="prepare-build" />
+
+        <!-- Copy install.rdf with updated release version info -->
+        <replace file="${build.dir}/install.rdf" token="@VERSION@" value="${VERSION}"/>
+
+        <antcall target="createXPI">
+            <param name="file-name" value="spa_eye-${VERSION}.xpi"/>
+            <param name="file-dir" value="${nightly.dir}"/>
+        </antcall>
+
+        <delete dir="${build.dir}"/>
+        <echo message="spa_eye version: ${VERSION} in ${nightly.dir}"/>
+    </target>
+
+    <!-- Feature Build -->
+    <target name="build" depends="clean, git.revision">
+        <antcall target="prepare-build" />
+
+        <!-- Copy install.rdf with updated release version info -->
+        <replace file="${build.dir}/install.rdf" token="@VERSION@" value="${VERSION}"/>
+
+        <antcall target="createXPI">
+            <param name="file-name" value="spa_eye-${VERSION}.xpi"/>
+            <param name="file-dir" value="${release.dir}"/>
+        </antcall>
+
+        <delete dir="${build.dir}"/>
+        <echo message="spa_eye version: ${VERSION} in ${release.dir}"/>
+    </target>
+
+    <!-- Prepare build files -->
+    <target name="prepare-build">
+
+        <mkdir dir="${build.dir}" />
+
+        <!-- Copy all files -->
+        <copy todir="${build.dir}">
+            <fileset dir="${extension.dir}">
+                <include name="**/*.js"/>
+                <include name="**/*.xul"/>
+                <include name="**/*.properties"/>
+                <include name="**/*.css"/>
+                <include name="**/*.html"/>
+                <include name="**/*.xml"/>
+                <include name="**/*.dtd"/>
+                <include name="**/*.png"/>
+                <include name="**/*.gif"/>
+                <include name="**/*.svg"/>
+                <include name="**/*.ico"/>
+                <include name="**/*.manifest"/>
+                <include name="**/*.txt"/>
+            </fileset>
+            <fileset dir=".">
+                <include name="*.txt"/>
+                <include name="*.md"/>
+            </fileset>
+        </copy>
+
+        <!-- Copy install.rdf template into the build dir -->
+        <copy file="install.rdf.tpl.xml" tofile="${build.dir}/install.rdf"/>
+    </target>
+
+    <!-- Create final `.xpi` file -->
+    <target name="createXPI" depends="git.revision">
+
+        <!-- Compress files (ZIP) -->
+        <zip destfile="${file-dir}/${file-name}" basedir="${build.dir}" update="true" />
+
+        <!-- Copy update.rdf file with updated release version info -->
+        <copy file="update.rdf.tpl.xml" tofile="${file-dir}/update.rdf"/>
+        <replace file="${file-dir}/update.rdf" token="@VERSION@" value="${VERSION}"/>
+        <replace file="${file-dir}/update.rdf" token="@LEAF@" value="spa_eye-${VERSION}.xpi"/>
+    </target>
+
+    <!-- Get version number from `git describe` -->
+    <available file=".git" type="dir" property="git.present"/>
+
+    <target name="git.revision" description="Store git revision in ${VERSION}" if="git.present">
+        <exec executable="git" outputproperty="git.revision" failifexecutionfails="false" errorproperty="">
+            <arg value="describe"/>
+            <arg value="--tags"/>
+            <arg value="--always"/>
+            <arg value="HEAD"/>
+        </exec>
+        <condition property="VERSION" value="${git.revision}" else="unknown">
+            <and>
+                <isset property="git.revision"/>
+                <length string="${git.revision}" trim="yes" length="0" when="greater"/>
+            </and>
+        </condition>
+    </target>
+
+</project>

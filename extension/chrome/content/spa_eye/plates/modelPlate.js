@@ -6,6 +6,7 @@ define([
     "firebug/firebug",
     "firebug/lib/object",
     "firebug/lib/trace",
+    "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/css",
     "firebug/lib/string",
@@ -19,7 +20,7 @@ define([
     "spa_eye/dom/domEditor"
 
 ],
-    function (Firebug, Obj, FBTrace, Events, Css, Str, Dom, MostUsed, BasePlate, ChildSection, ModelReps, DOMEditor) {
+    function (Firebug, Obj, FBTrace, Locale, Events, Css, Str, Dom, MostUsed, BasePlate, ChildSection, ModelReps, DOMEditor) {
 
         var NetRequestEntry = Firebug.NetMonitor.NetRequestEntry;
 
@@ -51,7 +52,7 @@ define([
 
                 var pinned = new ChildSection({
                     name:'pinned_models',
-                    title:'Pinned Models',
+                    title:Locale.$STR('spa_eye.models.pinned'),
                     parent:this.parent.panelNode,
                     order:0,
                     container:'pinnedModelsDiv',
@@ -66,7 +67,7 @@ define([
 
                 var mostUsed = new ChildSection({
                     name:'most_used_models',
-                    title:'Most Used',
+                    title:Locale.$STR('spa_eye.models.mostused'),
                     parent:this.parent.panelNode,
                     order:1,
                     container:'mostUsedModelsDiv',
@@ -81,7 +82,7 @@ define([
 
                 var allModels = new ChildSection({
                     name:'all_models',
-                    title:'All Models',
+                    title:Locale.$STR('spa_eye.all'),
                     parent:this.parent.panelNode,
                     order:2,
                     container:'allModelsDiv',
@@ -96,75 +97,6 @@ define([
                 sections.push(pinned, mostUsed, allModels);
 
                 return sections;
-            },
-
-            search:function (pattern) {
-                if (!pattern) {
-                    this._filter(function (row) {
-                        Css.removeClass(row, 'hide');
-                    }, this);
-                    return true;
-                }
-
-                var globalFound = false;
-                this._filter(function (row) {
-                    Css.setClass(row, 'hide');
-                    if (row.domObject.value) {
-                        var model = row.domObject.value,
-                            cid = row.domObject.name,
-                            type = 'attr',
-                            found = false,
-                            rKey = null,
-                            rValue = null,
-
-                            kPattern = pattern,
-                            vPattern = pattern;
-
-                        if (/^#/.test(pattern)) {
-                            kPattern = pattern.substr(1);
-                            type = 'cid';
-                        } else if (/:/.test(pattern)) {
-                            var match = /^([^:]*):(.*)$/.exec(pattern);
-                            if (pattern.trim() !== ':' && match) {
-                                kPattern = match[1].trim();
-                                vPattern = match[2].trim();
-                            }
-                        }
-
-                        rKey = new RegExp(kPattern),
-                            rValue = new RegExp(vPattern);
-
-                        if (type === 'cid') {
-                            if (rKey.test(cid)) {
-                                found = true;
-                            }
-                        } else {
-                            var attrs = model.attributes;
-                            for (var a in attrs) {
-                                if ((kPattern === vPattern && (rKey.test(a) || rKey.test(attrs[a])))
-                                    || (rKey.test(a) && rValue.test(attrs[a]))) {
-                                    found = true;
-                                    break;
-                                }
-                            }
-                        }
-                        found && Css.removeClass(row, 'hide');
-                        globalFound = globalFound || found;
-                    }
-                }, this);
-
-                return globalFound;
-            },
-
-            _filter:function (iterator, context) {
-                var rows = this.parent.panelNode.getElementsByClassName("0level");
-                for (var i = 0; i < rows.length; i++) {
-                    var row = rows[i];
-                    if (Css.hasClass(row, "opened")) {
-                        ModelReps.DirTablePlate.toggleRow(row);
-                    }
-                    iterator.call(context, row);
-                }
             },
 
             onSelectRow:function (row) {
@@ -248,8 +180,8 @@ define([
             },
 
             onModelSave:function (model, file) {
-                if (this.isCurrentPlate() && this.isModel(model) && file) {
-                    var isError = NetRequestEntry.isError(file);
+                if (this.isCurrentPlate() && this.isModel(model)) {
+                    var isError = file && NetRequestEntry.isError(file);
                     var type = isError ? 'row-error' : 'row-success';
                     this.context.spa_eyeObj._mostused_models.add(model.cid, model, 'save');
                     this.sections.forEach(function (p) {

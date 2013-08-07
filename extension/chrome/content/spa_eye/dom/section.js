@@ -23,6 +23,9 @@ define([
 
             order:0,
 
+            // Default collapse behavior for section
+            collapse:false,
+
             // Element class
             container:null,
             body:null,
@@ -33,7 +36,7 @@ define([
             },
 
             // onRemoveModel
-            onRemoveModel: null,
+            onRemoveModel:null,
 
             // Other default property for its data
             autoAdd:true,

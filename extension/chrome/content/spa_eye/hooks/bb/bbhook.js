@@ -40,6 +40,9 @@ define([
                     this[key] = obj[key];
                 }
             }
+
+            this._modelProxies = {};
+            this._collectionProxies = {};
         }
 
         BBHook.prototype = {
@@ -86,13 +89,6 @@ define([
                                 // Record using script_id
                                 win.spa_eye.templates[script_id] = text;
 
-                            } else {
-                                if (FBTrace.DBG_ERRORS)
-                                    FBTrace.sysout("spa_eye; No compiled template found for scriptid = " +
-                                        script_id +
-                                        " and template text = " +
-                                        text
-                                    );
                             }
                         }
 
@@ -143,34 +139,25 @@ define([
             },
 
             registerSetHooks:function (win) {
-                var _setProxy = win.Backbone.Model.prototype.set;
                 var self = this;
-                win.Backbone.Model.prototype.set = function (attributes, options) {
-                    if (!this.save._proxied) {
-                        var _saveProxy = this.save;
-                        this.save = function () {
-                            return self.modelFnWomb(win, this, Operation.SAVE, _saveProxy, arguments);
-                        };
-                        this.save._proxied = true;
-                    }
+                var ModelProto = win.Backbone.Model.prototype;
+                var CollectionProto = win.Backbone.Collection.prototype;
 
-                    if (!this.fetch._proxied) {
-                        var _fetchProxy = this.fetch;
-                        this.fetch = function () {
-                            return self.modelFnWomb(win, this, Operation.FETCH, _fetchProxy, arguments);
-                        };
-                        this.fetch._proxied = true;
-                    }
-
-                    return self.modelFnWomb(win, this, Operation.SET, _setProxy, arguments);
-                }
-                _.each([Operation.SET, Operation.ADD, Operation.REMOVE, Operation.RESET, Operation.SORT],
-                    function (operation) {
-                        var _proxy = win.Backbone.Collection.prototype[operation];
-                        win.Backbone.Collection.prototype[operation] = function () {
-                            return self.collectionFnWomb(win, this, operation, _proxy, arguments);
+                _.each(Operation, function (key) {
+                    if (ModelProto[key]) {
+                        self._modelProxies[key] = ModelProto[key];
+                        ModelProto[key] = function () {
+                            return self.modelFnWomb(win, this, key, self._modelProxies[key], arguments);
                         }
-                    });
+                    }
+
+                    if (CollectionProto[key]) {
+                        self._collectionProxies[key] = CollectionProto[key];
+                        CollectionProto[key] = function () {
+                            return self.collectionFnWomb(win, this, key, self._collectionProxies[key], arguments);
+                        }
+                    }
+                });
             },
 
             registerWPHooks:function (win) {
@@ -230,14 +217,15 @@ define([
 
                 this.recordSequenceEvent(win, {
                     cid:model.cid,
-                    target:model,
+                    target:model.toJSON(),
                     operation:type,
                     args:fnargs
                 });
 
                 this.recordModelAudit(model, {
+                    cid:model.cid,
                     operation:type,
-                    target:model,
+                    target:model.toJSON(),
                     args:fnargs
                 });
 
@@ -264,14 +252,15 @@ define([
 
                 this.recordSequenceEvent(win, {
                     cid:collection.cid,
-                    target:collection,
+                    target:collection.toJSON(),
                     operation:type,
                     args:fnargs
                 });
 
                 this.recordModelAudit(collection, {
+                    cid:collection.cid,
                     operation:type,
-                    target:collection,
+                    target:collection.toJSON(),
                     args:fnargs
                 });
 
@@ -330,7 +319,7 @@ define([
                 }
             },
 
-            recordModelAudit:function (model, doc) {
+            recordModelAudit:function (model, record) {
                 // return if `record` is off
                 var spa_eyeObj = this.context.spa_eyeObj;
 
@@ -339,8 +328,11 @@ define([
                 }
                 t = DateUtil.getFormattedTime(new Date());
                 var records = spa_eyeObj.auditRecords = spa_eyeObj.auditRecords || {};
-                records[model.cid] = records[model.cid] || {};
-                records[model.cid][t] = doc;
+
+                records[model.cid] || (records[model.cid] = []);
+                var rec = {};
+                rec[t] = record;
+                records[model.cid].splice(0, 0, rec);
             },
 
             cleanup:function () {

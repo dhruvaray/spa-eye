@@ -1,6 +1,5 @@
 <svg width="16" height="16" xmlns="http://www.w3.org/2000/svg">
  <g>
-  <title>Layer 1</title>
   <g>
    <ellipse fill="#fc0521" stroke="#000000" cx="8" cy="8" rx="4" ry="4" id="recording">
         <animate attributeName="fill" from="#fc0521" to="#ffffff" dur="5s" repeatCount="indefinite" />
