@@ -5,7 +5,8 @@
         >
 
     <hbox flex="1" style="overflow:scroll;">
-        <div id="sequence">Loading...</div>
+        <div id="loading">Generating...</div>
+        <div id="sequence"></div>
     </hbox>
 
     <script type="application/x-javascript" src="chrome://spa_eye/content/lib/ext/underscore.js"/>
@@ -57,9 +58,11 @@
             }
 
             try {
+                document.getElementById("loading").innerHTML = "Generating...";
                 document.getElementById("sequence").innerHTML = "";
                 sequenceDiagram = Diagram.parse(sequence);
                 sequenceDiagram.drawSVG("sequence", {theme:'simple'});
+                document.getElementById("loading").innerHTML = "";
             } catch (e) {
 
             }

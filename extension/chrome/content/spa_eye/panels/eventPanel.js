@@ -20,6 +20,7 @@ define([
         var eventPanel = Firebug.eventPanel = BasePanel.extend({
             name:"spa_eye:event",
             title:Locale.$STR("spa_eye.event.title"),
+            tooltip:Locale.$STR("spa_eye.event.tooltip"),
 
             parentPanel:"spa_eye",
             order:1,

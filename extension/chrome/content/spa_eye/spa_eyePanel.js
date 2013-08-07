@@ -32,6 +32,7 @@ define([
         };
         var spa_eyePanel = Firebug.spa_eyePanel = BasePanel.extend(Obj.extend(Firebug.ActivablePanel, {
             name:"spa_eye",
+            tooltip:Locale.$STR("spa_eye.tooltip"),
             title:Locale.$STR("spa_eye.title"),
             searchable:true,
             editable:true,
@@ -168,10 +169,11 @@ define([
                 buttons.push(
                     {
                         id:"spa_eye_panel_button_record",
-                        tooltiptext:Locale.$STR("spa_eye.record_events"),
+                        tooltiptext:isRecord ?
+                            Locale.$STR("spa_eye.record_events.yes") : Locale.$STR("spa_eye.record_events.no"),
                         image:isRecord
                             ? "chrome://spa_eye/skin/recording.svg"
-                            : "chrome://spa_eye/skin/recordon.svg",
+                            : "chrome://spa_eye/skin/norecording.svg",
                         type:"checkbox",
                         checked:isRecord,
                         className:"toolbar-image-button fbInternational",
@@ -179,8 +181,8 @@ define([
                     },
                     "-",
                     {
-                        tooltiptext:Locale.$STR("spa_eye.refresh"),
-                        image:"chrome://firebug/skin/rerun.svg",
+                        tooltiptext:Locale.$STR("spa_eye.clear"),
+                        image:"chrome://spa_eye/skin/remove.svg",
                         className:"toolbar-image-button fbInternational",
                         command:FBL.bindFixed(this.resetTrackingData, this)
                     },
@@ -240,7 +242,9 @@ define([
                 if (recordButton) {
                     recordButton.image = recordButton.checked
                         ? "chrome://spa_eye/skin/recording.svg"
-                        : "chrome://spa_eye/skin/recordon.svg";
+                        : "chrome://spa_eye/skin/norecording.svg";
+                    recordButton.tooltiptext = recordButton.checked ?
+                        Locale.$STR("spa_eye.record_events.yes") : Locale.$STR("spa_eye.record_events.no");
                     spa_eyeObj.isRecord = recordButton.checked;
                 }
             },
@@ -255,14 +259,6 @@ define([
 
             getCurrentPlate:function (plateName) {
                 return this.plates[plateName || this.currentPlate];
-            },
-
-            getOptionsMenuItems:function (context) {
-                return [
-                    this.optionMenu(Locale.$STR("spa_eye.all"), "spa_eye.all"),
-                    "-",
-                    this.optionMenu(Locale.$STR("spa_eye.views"), "spa_eye.views")
-                ];
             },
 
             optionMenu:function (label, option) {
