@@ -11,10 +11,9 @@ define([
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/string",
-    "firebug/dom/toggleBranch",
     "firebug/dom/domModule"
 ],
-    function (Firebug, D, FirebugReps, Locale, Events, Dom, Css, Str, ToggleBranch, DOMModule) {
+    function (Firebug, D, FirebugReps, Locale, Events, Dom, Css, Str, DOMModule) {
 
         "use strict";
 
@@ -366,6 +365,39 @@ define([
             }, 1000);
         }
 
+        var _bubbleUpRow = function (row) {
+            var tbody = row.parentNode;
+
+            var level = parseInt(row.getAttribute('level'), 10);
+            var model = row.domObject.value;
+
+            setTimeout(function () {
+                var firstRow = row.previousSibling;
+                while (firstRow) {
+                    var l = parseInt(firstRow.getAttribute("level", 10));
+                    if (isNaN(l)) break;
+                    if (l === level) {
+                        tbody.removeChild(row);
+                        tbody.insertBefore(row, firstRow);
+                        firstRow = row.previousSibling;
+                    } else {
+                        firstRow = firstRow.previousSibling;
+                    }
+                }
+            }, 100);
+        }
+
+        var _foldRow = function (row, cb, context, otherArgs) {
+            var args = [row];
+            otherArgs && args.push.apply(args, otherArgs);
+            if (row && Css.hasClass(row, 'opened')) {
+                return DirTablePlate.toggleRow(row, function () {
+                    cb && cb.apply(this, args);
+                }, context ? context : this);
+            }
+            return cb && cb.apply(context ? context : this, args);
+        }
+
         // Select row
         // @param row <domObject>
         var selectRow = function (row, panel) {
@@ -406,7 +438,9 @@ define([
 
             highlightRow:highlightRow,
             selectRow:selectRow,
-            getSelectedRow:getSelectedRow
+            getSelectedRow:getSelectedRow,
+            _bubbleUpRow:_bubbleUpRow,
+            _foldRow:_foldRow
         };
 
 // ********************************************************************************************* //
