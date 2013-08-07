@@ -12,10 +12,10 @@ define([
     "spa_eye/lib/uri",
     "spa_eye/lib/date",
 
-
-    "spa_eye/lib/require/underscore"
+    "spa_eye/lib/require/underscore",
+    "spa_eye/util/common"
 ],
-    function (FBTrace, Http, Events, Dom, SHA, DOM, URI, DateUtil, _) {
+    function (FBTrace, Http, Events, Dom, SHA, DOM, URI, DateUtil, _, Common) {
 
 // ********************************************************************************************* //
 // Constants
@@ -24,8 +24,8 @@ define([
         const Ci = Components.interfaces;
         const Cr = Components.results;
         const bbhook_wp = "chrome://spa_eye/content/hooks/bb/bbhook_wp.js";
-        const Operation = {SAVE:"save", FETCH:"fetch", SET:"set", VIEW:"render", ADD:"add",
-            REMOVE:"remove", RESET:"reset", SORT:"sort", DESTROY:"destroy"};
+
+        var Operation = Common.Operation;
 
 // ********************************************************************************************* //
 //  BBHook Class
