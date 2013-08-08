@@ -114,7 +114,7 @@ define([
                         "aria-label":Locale.$STR("aria.labels.dom properties")},
                     D.TBODY({role:"presentation", "class":"$section.body"},
                         SizerRow,
-                        D.FOR("member", "$section.data|result|memberIterator",
+                        D.FOR("member", "$section|augment|memberIterator",
                             D.TAG("$memberRowTag", {member:"$member"})
                         )
                     )
@@ -123,12 +123,12 @@ define([
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-            memberIterator:function (object) {
-                var result = object;
-                if (object && Array.isArray(object)) {
+            memberIterator:function (obj) {
+                var result = obj.data;
+                if (!obj.section.ignoreKey && obj.data && Array.isArray(obj.data)) {
                     result = {};
-                    object.forEach(function (eachElement) {
-                        result[eachElement.cid] = eachElement;
+                    obj.data.forEach(function (eachElement) {
+                        result[eachElement.cid || index] = eachElement;
                     });
                 }
 
@@ -157,6 +157,18 @@ define([
                     return obj();
                 }
                 return obj;
+            },
+
+            augment:function (section) {
+                var obj = section.data;
+                var data = obj;
+                if (typeof obj === 'function') {
+                    data = obj();
+                }
+                return {
+                    data: data,
+                    section: section
+                }
             },
 
             // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

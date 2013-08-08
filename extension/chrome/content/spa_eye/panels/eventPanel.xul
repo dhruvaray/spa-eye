@@ -60,9 +60,11 @@
             try {
                 document.getElementById("loading").innerHTML = "Generating...";
                 document.getElementById("sequence").innerHTML = "";
-                sequenceDiagram = Diagram.parse(sequence);
-                sequenceDiagram.drawSVG("sequence", {theme:'simple'});
-                document.getElementById("loading").innerHTML = "";
+                setTimeout(function(){
+                    sequenceDiagram = Diagram.parse(sequence);
+                    sequenceDiagram.drawSVG("sequence", {theme:'simple'});
+                    document.getElementById("loading").innerHTML = "";
+                }, 200);
             } catch (e) {
 
             }

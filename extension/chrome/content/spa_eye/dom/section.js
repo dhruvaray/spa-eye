@@ -35,6 +35,7 @@ define([
 
             // Default collapse behavior for section
             collapse:false,
+            ignoreKey:false,
 
             // Element class
             container:null,
@@ -105,7 +106,7 @@ define([
                 if (!found && options.autoAdd) {
                     var obj = {};
                     obj[model.cid] = model;
-                    var members = ModelReps.DirTablePlate.memberIterator(obj);
+                    var members = ModelReps.DirTablePlate.memberIterator({data: obj, section: this});
                     var result = ModelReps.DirTablePlate.rowTag.insertRows({members:members}, tbody);
                     ModelReps.highlightRow(result[0], options.type || 'row-warning');
                     ModelReps._bubbleUpRow(result[0]);

@@ -121,6 +121,7 @@ define([
                             parent:this.panelNode,
                             autoAdd:false,
                             collapse:true,
+                            ignoreKey:true,
                             data:this.sequenceData[i]
                         }));
                     }

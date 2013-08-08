@@ -132,19 +132,10 @@ define([
                 }
                 try {
                     this.context.spa_eyeObj._pinned_models[model.cid] = model;
-                    var tbody = Dom.getElementByClass(this.parent.panelNode, 'pinnedModelsDivBody');
-                    var noObjectRow = Dom.getChildByClass(tbody, 'noMemberRow');
-
-                    if (noObjectRow) {
-                        Css.removeClass(noObjectRow, 'hide');
-                        Css.setClass(noObjectRow, 'hide');
-                    }
-
-                    var obj = {};
-                    obj[model.cid] = model;
-                    var members = ModelReps.DirTablePlate.memberIterator(obj);
-                    ModelReps.DirTablePlate.rowTag.insertRows({members:members}, tbody);
-
+                    var pinSection = this.sections[0];
+                    pinSection._onRowAdd(model, {
+                        autoAdd:true
+                    });
                 } catch (e) {
                     if (FBTrace.DBG_SPA_EYE) {
                         FBTrace.sysout("Error: model.cid - " + model.cid, e);

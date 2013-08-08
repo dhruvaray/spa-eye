@@ -314,8 +314,7 @@ define([
                                 isNewInteractionModel :
                                 isNewInteractionCollection;
 
-                            record.cid = record.cid + record.operation +
-                                isNewInteraction ? flows.push([record]) : flows[flows.length - 1].push(record);
+                            isNewInteraction ? flows.push([record]) : flows[flows.length - 1].push(record);
                         }
 
                     }, this);
