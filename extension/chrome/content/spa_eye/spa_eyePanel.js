@@ -118,20 +118,15 @@ define([
 
             inspectNode:function (node) {
                 if (this.currentPlate === childPlate.VIEW) {
-                    this.plates.view.expandSelectedView(this.inspectedViewIndex);
+                    var views = this.context.spa_eyeObj.getViews();
+                    this.plates.view.expandSelectedView(_.findWhere(views, {el:node.wrappedJSObject}));
                 }
                 return false;
             },
 
             supportsObject:function (object, type) {
                 var views = this.context.spa_eyeObj.getViews();
-                for (i = 0; i < views.length; ++i) {
-                    if (views[i].el.innerHTML === object.innerHTML) {
-                        this.inspectedViewIndex = i;
-                        return 1;
-                    }
-                }
-                return 0;
+                return _.findWhere(views, {el:object.wrappedJSObject});
             },
 
             showWarning:function () {
@@ -163,8 +158,7 @@ define([
                 buttons.push(
                     {
                         id:"spa_eye_panel_button_record",
-                        tooltiptext:isRecord ?
-                            Locale.$STR("spa_eye.record_events.yes") : Locale.$STR("spa_eye.record_events.no"),
+                        tooltiptext:Locale.$STR("spa_eye.record_events"),
                         image:isRecord
                             ? "chrome://spa_eye/skin/recording.svg"
                             : "chrome://spa_eye/skin/norecording.svg",
@@ -237,8 +231,6 @@ define([
                     recordButton.image = recordButton.checked
                         ? "chrome://spa_eye/skin/recording.svg"
                         : "chrome://spa_eye/skin/norecording.svg";
-                    recordButton.tooltiptext = recordButton.checked ?
-                        Locale.$STR("spa_eye.record_events.yes") : Locale.$STR("spa_eye.record_events.no");
                     spa_eyeObj.isRecord = recordButton.checked;
                 }
             },

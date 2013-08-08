@@ -50,7 +50,7 @@ if (window.Backbone) {
         window.Backbone.View = function (attributes, options) {
             var renderProxy = this.render;
             var removeProxy = this.remove;
-            try{
+            try {
                 this.render = function () {
                     window.spa_eye.cv = this;
                     this.inferredTemplates = this.inferredTemplates || [];
@@ -62,8 +62,11 @@ if (window.Backbone) {
                 };
 
                 this.remove = function () {
+                    var result = removeProxy.apply(this, arguments);
                     this.mfd = true;
-                    return removeProxy.apply(this, arguments);
+                    var event = new CustomEvent('SPA_Eye:View.Remove', {'view':this});
+                    window.dispatchEvent(event);
+                    return result;
                 };
 
                 window.spa_eye.views = window.spa_eye.views || [];

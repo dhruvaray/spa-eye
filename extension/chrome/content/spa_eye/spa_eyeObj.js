@@ -42,8 +42,8 @@ define([
                 return this._spaHook && this._spaHook.removeModel(model);
             },
 
-            getViews:function () {
-                return this._spaHook ? this._spaHook.views() : [];
+            getViews:function (options) {
+                return this._spaHook ? this._spaHook.views(options) : [];
             },
 
             removeView:function (view) {
