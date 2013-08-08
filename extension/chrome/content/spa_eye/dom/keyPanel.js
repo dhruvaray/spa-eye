@@ -27,10 +27,10 @@ define([
                 );
 
                 // expand-collapse key handlers
-                this.keyListeners.push(
+                /*this.keyListeners.push(
                     chrome.keyCodeListen("RIGHT", null, Obj.bindFixed(this._expandKeyHandler, this, false)),
                     chrome.keyCodeListen("LEFT", null, Obj.bindFixed(this._expandKeyHandler, this, true))
-                );
+                );*/
 
                 this.keyListeners.push(
                     chrome.keyCodeListen("RETURN", null, Obj.bindFixed(this._enterKeyHandler, this))
