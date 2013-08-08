@@ -50,8 +50,8 @@ define([
 
             registerViewHooks:function (win) {
                 var self = this;
-
                 var _templateProxy = win._ && win._.template;
+
                 if (!_templateProxy) {
                     if (FBTrace.DBG_SPA_EYE) {
                         FBTrace.sysout("spa_eye; Could not add hook.Either _/_.template is not found. _ = " +
@@ -59,7 +59,6 @@ define([
                     }
                     return false;
                 }
-
                 win.spa_eye.templates = win.spa_eye.templates || {};
 
                 win._.template = function (text, data, settings) {
@@ -81,11 +80,9 @@ define([
                             var source = _.template.call(_, text).source;
                             if (source) {
                                 var f = escape("window['" + proxiedTemplateRef + "']=" + source);
-
                                 // Attach to body
                                 DOM.appendExternalScriptTagToHead(win.document,
                                     "data:text/javascript;fileName=" + script_id + ";," + f);
-
                                 // Record using script_id
                                 win.spa_eye.templates[script_id] = text;
 
@@ -136,6 +133,7 @@ define([
                     };
                 }
 
+
             },
 
             registerSetHooks:function (win) {
@@ -177,6 +175,10 @@ define([
                 win.document.addEventListener("afterscriptexecute", register);
                 //probably not required.
                 win.addEventListener("load", register);
+                win.addEventListener('SPA_Eye:View.Remove', function (e) {
+                    Events.dispatch(self.listener.fbListeners, 'onViewRender', [e.view]);
+                });
+
             },
 
             registerBBHooks:function (win) {
@@ -312,7 +314,8 @@ define([
                                 isNewInteractionModel :
                                 isNewInteractionCollection;
 
-                            isNewInteraction ? flows.push([record]) : flows[flows.length - 1].push(record);
+                            record.cid = record.cid + record.operation +
+                                isNewInteraction ? flows.push([record]) : flows[flows.length - 1].push(record);
                         }
 
                     }, this);
@@ -360,9 +363,16 @@ define([
                     model);
             },
 
-            views:function () {
+            views:function (options) {
                 if (this.win) {
-                    return this.win.spa_eye.views;
+                    var views = this.win.spa_eye.views;
+
+                    if (!options || options.all)
+                        return views;
+
+                    return _.filter(views, function (view) {
+                        return !view.mfd == options.live;
+                    });
                 }
                 return [];
             },
