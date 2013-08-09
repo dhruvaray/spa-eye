@@ -28,8 +28,10 @@ define([
                         context:context
                     });
                     spObj._spaHook.cleanup();
-                    spObj._spaHook.registerContentLoadedHook();
-
+                    var enable = Firebug.Options.get("spa_eye.enableSites");
+                    if (enable) {
+                        spObj._spaHook.registerContentLoadedHook();
+                    }
                 }
             },
 
@@ -41,8 +43,6 @@ define([
                     FBTrace.sysout("spa_eye; Successfully emptied maintenance collections for spa-eye module.");
                 }
             }
-
-
         });
 
 // ********************************************************************************************* //
