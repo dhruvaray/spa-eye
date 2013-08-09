@@ -56,6 +56,13 @@ define([
 
             removeCollection:function (col) {
                 return this._spaHook && this._spaHook.removeCollection(col);
+            },
+
+            resetTrackingData:function () {
+                this.auditRecords = {};
+                this._spaHook.resetTrackingData();
+                Events.dispatch(spa_eyeObj._spaHook.listener.fbListeners, 'onTrackingDataCleared');
+
             }
         };
 

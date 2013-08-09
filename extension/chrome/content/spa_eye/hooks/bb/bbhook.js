@@ -342,6 +342,12 @@ define([
                 }
             },
 
+            resetTrackingData:function () {
+                if (this.win) {
+                    this.win.spa_eye.sequence = {};
+                }
+            },
+
             models:function () {
                 if (this.win) {
                     return this.win.spa_eye.models;

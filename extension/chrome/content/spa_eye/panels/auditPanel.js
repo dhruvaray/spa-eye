@@ -26,27 +26,15 @@ define([
             parentPanel:"spa_eye",
             tag:DOMReps.DirTablePlate.tag,
             order:0,
+            follows:['Model', 'Collection'],
 
             onModelOfInterestChange:function (m) {
-                this.show();
-            },
-
-            onModelSet:function () {
-                this.show();
-            },
-
-            onModelFetch:function () {
-                this.show();
-            },
-
-            onModelSave:function () {
                 this.show();
             },
 
             onTrackingDataCleared:function () {
                 this.show();
             },
-
 
             show:function () {
                 var spa_eyeObj = this.context.spa_eyeObj;

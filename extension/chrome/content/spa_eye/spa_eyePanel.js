@@ -117,16 +117,16 @@ define([
 
 
             inspectNode:function (node) {
-                if (this.currentPlate === childPlate.VIEW) {
-                    var views = this.context.spa_eyeObj.getViews();
-                    this.plates.view.expandSelectedView(_.findWhere(views, {el:node.wrappedJSObject}));
+                if (this.currentPlate === childPlate.VIEW && this.inspectingObject) {
+                    this.plates.view.expandSelectedView(this.inspectingObject);
                 }
                 return false;
             },
 
             supportsObject:function (object, type) {
                 var views = this.context.spa_eyeObj.getViews();
-                return _.findWhere(views, {el:object.wrappedJSObject});
+                this.inspectingObject = _.findWhere(views, {el:object.wrappedJSObject});
+                return this.inspectingObject;
             },
 
             showWarning:function () {
@@ -236,11 +236,7 @@ define([
             },
 
             resetTrackingData:function () {
-                var spa_eyeObj = this.context.spa_eyeObj;
-                var win = this.context.window.wrappedJSObject;
-                win.spa_eye.sequence = {};
-                spa_eyeObj.auditRecords = {};
-                Events.dispatch(spa_eyeObj._spaHook.listener.fbListeners, 'onTrackingDataCleared');
+                this.context.spa_eyeObj.resetTrackingData();
             },
 
             getCurrentPlate:function (plateName) {

@@ -24,42 +24,22 @@ define([
 
             parentPanel:"spa_eye",
             order:1,
+            follows:['Model', 'Collection'],
 
 
             initialize:function () {
                 this._super.apply(this, arguments);
-                //var splitter = Firebug.chrome.window.document.createElement("hr");
-                /*splitter.setAttribute("orient","horizontal");
-                 splitter.setAttribute("id","eventSplitter");
-                 splitter.setAttribute("collapse","none");
-                 splitter.setAttribute("tooltip","hello there");*/
-
                 this.timeline.TIMELINE.replace({object:[]}, this.panelNode);
                 this.timeline.TABLE.append({}, this.panelNode);
                 this.timeline.tag.append({sections:[], mainPanel:this.panelNode}, this.panelNode.lastChild);
-                //this.panelNode.parentNode.insertBefore(splitter, this.panelNode.lastChild);
-
                 this.sequenceEditor = this.panelNode.firstChild.contentWindow;
                 var self = this;
                 this.panelNode.firstChild.onload = function () {
                     self.show();
                 }
-
             },
 
             onModelOfInterestChange:function (m) {
-                this.show();
-            },
-
-            onModelSet:function () {
-                this.show();
-            },
-
-            onModelFetch:function () {
-                this.show();
-            },
-
-            onModelSave:function () {
                 this.show();
             },
 
