@@ -5,7 +5,6 @@
         >
 
     <hbox flex="1" style="overflow:scroll;">
-        <div id="loading">Generating...</div>
         <div id="sequence"></div>
     </hbox>
 
@@ -58,9 +57,12 @@
             }
 
             try {
-                document.getElementById("loading").innerHTML = "Generating...";
                 document.getElementById("sequence").innerHTML = "";
+                sequenceDiagram = Diagram.parse("Title: Generating...");
+                sequenceDiagram.drawSVG("sequence", {theme:'simple'});
+
                 setTimeout(function(){
+                    document.getElementById("sequence").innerHTML = "";
                     sequenceDiagram = Diagram.parse(sequence);
                     sequenceDiagram.drawSVG("sequence", {theme:'simple'});
                     document.getElementById("loading").innerHTML = "";
