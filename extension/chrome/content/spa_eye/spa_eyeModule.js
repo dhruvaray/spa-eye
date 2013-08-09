@@ -9,12 +9,14 @@ define([
 
     "spa_eye/lib/uri",
     "spa_eye/hooks/bb/bbhook",
+    "spa_eye/util/common",
 
     "spa_eye/spa_eyeObj"
 ],
-    function (Firebug, FBL, FBTrace, Locale, Events, URI, BBHook, spa_eyeObj) {
+    function (Firebug, FBL, FBTrace, Locale, Events, URI, BBHook, Common, spa_eyeObj) {
 
         var NetRequestEntry = Firebug.NetMonitor.NetRequestEntry;
+        var Operation = Common.Operation;
 
         Firebug.spa_eyeModule = FBL.extend(Firebug.ActivableModule, {
             initialize:function (prefDomain, prefNames) {
@@ -73,8 +75,8 @@ define([
                             FBTrace.sysout("spa_eye; on response, current model", win.spa_eye.cm);
                         }
                         hook.recordAuditEvent(win.spa_eye.cm, win.spa_eye.cm);
-                        Events.dispatch(hook.listener.fbListeners, 'onModelSave',
-                            [win.spa_eye.cm, NetRequestEntry.isError(file) ? 'row-error' : 'row-success']);
+                        Events.dispatch(hook.listener.fbListeners, 'onBackboneEvent',
+                            [win.spa_eye.cm, Operation.SYNC, NetRequestEntry.isError(file)]);
                     }
                 }
             },

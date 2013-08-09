@@ -45,13 +45,9 @@ define([
                 if (!m || !m.cid) return;
                 spa_eyeObj._moi = m;
                 Events.dispatch(spa_eyeObj._spaHook.listener.fbListeners, 'onModelOfInterestChange', [m]);
-            },
-
-            isValidValue:function(col) {
-                if (!col || !col.cid) return false;
-                var collections = this.context.spa_eyeObj.getCollections() || [];
-                return collections.indexOf(col) !== -1;
             }
+
+
         });
 
         return PANEL;

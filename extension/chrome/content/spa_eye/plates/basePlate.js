@@ -28,6 +28,7 @@ define([
                     this.parent = options.parent;
                     this.sections = this.createSections();
                 }
+                this.spa_eyeObj = this.context.spa_eyeObj;
             },
 
             render:function () {
@@ -147,18 +148,28 @@ define([
                 }
             },
 
-            isValidValue:function (m) {
-                return false;
-            }
-        });
+            onBackboneLoaded:function () {
+                this.Backbone = this.spa_eyeObj.Backbone;
+            },
 
-        _.each(Common.Operation, function (key) {
-            var cb = key.charAt(0).toUpperCase() + key.slice(1);
-            BasePlate.prototype['onModel' + cb] = function (m, t) {
-                if (this.isCurrentPlate() && this.isValidValue(m)) {
-                    this.sections && this.sections.forEach(function (p) {
-                        p._onRowAdd(m, {type:t || Common.OperationClass[key]});
+            onBackboneEvent:function (bbentity, operation, args) {
+                if (!this.parent.isCurrentPanel()) return false;
+
+
+                operation = operation.charAt(0).toUpperCase() + operation.slice(1);
+                var type = '';
+                if (this.name)
+                    type = this.name.charAt(0).toUpperCase() + this.name.slice(1);
+
+                if (type && (bbentity instanceof this.spa_eyeObj.Backbone[type])) {
+                    this.sections && this.sections.forEach(function (section) {
+                        section._onRowAdd(bbentity, {type:Common.OperationClass[operation]});
                     }, this);
+
+                    var catchall_args = [bbentity];
+                    catchall_args.push.apply(catchall_args, args);
+                    var method = 'on' + type + operation;
+                    this[method] && this[method].apply(this, catchall_args);
                 }
             }
         });

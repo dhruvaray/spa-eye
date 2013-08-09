@@ -71,8 +71,7 @@ define([
 
                 win.spa_eye.path.pop();
 
-                var cb = type.charAt(0).toUpperCase() + type.slice(1);
-                Events.dispatch(self.listener.fbListeners, 'onModel' + cb, [model]);
+                Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [model, type]);
 
                 return result;
             };
@@ -105,8 +104,7 @@ define([
 
                 win.spa_eye.path.pop();
 
-                var cb = type.charAt(0).toUpperCase() + type.slice(1);
-                Events.dispatch(self.listener.fbListeners, 'onModel' + cb, [collection]);
+                Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [collection, type]);
 
                 return result;
             }
@@ -134,7 +132,7 @@ define([
                     attachTemplatesToViews();
                     result = fn.call(win._, data);
                 }
-                Events.dispatch(self.listener.fbListeners, 'onViewRender', [win.spa_eye.cv]);
+                Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [win.spa_eye.cv, Operation.VIEW]);
                 return result;
             }
 
@@ -240,7 +238,7 @@ define([
                 win.document.addEventListener("afterscriptexecute", register);
                 win.addEventListener("load", register);
                 win.addEventListener('SPA_Eye:View.Remove', function (e) {
-                    Events.dispatch(self.listener.fbListeners, 'onViewRender', [e.view]);
+                    Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [e.view, Operation.REMOVE]);
                 });
 
             },

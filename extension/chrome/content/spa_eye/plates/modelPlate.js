@@ -159,26 +159,14 @@ define([
 // ********************************************************************************************* //
 // onModelSet and onModelSave
 // ********************************************************************************************* //
-
-            isValidValue:function(model) {
-                if (!model || !model.cid) return false;
-                var models = this.context.spa_eyeObj.getModels() || [];
-                return models.indexOf(model) !== -1;
-            },
-
             onModelSet:function (model) {
-                if (this.isCurrentPlate() && this.isValidValue(model)) {
-                    this.context.spa_eyeObj._mostused_models.add(model.cid, model, 'set');
-                    this._super.apply(this, arguments);
-                }
+                this.context.spa_eyeObj._mostused_models.add(model.cid, model, 'set');
             },
 
             onModelSave:function (model) {
-                if (this.isCurrentPlate() && this.isValidValue(model)) {
-                    this.context.spa_eyeObj._mostused_models.add(model.cid, model, 'save');
-                    this._super.apply(this, arguments);
-                }
+                this.context.spa_eyeObj._mostused_models.add(model.cid, model, 'save');
             }
+
         });
 
         return PANEL;

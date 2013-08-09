@@ -55,7 +55,7 @@ define([
                     container:'allViewsDiv',
                     body:'allViewsDivBody',
                     data:function () {
-                        return self.context.spa_eyeObj.getViews({live:true})
+                        return self.spa_eyeObj.getViews({live:true})
                     }
                 });
 
@@ -66,7 +66,7 @@ define([
                     container:'allViewsDiv',
                     body:'allViewsDivBody',
                     data:function () {
-                        return self.context.spa_eyeObj.getViews({live:false})
+                        return self.spa_eyeObj.getViews({live:false})
                     }
                 });
 
@@ -89,7 +89,9 @@ define([
                     Firebug.Inspector.highlightObject(v.el, this.context);
                 }
             }
+
         });
+
 
         return PANEL;
     });
