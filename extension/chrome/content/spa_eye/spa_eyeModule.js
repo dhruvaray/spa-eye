@@ -15,25 +15,7 @@ define([
 ],
     function (Firebug, FBL, FBTrace, Locale, Events, URI, BBHook, Common, spa_eyeObj) {
 
-        var NetRequestEntry = Firebug.NetMonitor.NetRequestEntry;
-        var Operation = Common.Operation;
-
         Firebug.spa_eyeModule = FBL.extend(Firebug.ActivableModule, {
-            initialize:function (prefDomain, prefNames) {
-                Firebug.Module.initialize.apply(this, arguments);
-                // Add Listener
-                Firebug.NetMonitor.addListener(this);
-                Firebug.connection.addListener(this);
-
-            },
-
-            shutdown:function () {
-                Firebug.Module.shutdown.apply(this, arguments);
-
-                // Remove Listener
-                Firebug.NetMonitor.removeListener(this);
-                Firebug.connection.removeListener(this);
-            },
 
             // Called when a new context is created but before the page is loaded.
             initContext:function (context, persistedState) {
@@ -57,51 +39,6 @@ define([
                 context.spa_eyeObj._spaHook.cleanup();
                 if (FBTrace.DBG_SPA_EYE) {
                     FBTrace.sysout("spa_eye; Successfully emptied maintenance collections for spa-eye module.");
-                }
-            },
-
-
-            onResponseBody:function (context, file) {
-                var win = context.window.wrappedJSObject;
-                var spObj = context.spa_eyeObj;
-                var hook = spObj._spaHook;
-                if (spObj.hooked()) {
-                    if (file && file.href) {
-                        win.spa_eye.cm = spObj._currentSynced[file.href];
-                        delete spObj._currentSynced[file.href];
-                    }
-                    if (win.spa_eye.cm) {
-                        if (FBTrace.DBG_SPA_EYE) {
-                            FBTrace.sysout("spa_eye; on response, current model", win.spa_eye.cm);
-                        }
-                        hook.recordAuditEvent(win.spa_eye.cm, win.spa_eye.cm);
-                        Events.dispatch(hook.listener.fbListeners, 'onBackboneEvent',
-                            [win.spa_eye.cm, Operation.SYNC, NetRequestEntry.isError(file)]);
-                    }
-                }
-            },
-
-            onRequest:function (context, file) {
-                var win = context.window.wrappedJSObject;
-                var spObj = context.spa_eyeObj;
-                if (spObj && spObj.hooked()) {
-                    if (win.spa_eye.cm) {
-                        context.spa_eyeObj._currentSynced[file.href] = win.spa_eye.cm;
-                    }
-                }
-            },
-
-            showPanel:function (browser, panel) {
-
-            },
-
-            onObserverChange:function (observer) {
-                if (this.hasObservers()) {
-                    // There are observers (plates) using this model,
-                    // let's activate necessary service/server hooks.
-                } else {
-                    // There are no observer using this model, let's clean up
-                    // registered hooks.
                 }
             }
 

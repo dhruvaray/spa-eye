@@ -3,7 +3,7 @@ define([
 ], function () {
     return {
         Operation:{
-            SAVE:"save", FETCH:"fetch", SET:"set", VIEW:"render", ADD:"add",
+            SAVE:"save", FETCH:"fetch", SET:"set", RENDER:"render", ADD:"add",
             REMOVE:"remove", RESET:"reset", SORT:"sort", DESTROY:"destroy", SYNC:"sync"
         },
         OperationClass:{

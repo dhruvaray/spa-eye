@@ -155,8 +155,8 @@ define([
             onBackboneEvent:function (bbentity, operation, args) {
                 if (!this.parent.isCurrentPanel()) return false;
 
-
-                operation = operation.charAt(0).toUpperCase() + operation.slice(1);
+                //Note the case
+                var Operation = operation.charAt(0).toUpperCase() + operation.slice(1);
                 var type = '';
                 if (this.name)
                     type = this.name.charAt(0).toUpperCase() + this.name.slice(1);
@@ -168,7 +168,7 @@ define([
 
                     var catchall_args = [bbentity];
                     catchall_args.push.apply(catchall_args, args);
-                    var method = 'on' + type + operation;
+                    var method = 'on' + type + Operation;
                     this[method] && this[method].apply(this, catchall_args);
                 }
             }

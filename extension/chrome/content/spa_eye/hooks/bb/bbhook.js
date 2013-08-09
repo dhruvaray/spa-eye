@@ -122,7 +122,7 @@ define([
                 };
 
                 self.recordSequenceEvent(win, {
-                    operation:Operation.VIEW,
+                    operation:Operation.RENDER,
                     cid:win.spa_eye.cv ? win.spa_eye.cv.cid : "",
                     target:win.spa_eye.cv,
                     args:fnargs
@@ -132,7 +132,7 @@ define([
                     attachTemplatesToViews();
                     result = fn.call(win._, data);
                 }
-                Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [win.spa_eye.cv, Operation.VIEW]);
+                Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [win.spa_eye.cv, Operation.RENDER]);
                 return result;
             }
 
