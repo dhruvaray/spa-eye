@@ -3,10 +3,13 @@ if (window.Backbone) {
     window.spa_eye.sequence = {};
     window.spa_eye.path = [];
     window.spa_eye.idCounter = 0;
+    window.spa_eye.templates = {};
+
     window.spa_eye.uniqueId = function (prefix) {
         var id = ++this.idCounter + '';
         return prefix ? prefix + id : id;
     };
+
     var _ModelProxy = window.Backbone.Model;
     if (_ModelProxy) {
         var _ModelProxyProto = window.Backbone.Model.prototype;

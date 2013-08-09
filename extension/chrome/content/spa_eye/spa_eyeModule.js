@@ -72,9 +72,9 @@ define([
                         if (FBTrace.DBG_SPA_EYE) {
                             FBTrace.sysout("spa_eye; on response, current model", win.spa_eye.cm);
                         }
-                        hook.recordModelAudit(win.spa_eye.cm, win.spa_eye.cm);
+                        hook.recordAuditEvent(win.spa_eye.cm, win.spa_eye.cm);
                         Events.dispatch(hook.listener.fbListeners, 'onModelSave',
-                                [win.spa_eye.cm, NetRequestEntry.isError(file) ? 'row-error' : 'row-success']);
+                            [win.spa_eye.cm, NetRequestEntry.isError(file) ? 'row-error' : 'row-success']);
                     }
                 }
             },

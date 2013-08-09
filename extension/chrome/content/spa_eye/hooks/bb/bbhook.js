@@ -40,9 +40,104 @@ define([
                     this[key] = obj[key];
                 }
             }
+            var self = this;
+            this.function_womb = {};
+            this.function_womb.MODEL = function (win, model, type, fn, fnargs) {
 
-            this._modelProxies = {};
-            this._collectionProxies = {};
+                win.spa_eye.cm = model;
+
+                win.spa_eye.path.push(model);
+
+                self.recordSequenceEvent(win, {
+                    cid:model.cid,
+                    target:model.toJSON(),
+                    operation:type,
+                    args:fnargs
+                });
+
+                self.recordAuditEvent(model, {
+                    cid:model.cid,
+                    operation:type,
+                    target:model.toJSON(),
+                    args:fnargs
+                });
+
+                var result = fn.apply(model, Array.slice(fnargs));
+
+                if (win.spa_eye.cm === win.spa_eye.msr)
+                    win.spa_eye.msr = undefined;
+
+                win.spa_eye.cm = undefined;
+
+                win.spa_eye.path.pop();
+
+                var cb = type.charAt(0).toUpperCase() + type.slice(1);
+                Events.dispatch(self.listener.fbListeners, 'onModel' + cb, [model]);
+
+                return result;
+            };
+            this.function_womb.COLLECTION = function (win, collection, type, fn, fnargs) {
+
+                win.spa_eye.cc = collection;
+
+                win.spa_eye.path.push(collection);
+
+                self.recordSequenceEvent(win, {
+                    cid:collection.cid,
+                    target:collection.toJSON(),
+                    operation:type,
+                    args:fnargs
+                });
+
+                self.recordAuditEvent(collection, {
+                    cid:collection.cid,
+                    operation:type,
+                    target:collection.toJSON(),
+                    args:fnargs
+                });
+
+                var result = fn.apply(collection, Array.slice(fnargs));
+
+                if (win.spa_eye.cc === win.spa_eye.csr)
+                    win.spa_eye.csr = undefined;
+
+                win.spa_eye.cc = undefined;
+
+                win.spa_eye.path.pop();
+
+                var cb = type.charAt(0).toUpperCase() + type.slice(1);
+                Events.dispatch(self.listener.fbListeners, 'onModel' + cb, [collection]);
+
+                return result;
+            }
+            this.function_womb.VIEW = function (win, script_id, fn, fnargs, data) {
+                var result;
+
+                var attachTemplatesToViews = function () {
+                    var rendered = win.spa_eye.cv;
+                    if (rendered) {
+                        var templates = rendered.inferredTemplates;
+                        if (templates.indexOf(script_id) == -1) {
+                            templates.push(script_id);
+                        }
+                    }
+                };
+
+                self.recordSequenceEvent(win, {
+                    operation:Operation.VIEW,
+                    cid:win.spa_eye.cv ? win.spa_eye.cv.cid : "",
+                    target:win.spa_eye.cv,
+                    args:fnargs
+                });
+
+                if (data) {
+                    attachTemplatesToViews();
+                    result = fn.call(win._, data);
+                }
+                Events.dispatch(self.listener.fbListeners, 'onViewRender', [win.spa_eye.cv]);
+                return result;
+            }
+
         }
 
         BBHook.prototype = {
@@ -50,90 +145,56 @@ define([
 
             registerViewHooks:function (win) {
                 var self = this;
-                var _templateProxy = win._ && win._.template;
-
-                if (!_templateProxy) {
-                    if (FBTrace.DBG_SPA_EYE) {
-                        FBTrace.sysout("spa_eye; Could not add hook.Either _/_.template is not found. _ = " +
-                            win._);
+                var watch = function (id, oldval, newval) {
+                    return function () {
+                        var args = [newval];
+                        args.push.apply(args, arguments);
+                        return self.registerTemplateHook.apply(self, args);
                     }
-                    return false;
                 }
-                win.spa_eye.templates = win.spa_eye.templates || {};
+                if (win._) {
+                    win._.watch("template", watch);
+                    win._["template"] = win._["template"];
+                }
+            },
 
-                win._.template = function (text, data, settings) {
+            registerTemplateHook:function (original, text, data, settings) {
 
-                    try {
-                        if (!text) {
-                            if (FBTrace.DBG_SPA_EYE) {
-                                FBTrace.sysout("spa_eye; template text is empty ");
-                            }
-                            return false;
+                var self = this;
+                var win = this.context.window.wrappedJSObject;
+                try {
+                    if (!text) {
+                        if (FBTrace.DBG_SPA_EYE) {
+                            FBTrace.sysout("spa_eye; template text is empty ");
                         }
-                        var script = DOM.getMatchingNode(win, "script", text)
-                        var script_id = (script && script.id) ? script.id : SHA.getTextHash(text);
-                        var proxiedTemplateRef = '_t' + script_id;
-                        var compiledTemplate = win[proxiedTemplateRef];
-
-                        if (!compiledTemplate) {
-                            compiledTemplate = _templateProxy.call(win._, text);
-                            var source = _.template.call(_, text).source;
-                            if (source) {
-                                var f = escape("window['" + proxiedTemplateRef + "']=" + source);
-                                // Attach to body
-                                DOM.appendExternalScriptTagToHead(win.document,
-                                    "data:text/javascript;fileName=" + script_id + ";," + f);
-                                // Record using script_id
-                                win.spa_eye.templates[script_id] = text;
-
-                            }
-                        }
-
-                        var attachTemplatesToViews = function () {
-                            var rendered = win.spa_eye.cv;
-                            if (rendered) {
-                                var templates = rendered.inferredTemplates;
-                                if (templates.indexOf(script_id) == -1) {
-                                    templates.push(script_id);
-                                }
-                            }
-                        };
-
-
-                        self.recordSequenceEvent(win, {
-                            operation:Operation.VIEW,
-                            cid:win.spa_eye.cv ? win.spa_eye.cv.cid : "",
-                            target:win.spa_eye.cv,
-                            args:arguments
-                        });
-
-                        if (data) {
-                            attachTemplatesToViews();
-                            return compiledTemplate.call(win._, data);
-                        }
-                        Events.dispatch(self.listener.fbListeners, 'onViewRender', [win.spa_eye.cv]);
-
-                    } catch (e) {
-                        if (FBTrace.DBG_ERRORS)
-                            FBTrace.sysout("spa_eye; Unexpected error", e);
+                        return false;
                     }
+                    var script = DOM.getMatchingNode(win, "script", text)
+                    var script_id = (script && script.id) ? script.id : SHA.getTextHash(text);
+                    var proxiedTemplateRef = '_t' + script_id;
+                    var compiledTemplate = win[proxiedTemplateRef];
 
-                    return function (data) {
-                        var render = win[proxiedTemplateRef] ? win[proxiedTemplateRef] : compiledTemplate;
-                        render.source = render.source || source;
-                        self.recordSequenceEvent(win, {
-                            operation:Operation.VIEW,
-                            cid:win.spa_eye.cv ? win.spa_eye.cv.cid : "",
-                            target:win.spa_eye.cv,
-                            args:arguments
-                        });
-                        attachTemplatesToViews();
-                        Events.dispatch(self.listener.fbListeners, 'onViewRender', [win.spa_eye.cv]);
-                        return render.call(win._, data);
-                    };
+                    if (!compiledTemplate) {
+                        compiledTemplate = original.call(win._, text);
+                        var source = _.template.call(_, text).source;
+                        if (source) {
+                            var f = escape("window['" + proxiedTemplateRef + "']=" + source);
+                            DOM.appendExternalScriptTagToHead(win.document,
+                                "data:text/javascript;fileName=" + script_id + ";," + f);
+                            win.spa_eye.templates[script_id] = text;
+                        }
+                    }
+                    var result = self.function_womb.VIEW(win, script_id, compiledTemplate, [text, data, settings], data);
+                    if (result) return result;
+
+                } catch (e) {
+                    if (FBTrace.DBG_ERRORS)
+                        FBTrace.sysout("spa_eye; Unexpected error", e);
                 }
-
-
+                return function (templateData) {
+                    var render = win[proxiedTemplateRef] ? win[proxiedTemplateRef] : compiledTemplate;
+                    return self.function_womb.VIEW(win, script_id, render, arguments, templateData);
+                };
             },
 
             registerSetHooks:function (win) {
@@ -142,19 +203,23 @@ define([
                 var ModelProto = spa_eyeObj.Backbone.Model.prototype;
                 var CollectionProto = spa_eyeObj.Backbone.Collection.prototype;
 
-                _.each(Operation, function (key) {
-                    if (ModelProto[key]) {
-                        self._modelProxies[key] = ModelProto[key];
-                        ModelProto[key] = function () {
-                            return self.modelFnWomb(win, this, key, self._modelProxies[key], arguments);
+                var getWatch = function (womb) {
+                    var watch = function (id, oldval, newval) {
+                        return function () {
+                            return womb.call(self, win, this, id, newval, arguments);
                         }
                     }
+                    return watch;
+                }
 
+                _.each(Operation, function (key) {
+                    if (ModelProto[key]) {
+                        ModelProto.watch(key, getWatch(self.function_womb.MODEL));
+                        ModelProto[key] = ModelProto[key];
+                    }
                     if (CollectionProto[key]) {
-                        self._collectionProxies[key] = CollectionProto[key];
-                        CollectionProto[key] = function () {
-                            return self.collectionFnWomb(win, this, key, self._collectionProxies[key], arguments);
-                        }
+                        CollectionProto.watch(key, getWatch(self.function_womb.COLLECTION));
+                        CollectionProto[key] = CollectionProto[key];
                     }
                 });
             },
@@ -173,7 +238,6 @@ define([
                     self.registerBBHooks(win);
                 };
                 win.document.addEventListener("afterscriptexecute", register);
-                //probably not required.
                 win.addEventListener("load", register);
                 win.addEventListener('SPA_Eye:View.Remove', function (e) {
                     Events.dispatch(self.listener.fbListeners, 'onViewRender', [e.view]);
@@ -212,76 +276,6 @@ define([
 
             isBackboneInitialized:function (win) {
                 return win.Backbone;
-            },
-
-            modelFnWomb:function (win, model, type, fn, fnargs) {
-
-                win.spa_eye.cm = model;
-
-                win.spa_eye.path.push(model);
-
-                this.recordSequenceEvent(win, {
-                    cid:model.cid,
-                    target:model.toJSON(),
-                    operation:type,
-                    args:fnargs
-                });
-
-                this.recordModelAudit(model, {
-                    cid:model.cid,
-                    operation:type,
-                    target:model.toJSON(),
-                    args:fnargs
-                });
-
-                var result = fn.apply(model, Array.slice(fnargs));
-
-                if (win.spa_eye.cm === win.spa_eye.msr)
-                    win.spa_eye.msr = undefined;
-
-                win.spa_eye.cm = undefined;
-
-                win.spa_eye.path.pop();
-
-                var cb = type.charAt(0).toUpperCase() + type.slice(1);
-                Events.dispatch(this.listener.fbListeners, 'onModel' + cb, [model]);
-
-                return result;
-            },
-
-            collectionFnWomb:function (win, collection, type, fn, fnargs) {
-
-                win.spa_eye.cc = collection;
-
-                win.spa_eye.path.push(collection);
-
-                this.recordSequenceEvent(win, {
-                    cid:collection.cid,
-                    target:collection.toJSON(),
-                    operation:type,
-                    args:fnargs
-                });
-
-                this.recordModelAudit(collection, {
-                    cid:collection.cid,
-                    operation:type,
-                    target:collection.toJSON(),
-                    args:fnargs
-                });
-
-                var result = fn.apply(collection, Array.slice(fnargs));
-
-                if (win.spa_eye.cc === win.spa_eye.csr)
-                    win.spa_eye.csr = undefined;
-
-                win.spa_eye.cc = undefined;
-
-                win.spa_eye.path.pop();
-
-                var cb = type.charAt(0).toUpperCase() + type.slice(1);
-                Events.dispatch(this.listener.fbListeners, 'onModel' + cb, [collection]);
-
-                return result;
             },
 
             recordSequenceEvent:function (win, record) {
@@ -324,7 +318,7 @@ define([
                 }
             },
 
-            recordModelAudit:function (model, record) {
+            recordAuditEvent:function (model, record) {
                 // return if `record` is off
                 var spa_eyeObj = this.context.spa_eyeObj;
 
