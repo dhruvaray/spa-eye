@@ -108,7 +108,7 @@ define([
 
                 return result;
             }
-            this.function_womb.VIEW = function (win, script_id, fn, fnargs, data) {
+            this.function_womb.TEMPLATE = function (win, script_id, fn, fnargs, data) {
                 var result;
 
                 var attachTemplatesToViews = function () {
@@ -135,6 +135,23 @@ define([
                 Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [win.spa_eye.cv, Operation.RENDER]);
                 return result;
             }
+
+            this.function_womb.VIEW = {};
+            this.function_womb.VIEW.render = function (win, view, fn, fnargs) {
+                win.spa_eye.cv = view;
+                view.inferredTemplates = view.inferredTemplates || [];
+                win.spa_eye.path.push(view);
+                var result = fn.apply(view, fnargs);
+                win.spa_eye.path.pop();
+                win.spa_eye.cv = undefined;
+                return result;
+            };
+            this.function_womb.VIEW.remove = function (win, view, fn, fnargs) {
+                var result = fn.apply(view, fnargs);
+                view.mfd = true;
+                Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [view, Operation.REMOVE]);
+                return result;
+            };
 
         }
 
@@ -182,7 +199,7 @@ define([
                             win.spa_eye.templates[script_id] = text;
                         }
                     }
-                    var result = self.function_womb.VIEW(win, script_id, compiledTemplate, [text, data, settings], data);
+                    var result = self.function_womb.TEMPLATE(win, script_id, compiledTemplate, [text, data, settings], data);
                     if (result) return result;
 
                 } catch (e) {
@@ -191,7 +208,7 @@ define([
                 }
                 return function (templateData) {
                     var render = win[proxiedTemplateRef] ? win[proxiedTemplateRef] : compiledTemplate;
-                    return self.function_womb.VIEW(win, script_id, render, arguments, templateData);
+                    return self.function_womb.TEMPLATE(win, script_id, render, arguments, templateData);
                 };
             },
 
@@ -237,8 +254,25 @@ define([
                 };
                 win.document.addEventListener("afterscriptexecute", register);
                 win.addEventListener("load", register);
-                win.addEventListener('SPA_Eye:View.Remove', function (e) {
-                    Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [e.view, Operation.REMOVE]);
+                win.addEventListener('Backbone_Eye:ADD', function (e) {
+
+                    var viewInstanceFnWomb = function (womb, view) {
+                        return function (id, oldval, newval) {
+                            return function () {
+                                return womb.call(view, win, view, newval, arguments);
+                            }
+                        };
+                    };
+                    var target = e.detail.data;
+                    if (e.detail.type == 'View' && target) {
+                        _.each(Operation, function (key) {
+                            if (target[key]) {
+                                target.watch(key, viewInstanceFnWomb(self.function_womb.VIEW[key], target));
+                                target[key] = target[key];
+                            }
+                        });
+                    }
+                    Events.dispatch(self.listener.fbListeners, 'onBackboneEntityAdded', [e]);
                 });
 
             },
