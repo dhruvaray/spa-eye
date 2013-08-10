@@ -1,14 +1,12 @@
 if (window.Backbone) {
     window.spa_eye = {};
-    window.spa_eye.sequence = {};
-    window.spa_eye.path = [];
     window.spa_eye.idCounter = 0;
-    window.spa_eye.templates = {};
 
     window.spa_eye.uniqueId = function (prefix) {
         var id = ++this.idCounter + '';
         return prefix ? prefix + id : id;
     };
+
     window.spa_eye.proxyable = ['Model', 'Collection', 'View'];
     window.spa_eye.proxy = {};
     window.spa_eye.proxyproto = {};
@@ -23,12 +21,6 @@ if (window.Backbone) {
             if (window.spa_eye.proxy[entity]) {
                 window.spa_eye.proxyproto[entity] = window.Backbone[entity].prototype;
                 window.Backbone[entity] = function (attributes, options) {
-                    console.log("Entity : " + entity);
-                    console.log("Key : " + key);
-                    console.log("Backbone Entity : " + window.Backbone[entity]);
-                    console.log("Backbone Proxy Entity : " + window.spa_eye.proxy[entity]);
-                    console.log(this);
-                    console.log(this instanceof  window.Backbone[entity]);
                     this.cid = this.cid || (typeof(window._) === "undefined")
                         ? window.spa_eye.uniqueId(prefix)
                         : window._.uniqueId(prefix);

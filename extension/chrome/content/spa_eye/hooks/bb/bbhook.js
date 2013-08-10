@@ -25,6 +25,8 @@ define([
         const Cr = Components.results;
         const bbhook_wp = "chrome://spa_eye/content/hooks/bb/bbhook_wp.js";
 
+        var _csr, _msr, _vsr, _cm, _cc, _cv, _path = [], _sequences = {}, _templates = {};
+
         var Operation = Common.Operation;
 
 // ********************************************************************************************* //
@@ -44,9 +46,9 @@ define([
             this.function_womb = {};
             this.function_womb.MODEL = function (win, model, type, fn, fnargs) {
 
-                win.spa_eye.cm = model;
+                _cm = model;
 
-                win.spa_eye.path.push(model);
+                _path.push(model);
 
                 self.recordSequenceEvent(win, {
                     cid:model.cid,
@@ -64,12 +66,12 @@ define([
 
                 var result = fn.apply(model, Array.slice(fnargs));
 
-                if (win.spa_eye.cm === win.spa_eye.msr)
-                    win.spa_eye.msr = undefined;
+                if (_cm === _msr)
+                    _msr = undefined;
 
-                win.spa_eye.cm = undefined;
+                _cm = undefined;
 
-                win.spa_eye.path.pop();
+                _path.pop();
 
                 Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [model, type]);
 
@@ -77,9 +79,9 @@ define([
             };
             this.function_womb.COLLECTION = function (win, collection, type, fn, fnargs) {
 
-                win.spa_eye.cc = collection;
+                _cc = collection;
 
-                win.spa_eye.path.push(collection);
+                _path.push(collection);
 
                 self.recordSequenceEvent(win, {
                     cid:collection.cid,
@@ -97,12 +99,12 @@ define([
 
                 var result = fn.apply(collection, Array.slice(fnargs));
 
-                if (win.spa_eye.cc === win.spa_eye.csr)
-                    win.spa_eye.csr = undefined;
+                if (_cc === _csr)
+                    _csr = undefined;
 
-                win.spa_eye.cc = undefined;
+                _cc = undefined;
 
-                win.spa_eye.path.pop();
+                _path.pop();
 
                 Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [collection, type]);
 
@@ -112,7 +114,7 @@ define([
                 var result;
 
                 var attachTemplatesToViews = function () {
-                    var rendered = win.spa_eye.cv;
+                    var rendered = _cv;
                     if (rendered) {
                         var templates = rendered.inferredTemplates;
                         if (templates.indexOf(script_id) == -1) {
@@ -123,8 +125,8 @@ define([
 
                 self.recordSequenceEvent(win, {
                     operation:Operation.RENDER,
-                    cid:win.spa_eye.cv ? win.spa_eye.cv.cid : "",
-                    target:win.spa_eye.cv,
+                    cid:_cv ? _cv.cid : "",
+                    target:_cv,
                     args:fnargs
                 });
 
@@ -132,18 +134,18 @@ define([
                     attachTemplatesToViews();
                     result = fn.call(win._, data);
                 }
-                Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [win.spa_eye.cv, Operation.RENDER]);
+                Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [_cv, Operation.RENDER]);
                 return result;
             }
 
             this.function_womb.VIEW = {};
             this.function_womb.VIEW.render = function (win, view, fn, fnargs) {
-                win.spa_eye.cv = view;
+                _cv = view;
                 view.inferredTemplates = view.inferredTemplates || [];
-                win.spa_eye.path.push(view);
+                _path.push(view);
                 var result = fn.apply(view, fnargs);
-                win.spa_eye.path.pop();
-                win.spa_eye.cv = undefined;
+                _path.pop();
+                _cv = undefined;
                 return result;
             };
             this.function_womb.VIEW.remove = function (win, view, fn, fnargs) {
@@ -196,7 +198,7 @@ define([
                             var f = escape("window['" + proxiedTemplateRef + "']=" + source);
                             DOM.appendExternalScriptTagToHead(win.document,
                                 "data:text/javascript;fileName=" + script_id + ";," + f);
-                            win.spa_eye.templates[script_id] = text;
+                            _templates[script_id] = text;
                         }
                     }
                     var result = self.function_womb.TEMPLATE(win, script_id, compiledTemplate, [text, data, settings], data);
@@ -259,7 +261,9 @@ define([
                     var viewInstanceFnWomb = function (womb, view) {
                         return function (id, oldval, newval) {
                             return function () {
-                                return womb.call(view, win, view, newval, arguments);
+                                var args = [win, view, newval];
+                                args.push.apply(args, arguments);
+                                return womb.apply(view, args);
                             }
                         };
                     };
@@ -315,27 +319,27 @@ define([
                 if (!this.context.spa_eyeObj.isRecord) {
                     return;
                 }
-                record.source = win.spa_eye.path[win.spa_eye.path.length - 2];
+                record.source = _path[_path.length - 2];
 
-                var csr = win.spa_eye.csr;
-                var msr = win.spa_eye.msr;
+                var csr = _csr;
+                var msr = _msr;
                 var isNewInteractionModel = (!msr);
                 var isNewInteractionCollection = (!csr);
-                win.spa_eye.csr = csr || win.spa_eye.cc;
-                win.spa_eye.msr = msr || win.spa_eye.cm;
+                _csr = csr || _cc;
+                _msr = msr || _cm;
 
                 var process = [];
-                win.spa_eye.csr && (process.push(win.spa_eye.csr));
-                win.spa_eye.msr && (process.push(win.spa_eye.msr));
+                _csr && (process.push(_csr));
+                _msr && (process.push(_msr));
 
 
                 try {
                     _.each(process, function (sr) {
                         if (sr && sr.cid) {
-                            win.spa_eye.sequence[sr.cid] = win.spa_eye.sequence[sr.cid] || [];
+                            _sequences[sr.cid] = _sequences[sr.cid] || [];
                             var flows =
-                                (win.spa_eye.sequence[sr.cid].flows =
-                                    win.spa_eye.sequence[sr.cid].flows || []);
+                                (_sequences[sr.cid].flows =
+                                    _sequences[sr.cid].flows || []);
                             var isNewInteraction = sr instanceof this.context.spa_eyeObj.Backbone.Model ?
                                 isNewInteractionModel :
                                 isNewInteractionCollection;
@@ -369,17 +373,18 @@ define([
             cleanup:function () {
                 this.hooked = false;
                 if (this.win) {
-                    this.win.spa_eye.templates = [];
                     this.win.spa_eye.models = [];
                     this.win.spa_eye.views = [];
                     this.win.spa_eye.collections = [];
                 }
+                this.resetTrackingData();
             },
 
             resetTrackingData:function () {
-                if (this.win) {
-                    this.win.spa_eye.sequence = {};
-                }
+                _sequences = _templates = {};
+                _path = [];
+                _csr = _msr = _vsr = undefined;
+                _cm = _cc = _cv = undefined;
             },
 
             models:function () {
@@ -392,6 +397,14 @@ define([
             removeModel:function (model) {
                 return this._removeElement(this.win && this.win.spa_eye.models,
                     model);
+            },
+
+            sequences:function () {
+                return _sequences;
+            },
+
+            templates:function () {
+                return _templates;
             },
 
             views:function (options) {

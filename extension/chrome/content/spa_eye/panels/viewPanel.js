@@ -43,9 +43,8 @@ define([
                     Locale.$STR("spa_eye.script.view.template.transform")
                 ];
                 var context = this.context;
-                var win = context.window.wrappedJSObject;
                 var data = {};
-                data[attr[0]] = win.spa_eye.templates[this.templateName];
+                data[attr[0]] = this.context.spa_eyeObj._spaHook.templates()[this.templateName];
                 data[attr[1]] = source[0];
                 data[attr[2]] = source[1];
 

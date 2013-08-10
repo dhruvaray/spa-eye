@@ -58,9 +58,8 @@ define([
                     }
                     var data = section.data;
                     var cid = data[0] && data[0].cid;
-                    var win = this.context.window.wrappedJSObject;
-                    this.plotData = win.spa_eye.sequence[cid] ?
-                        [win.spa_eye.sequence[cid].flows[idx]] : [];
+                    var sequence = this.context.spa_eyeObj._spaHook.sequences()[cid];
+                    this.plotData = sequence ? [sequence.flows[idx]] : [];
                     this.plotFlow(cid, idx);
                 }
 
@@ -72,8 +71,7 @@ define([
                 var idx = 0;
                 var id = undefined;
                 if (moi && moi.cid) {
-                    var win = this.context.window.wrappedJSObject;
-                    var sequence = win.spa_eye.sequence[moi.cid];
+                    var sequence = this.context.spa_eyeObj._spaHook.sequences()[moi.cid];
                     this.sequenceData = (sequence && sequence.flows) ? sequence.flows : [];
                     idx = this.sequenceData.length - 1;
                     this.plotData = idx >= 0 ? [this.sequenceData[idx]] : [];
