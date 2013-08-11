@@ -6,6 +6,7 @@ define([
     "firebug/firebug",
     "firebug/lib/trace",
     "firebug/lib/locale",
+    "firebug/lib/events",
     "firebug/lib/css",
     "firebug/lib/string",
     "firebug/lib/dom",
@@ -17,7 +18,7 @@ define([
     "spa_eye/dom/modelReps"
 
 ],
-    function (Firebug, FBTrace, Locale, Css, Str, Dom, _, BasePlate, ChildSection, ModelReps) {
+    function (Firebug, FBTrace, Locale, Events, Css, Str, Dom, _, BasePlate, ChildSection, ModelReps) {
 
 
         var PANEL = BasePlate.extend({
@@ -88,6 +89,10 @@ define([
                     win.scroll(0, v.el.offsetTop);
                     Firebug.Inspector.highlightObject(v.el, this.context);
                 }
+                var spa_eyeObj = this.context.spa_eyeObj;
+                spa_eyeObj._moi = v;
+                Events.dispatch(spa_eyeObj._spaHook.listener.fbListeners, 'onModelOfInterestChange', [v]);
+
             }
 
         });

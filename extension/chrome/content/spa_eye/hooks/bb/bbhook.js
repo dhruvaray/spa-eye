@@ -145,15 +145,35 @@ define([
             this.function_womb.VIEW = {};
             this.function_womb.VIEW.render = function (root, view, fn, fnargs) {
                 _cv = view;
-                view.inferredTemplates = view.inferredTemplates || [];
-                _path.push(view);
-                var result = fn.apply(view, fnargs);
-                _path.pop();
+                _path.push(_cv);
+
+                self.recordSequenceEvent(root, {
+                    cid:view.cid,
+                    target:view,
+                    operation:Operation.RENDER,
+                    args:fnargs
+                });
+
+                self.recordAuditEvent(view, {
+                    cid:view.cid,
+                    operation:Operation.RENDER,
+                    target:view,
+                    args:fnargs
+                });
+
+                var result = fn && fn.apply(view, fnargs);
+
+                if (_cv === _vsr)
+                    _vsr = undefined;
+
                 _cv = undefined;
+
+                _path.pop();
+
                 return result;
             };
             this.function_womb.VIEW.remove = function (root, view, fn, fnargs) {
-                var result = fn.apply(view, fnargs);
+                var result = fn && fn.apply(view, fnargs);
                 view.mfd = true;
                 Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [view, Operation.REMOVE]);
                 return result;
@@ -259,36 +279,42 @@ define([
                 root.addEventListener("load", register);
                 root.addEventListener('Backbone_Eye:ADD', function (e) {
 
-                    /*var viewInstanceFnWomb = function (womb, view) {
-                     return function (id, oldval, newval) {
+                    var viewInstanceFnWomb = function (womb, view) {
+                        return function (id, oldval, newval) {
+                            return function () {
+                                var args = [root, view, newval];
+                                args.push.apply(args, arguments);
+                                return womb.apply(view, args);
+                            }
+                        };
+                    };
+
+                    /*var viewInstanceFnWomb = function (womb, view, oldInstanceFn) {
                      return function () {
-                     var args = [root, view, newval];
+                     var args = [root, view, oldInstanceFn];
                      args.push.apply(args, arguments);
                      return womb.apply(view, args);
                      }
-                     };
                      };*/
-
-                    var viewInstanceFnWomb = function (womb, view, oldInstanceFn) {
-                        return function () {
-                            var args = [root, view, oldInstanceFn];
-                            args.push.apply(args, arguments);
-                            return womb.apply(view, args);
-                        }
-                    };
 
                     var target = e.detail.data;
 
                     if (target instanceof self.Backbone.View) {
                         _views.push(target);
+                        var top = _views.length - 1;
                         target.cid = target.cid || _.uniqueId('view');
-                        /*_.each(Operation, function (key) {
-                         if (target[key]) {
-                         target.watch(key, viewInstanceFnWomb(self.function_womb.VIEW[key], target));
-                         target[key] = target[key];
-                         }
-                         });*/
-                        //target.render = viewInstanceFnWomb(self.function_womb.VIEW[render], target, target.render)
+                        target.inferredTemplates = [];
+                        _.each(Operation, function (key) {
+                            if (target[key]) {
+                                _views[top].watch(
+                                    key,
+                                    viewInstanceFnWomb(self.function_womb.VIEW[key], _views[top]
+                                    ));
+                                _views[top][key] = _views[top][key];
+                            }
+                        });
+                        //var renderProxy = target.render;
+                        //target.render = viewInstanceFnWomb(self.function_womb.VIEW[render], target, renderProxy)
                     }
                     if (target instanceof self.Backbone.Model) {
                         _models.push(target);
@@ -347,14 +373,18 @@ define([
 
                 var csr = _csr;
                 var msr = _msr;
+                var vsr = _vsr;
                 var isNewInteractionModel = (!msr);
                 var isNewInteractionCollection = (!csr);
+                var isNewInteractionView = (!vsr);
                 _csr = csr || _cc;
                 _msr = msr || _cm;
+                _vsr = vsr || _cv;
 
                 var process = [];
                 _csr && (process.push(_csr));
                 _msr && (process.push(_msr));
+                _vsr && (process.push(_vsr));
 
 
                 try {
@@ -364,9 +394,14 @@ define([
                             var flows =
                                 (_sequences[sr.cid].flows =
                                     _sequences[sr.cid].flows || []);
-                            var isNewInteraction = sr instanceof this.Backbone.Model ?
-                                isNewInteractionModel :
-                                isNewInteractionCollection;
+                            var isNewInteraction = false;
+
+                            if (sr instanceof this.Backbone.Model)
+                                isNewInteraction = isNewInteractionModel;
+                            if (sr instanceof this.Backbone.Collection)
+                                isNewInteraction = isNewInteractionCollection;
+                            if (sr instanceof this.Backbone.View)
+                                isNewInteraction = isNewInteractionView;
 
                             isNewInteraction ? flows.push([record]) : flows[flows.length - 1].push(record);
                         }
