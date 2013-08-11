@@ -121,7 +121,7 @@ define([
 
             onBackboneEvent:function (bbentity, operation, args) {
                 _.each(this.follows, function (follow) {
-                    if (bbentity  instanceof this.context.spa_eyeObj.Backbone[follow])
+                    if (bbentity  instanceof this.context.spa_eyeObj._spaHook.Backbone[follow])
                         this.show();
                 }, this);
             }

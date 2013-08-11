@@ -111,7 +111,8 @@ define([
             onActivationChanged:function (enable) {
                 if (enable) {
                     Firebug.spa_eyeModule.addObserver(this);
-                    Firebug.currentContext.spa_eyeObj._spaHook.registerContentLoadedHook();
+                    Firebug.currentContext.spa_eyeObj._spaHook.
+                        registerContentLoadedHook.apply(Firebug.currentContext.spa_eyeObj._spaHook);
                 } else {
                     Firebug.spa_eyeModule.removeObserver(this);
                 }

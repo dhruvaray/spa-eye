@@ -26,6 +26,7 @@ define([
         const bbhook_wp = "chrome://spa_eye/content/hooks/bb/bbhook_wp.js";
 
         var _csr, _msr, _vsr, _cm, _cc, _cv, _path = [], _sequences = {}, _templates = {};
+        var _models, _collections, _views;
 
         var Operation = Common.Operation;
 
@@ -37,6 +38,9 @@ define([
             this.context = null;
             this.listener = new Firebug.Listener();
             this.registering = false;
+            _models = [];
+            _collections = []
+            _views = [];
             if (obj) {
                 for (var key in obj) {
                     this[key] = obj[key];
@@ -216,9 +220,8 @@ define([
 
             registerSetHooks:function (win) {
                 var self = this;
-                var spa_eyeObj = this.context.spa_eyeObj;
-                var ModelProto = spa_eyeObj.Backbone.Model.prototype;
-                var CollectionProto = spa_eyeObj.Backbone.Collection.prototype;
+                var ModelProto = self.Backbone.Model.prototype;
+                var CollectionProto = self.Backbone.Collection.prototype;
 
                 var getWatch = function (womb) {
                     var watch = function (id, oldval, newval) {
@@ -248,7 +251,7 @@ define([
                     win);
             },
 
-            registerContentLoadedHook:function () {
+            registerContentLoadedHook:function (win) {
                 var self = this;
                 var win = this.context.window.wrappedJSObject;
                 var register = function () {
@@ -258,24 +261,46 @@ define([
                 win.addEventListener("load", register);
                 win.addEventListener('Backbone_Eye:ADD', function (e) {
 
-                    var viewInstanceFnWomb = function (womb, view) {
-                        return function (id, oldval, newval) {
-                            return function () {
-                                var args = [win, view, newval];
-                                args.push.apply(args, arguments);
-                                return womb.apply(view, args);
-                            }
-                        };
+                    /*var viewInstanceFnWomb = function (womb, view) {
+                     return function (id, oldval, newval) {
+                     return function () {
+                     var args = [win, view, newval];
+                     args.push.apply(args, arguments);
+                     return womb.apply(view, args);
+                     }
+                     };
+                     };*/
+
+                    var viewInstanceFnWomb = function (womb, view, oldInstanceFn) {
+                        return function () {
+                            var args = [win, view, oldInstanceFn];
+                            args.push.apply(args, arguments);
+                            return womb.apply(view, args);
+                        }
                     };
+
                     var target = e.detail.data;
-                    if (e.detail.type == 'View' && target) {
-                        _.each(Operation, function (key) {
-                            if (target[key]) {
-                                target.watch(key, viewInstanceFnWomb(self.function_womb.VIEW[key], target));
-                                target[key] = target[key];
-                            }
-                        });
+
+                    if (target instanceof self.Backbone.View) {
+                        _views.push(target);
+                        target.cid = target.cid || _.uniqueId('view');
+                        /*_.each(Operation, function (key) {
+                         if (target[key]) {
+                         target.watch(key, viewInstanceFnWomb(self.function_womb.VIEW[key], target));
+                         target[key] = target[key];
+                         }
+                         });*/
+                        //target.render = viewInstanceFnWomb(self.function_womb.VIEW[render], target, target.render)
                     }
+                    if (target instanceof self.Backbone.Model) {
+                        _models.push(target);
+                        target.cid = target.cid || _.uniqueId('c');
+                    }
+                    if (target instanceof self.Backbone.Collection) {
+                        _collections.push(target);
+                        target.cid = target.cid || _.uniqueId('col');
+                    }
+
                     Events.dispatch(self.listener.fbListeners, 'onBackboneEntityAdded', [e]);
                 });
 
@@ -284,11 +309,12 @@ define([
             registerBBHooks:function (win) {
                 var spa_eyeObj = this.context.spa_eyeObj;
                 if (this.isBackboneInitialized(win)) {
-                    spa_eyeObj.Backbone = win.Backbone;
                     if (!this.hooked && !this.registering) {
                         try {
-                            this.win = win;
                             this.registering = true;
+                            this.win = win;
+                            this.Backbone = win.Backbone;
+                            this.UnderScore = win._;
                             this.registerWPHooks(win);
                             this.registerSetHooks(win);
                             this.registerViewHooks(win);
@@ -340,7 +366,7 @@ define([
                             var flows =
                                 (_sequences[sr.cid].flows =
                                     _sequences[sr.cid].flows || []);
-                            var isNewInteraction = sr instanceof this.context.spa_eyeObj.Backbone.Model ?
+                            var isNewInteraction = sr instanceof this.Backbone.Model ?
                                 isNewInteractionModel :
                                 isNewInteractionCollection;
 
@@ -372,11 +398,9 @@ define([
 
             cleanup:function () {
                 this.hooked = false;
-                if (this.win) {
-                    this.win.spa_eye.models = [];
-                    this.win.spa_eye.views = [];
-                    this.win.spa_eye.collections = [];
-                }
+                _models = [];
+                _collections = [];
+                _views = [];
                 this.resetTrackingData();
             },
 
@@ -388,15 +412,11 @@ define([
             },
 
             models:function () {
-                if (this.win) {
-                    return this.win.spa_eye.models;
-                }
-                return [];
+                return _models;
             },
 
             removeModel:function (model) {
-                return this._removeElement(this.win && this.win.spa_eye.models,
-                    model);
+                return this._removeElement(_models, model);
             },
 
             sequences:function () {
@@ -408,34 +428,24 @@ define([
             },
 
             views:function (options) {
-                if (this.win) {
-                    var views = this.win.spa_eye.views;
+                if (!options || options.all)
+                    return _views;
 
-                    if (!options || options.all)
-                        return views;
-
-                    return _.filter(views, function (view) {
-                        return !view.mfd == options.live;
-                    });
-                }
-                return [];
+                return _.filter(_views, function (view) {
+                    return !view.mfd == options.live;
+                });
             },
 
             removeView:function (view) {
-                return this._removeElement(this.win && this.win.spa_eye.views,
-                    view);
+                return this._removeElement(_views, view);
             },
 
             collections:function () {
-                if (this.win) {
-                    return this.win.spa_eye.collections;
-                }
-                return [];
+                return _collections;
             },
 
             removeCollection:function (col) {
-                return this._removeElement(this.win && this.win.spa_eye.collections,
-                    col);
+                return this._removeElement(_collections, col);
             },
 
             _removeElement:function (list, model) {

@@ -30,7 +30,7 @@ define([
                     spObj._spaHook.cleanup();
                     var enable = Firebug.Options.get("spa_eye.enableSites");
                     if (enable) {
-                        spObj._spaHook.registerContentLoadedHook();
+                        spObj._spaHook.registerContentLoadedHook.apply(spObj._spaHook);
                     }
                 }
             },
