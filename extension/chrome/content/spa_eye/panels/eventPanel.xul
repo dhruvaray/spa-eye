@@ -47,13 +47,13 @@
 
         function draw(flows, id, index) {
             if (flows.length) {
-                sequence = "Title: Interaction flow for model : " + id + " at t=" + index;
+                sequence = "Title: Interaction flow for " + id + " at t=" + index;
                 returnTo = [];
                 flows.forEach(genFlows);
             } else {
                 sequence = id ?
-                        "Title: No interaction flow data available for model : " + id :
-                        "Title: No interaction flow data available for selected model";
+                        "Title: No interaction flow data available for " + id :
+                        "Title: No interaction flow data available for selected entity";
             }
 
             try {
@@ -61,7 +61,7 @@
                 sequenceDiagram = Diagram.parse("Title: Generating...");
                 sequenceDiagram.drawSVG("sequence", {theme:'simple'});
 
-                setTimeout(function(){
+                setTimeout(function () {
                     document.getElementById("sequence").innerHTML = "";
                     sequenceDiagram = Diagram.parse(sequence);
                     sequenceDiagram.drawSVG("sequence", {theme:'simple'});
