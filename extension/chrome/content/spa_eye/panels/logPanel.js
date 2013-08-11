@@ -33,7 +33,8 @@ define([
                 var spa_eyeObj = this.context.spa_eyeObj;
                 var result = spa_eyeObj._spaHook.errors();
                 if (result.length) {
-                    this.tag.replace({object:result}, this.panelNode);
+                    this.title = Locale.$STR("spa_eye.logs.title") + "[ " + result.length + " ]",
+                        this.tag.replace({object:result}, this.panelNode);
                 } else
                     FirebugReps.Warning.tag.replace({object:"spa_eye.logs.noerror"}, this.panelNode);
             }

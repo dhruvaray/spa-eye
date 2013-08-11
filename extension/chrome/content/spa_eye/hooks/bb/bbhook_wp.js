@@ -21,8 +21,7 @@ if (window.Backbone) {
                 window.Backbone[entity].prototype = proxyproto;
                 _.extend(window.Backbone[entity], proxy);
             }
-            ;
         })(window.spa_eye.proxyable[i], window.spa_eye.proxy[i], window.spa_eye.proxyproto[i]);
     }
 }
-;
+

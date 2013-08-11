@@ -160,14 +160,14 @@ define([
                     };
                     if (data) {
                         attachTemplatesToViews();
-                        result = fn && fn.call(self.UnderScore, data);
+                        result = fn && fn.call(self.Underscore, data);
                     }
                 } catch (e) {
                     if (FBTrace.DBG_ERRORS) {
                         Events.dispatch(self.listener.fbListeners, 'onIntrospectionError', [e]);
                         FBTrace.sysout("spa_eye; Unexpected error", e);
                     }
-                    result = fn && fn.call(self.UnderScore, data);
+                    result = fn && fn.call(self.Underscore, data);
                 }
                 return result;
             }
@@ -218,7 +218,7 @@ define([
         BBHook.prototype = {
             constructor:BBHook,
 
-            registerViewHooks:function (root) {
+            registerViewTemplateHook:function (root) {
                 var self = this;
                 var watch = function (id, oldval, newval) {
                     return function () {
@@ -311,29 +311,22 @@ define([
                 var register = function () {
                     self.registerBBHooks(root);
                 };
-                root.document.addEventListener("afterscriptexecute", register);
+
+                var viewInstanceFnWomb = function (womb, view, key) {
+                    return function (id, oldval, newval) {
+                        return function () {
+                            var args = [root, view, key, newval];
+                            args.push.apply(args, arguments);
+                            return womb.apply(view, args);
+                        }
+                    };
+                };
+
+                root.document && root.document.addEventListener("afterscriptexecute", register);
                 root.addEventListener("load", register);
                 root.addEventListener('Backbone_Eye:ADD', function (e) {
 
-                    var viewInstanceFnWomb = function (womb, view, key) {
-                        return function (id, oldval, newval) {
-                            return function () {
-                                var args = [root, view, key, newval];
-                                args.push.apply(args, arguments);
-                                return womb.apply(view, args);
-                            }
-                        };
-                    };
-
-                    /*var viewInstanceFnWomb = function (womb, view, oldInstanceFn) {
-                     return function () {
-                     var args = [root, view, oldInstanceFn];
-                     args.push.apply(args, arguments);
-                     return womb.apply(view, args);
-                     }
-                     };*/
-
-                    var target = e.detail.data;
+                    var target = e.detail && e.detail.data;
 
                     if (target instanceof self.Backbone.View) {
                         _views.push(target);
@@ -344,12 +337,11 @@ define([
                             if (target[key]) {
                                 _views[top].watch(
                                     key,
-                                    viewInstanceFnWomb(self.function_womb.VIEW, _views[top], key));
+                                    viewInstanceFnWomb(self.function_womb.VIEW, _views[top], key)
+                                );
                                 _views[top][key] = _views[top][key];
                             }
                         });
-                        //var renderProxy = target.render;
-                        //target.render = viewInstanceFnWomb(self.function_womb.VIEW[render], target, renderProxy)
                     }
                     if (target instanceof self.Backbone.Model) {
                         _models.push(target);
@@ -373,10 +365,10 @@ define([
                             this.registering = true;
                             this.root = root;
                             this.Backbone = root.Backbone;
-                            this.UnderScore = root._;
+                            this.Underscore = root._;
+                            this.registerViewTemplateHook(root);
                             this.registerWPHooks(root);
                             this.registerSetHooks(root);
-                            this.registerViewHooks(root);
                             if (FBTrace.DBG_SPA_EYE) {
                                 FBTrace.sysout("spa_eye; Successfully registered Backbone hooks for spa-eye module");
                             }
@@ -455,19 +447,18 @@ define([
                 // return if `record` is off
                 var spa_eyeObj = this.context.spa_eyeObj;
                 if (!spa_eyeObj.isRecording) return;
-                var rec = {};
                 if (model.cid) {
                     try {
                         t = DateUtil.getFormattedTime(new Date());
-                        _auditRecords[model.cid] || (_auditRecords[model.cid] = []);
-                        rec[t] = record;
-                        _auditRecords[model.cid].push(rec);
+                        _auditRecords[model.cid] || (_auditRecords[model.cid] = {});
+                        _auditRecords[model.cid][t] = record;
                     } catch (e) {
                         if (FBTrace.DBG_ERRORS) {
                             Events.dispatch(self.listener.fbListeners, 'onIntrospectionError', [e]);
                             FBTrace.sysout("spa_eye; Unexpected error", e);
-                            t ? (rec[t] = e) : (rec[_.uniqueId('e')] = e)
-                            _auditRecords[model.cid].push();
+                            t ?
+                                (_auditRecords[model.cid][t] = e) :
+                                (_auditRecords[model.cid][_.uniqueId('e')] = e)
                         }
                     }
                 }
@@ -546,10 +537,5 @@ define([
             }
         };
 
-
-// ********************************************************************************************* //
-
         return BBHook;
-
-// ********************************************************************************************* //
     });

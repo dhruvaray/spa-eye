@@ -40,12 +40,7 @@ define([
                 if (selectedEntity) {
                     var result = spa_eyeObj._spaHook.journals()[selectedEntity.cid];
                     if (result) {
-                        var audit = {};
-                        _.each(result, function (item) {
-                            var key = Object.keys(item)[0];
-                            audit[key] = item[key]
-                        });
-                        this.tag.replace({object:audit}, this.panelNode);
+                        this.tag.replace({object:result}, this.panelNode);
                     }
                     else
                         FirebugReps.Warning.tag.replace({object:"spa_eye.audit.nomodelselected"}, this.panelNode);
