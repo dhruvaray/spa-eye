@@ -90,8 +90,8 @@ define([
                     Firebug.Inspector.highlightObject(v.el, this.context);
                 }
                 var spa_eyeObj = this.context.spa_eyeObj;
-                spa_eyeObj._moi = v;
-                Events.dispatch(spa_eyeObj._spaHook.listener.fbListeners, 'onModelOfInterestChange', [v]);
+                spa_eyeObj.selectedEntity = v;
+                Events.dispatch(spa_eyeObj._spaHook.listener.fbListeners, 'onSelectedEntityChange', [v]);
 
             }
 

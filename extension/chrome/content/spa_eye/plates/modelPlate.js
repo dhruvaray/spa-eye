@@ -104,8 +104,8 @@ define([
                 if (!row || !row.domObject.value) return;
                 var m = row.domObject.value;
                 if (!m || !m.cid) return;
-                spa_eyeObj._moi = m;
-                Events.dispatch(spa_eyeObj._spaHook.listener.fbListeners, 'onModelOfInterestChange', [m]);
+                spa_eyeObj.selectedEntity = m;
+                Events.dispatch(spa_eyeObj._spaHook.listener.fbListeners, 'onSelectedEntityChange', [m]);
             },
 
 // ********************************************************************************************* //

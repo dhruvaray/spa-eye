@@ -39,7 +39,7 @@ define([
                 }
             },
 
-            onModelOfInterestChange:function (m) {
+            onSelectedEntityChange:function (m) {
                 this.show();
             },
 
@@ -67,7 +67,7 @@ define([
 
             show:function () {
                 var spa_eyeObj = this.context.spa_eyeObj;
-                var moi = spa_eyeObj && spa_eyeObj._moi;
+                var moi = spa_eyeObj && spa_eyeObj.selectedEntity;
                 var idx = 0;
                 var id = undefined;
                 if (moi && moi.cid) {

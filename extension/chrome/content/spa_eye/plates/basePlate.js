@@ -41,7 +41,7 @@ define([
 
                 ModelReps.DirTablePlate.tag.replace(args, this.parent.panelNode);
 
-                if (!this.context.spa_eyeObj._moi) {
+                if (!this.context.spa_eyeObj.selectedEntity) {
                     var firstRow = this.parent.panelNode.getElementsByClassName("0level").item(0);
                     return ModelReps.selectRow(firstRow, this);
                 }

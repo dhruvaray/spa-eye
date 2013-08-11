@@ -28,7 +28,7 @@ define([
             order:0,
             follows:['Model', 'Collection'],
 
-            onModelOfInterestChange:function (m) {
+            onSelectedEntityChange:function (m) {
                 this.show();
             },
 
@@ -38,7 +38,7 @@ define([
 
             show:function () {
                 var spa_eyeObj = this.context.spa_eyeObj;
-                var moi = spa_eyeObj && spa_eyeObj._moi;
+                var moi = spa_eyeObj && spa_eyeObj.selectedEntity;
                 if (moi) {
                     var result = spa_eyeObj.auditRecords && spa_eyeObj.auditRecords[moi.cid];
                     if (result) {
