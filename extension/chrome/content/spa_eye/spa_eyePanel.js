@@ -112,7 +112,10 @@ define([
                 if (enable) {
                     Firebug.spa_eyeModule.addObserver(this);
                     Firebug.currentContext.spa_eyeObj._spaHook.
-                        registerContentLoadedHook.apply(Firebug.currentContext.spa_eyeObj._spaHook);
+                        registerContentLoadedHook.call(
+                        Firebug.currentContext.spa_eyeObj._spaHook,
+                        Firebug.currentContext.window.wrappedJSObject
+                    );
                 } else {
                     Firebug.spa_eyeModule.removeObserver(this);
                 }

@@ -48,13 +48,13 @@ define([
             }
             var self = this;
             this.function_womb = {};
-            this.function_womb.MODEL = function (win, model, type, fn, fnargs) {
+            this.function_womb.MODEL = function (root, model, type, fn, fnargs) {
 
                 _cm = model;
 
                 _path.push(model);
 
-                self.recordSequenceEvent(win, {
+                self.recordSequenceEvent(root, {
                     cid:model.cid,
                     target:model.toJSON(),
                     operation:type,
@@ -81,13 +81,13 @@ define([
 
                 return result;
             };
-            this.function_womb.COLLECTION = function (win, collection, type, fn, fnargs) {
+            this.function_womb.COLLECTION = function (root, collection, type, fn, fnargs) {
 
                 _cc = collection;
 
                 _path.push(collection);
 
-                self.recordSequenceEvent(win, {
+                self.recordSequenceEvent(root, {
                     cid:collection.cid,
                     target:collection.toJSON(),
                     operation:type,
@@ -114,7 +114,7 @@ define([
 
                 return result;
             }
-            this.function_womb.TEMPLATE = function (win, script_id, fn, fnargs, data) {
+            this.function_womb.TEMPLATE = function (root, script_id, fn, fnargs, data) {
                 var result;
 
                 var attachTemplatesToViews = function () {
@@ -127,7 +127,7 @@ define([
                     }
                 };
 
-                self.recordSequenceEvent(win, {
+                self.recordSequenceEvent(root, {
                     operation:Operation.RENDER,
                     cid:_cv ? _cv.cid : "",
                     target:_cv,
@@ -136,14 +136,14 @@ define([
 
                 if (data) {
                     attachTemplatesToViews();
-                    result = fn.call(win._, data);
+                    result = fn.call(self.UnderScore, data);
                 }
                 Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [_cv, Operation.RENDER]);
                 return result;
             }
 
             this.function_womb.VIEW = {};
-            this.function_womb.VIEW.render = function (win, view, fn, fnargs) {
+            this.function_womb.VIEW.render = function (root, view, fn, fnargs) {
                 _cv = view;
                 view.inferredTemplates = view.inferredTemplates || [];
                 _path.push(view);
@@ -152,7 +152,7 @@ define([
                 _cv = undefined;
                 return result;
             };
-            this.function_womb.VIEW.remove = function (win, view, fn, fnargs) {
+            this.function_womb.VIEW.remove = function (root, view, fn, fnargs) {
                 var result = fn.apply(view, fnargs);
                 view.mfd = true;
                 Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [view, Operation.REMOVE]);
@@ -164,25 +164,24 @@ define([
         BBHook.prototype = {
             constructor:BBHook,
 
-            registerViewHooks:function (win) {
+            registerViewHooks:function (root) {
                 var self = this;
                 var watch = function (id, oldval, newval) {
                     return function () {
-                        var args = [newval];
+                        var args = [root, newval];
                         args.push.apply(args, arguments);
                         return self.registerTemplateHook.apply(self, args);
                     }
                 }
-                if (win._) {
-                    win._.watch("template", watch);
-                    win._["template"] = win._["template"];
+                if (root._) {
+                    root._.watch("template", watch);
+                    root._["template"] = root._["template"];
                 }
             },
 
-            registerTemplateHook:function (original, text, data, settings) {
+            registerTemplateHook:function (root, original, text, data, settings) {
 
                 var self = this;
-                var win = this.context.window.wrappedJSObject;
                 try {
                     if (!text) {
                         if (FBTrace.DBG_SPA_EYE) {
@@ -190,22 +189,22 @@ define([
                         }
                         return false;
                     }
-                    var script = DOM.getMatchingNode(win, "script", text)
+                    var script = DOM.getMatchingNode(root, "script", text)
                     var script_id = (script && script.id) ? script.id : SHA.getTextHash(text);
                     var proxiedTemplateRef = '_t' + script_id;
-                    var compiledTemplate = win[proxiedTemplateRef];
+                    var compiledTemplate = root[proxiedTemplateRef];
 
                     if (!compiledTemplate) {
-                        compiledTemplate = original.call(win._, text);
+                        compiledTemplate = original.call(root._, text);
                         var source = _.template.call(_, text).source;
                         if (source) {
                             var f = escape("window['" + proxiedTemplateRef + "']=" + source);
-                            DOM.appendExternalScriptTagToHead(win.document,
+                            DOM.appendExternalScriptTagToHead(root.document,
                                 "data:text/javascript;fileName=" + script_id + ";," + f);
                             _templates[script_id] = text;
                         }
                     }
-                    var result = self.function_womb.TEMPLATE(win, script_id, compiledTemplate, [text, data, settings], data);
+                    var result = self.function_womb.TEMPLATE(root, script_id, compiledTemplate, [text, data, settings], data);
                     if (result) return result;
 
                 } catch (e) {
@@ -213,12 +212,12 @@ define([
                         FBTrace.sysout("spa_eye; Unexpected error", e);
                 }
                 return function (templateData) {
-                    var render = win[proxiedTemplateRef] ? win[proxiedTemplateRef] : compiledTemplate;
-                    return self.function_womb.TEMPLATE(win, script_id, render, arguments, templateData);
+                    var render = root[proxiedTemplateRef] ? root[proxiedTemplateRef] : compiledTemplate;
+                    return self.function_womb.TEMPLATE(root, script_id, render, arguments, templateData);
                 };
             },
 
-            registerSetHooks:function (win) {
+            registerSetHooks:function (root) {
                 var self = this;
                 var ModelProto = self.Backbone.Model.prototype;
                 var CollectionProto = self.Backbone.Collection.prototype;
@@ -226,7 +225,7 @@ define([
                 var getWatch = function (womb) {
                     var watch = function (id, oldval, newval) {
                         return function () {
-                            return womb.call(self, win, this, id, newval, arguments);
+                            return womb.call(self, root, this, id, newval, arguments);
                         }
                     }
                     return watch;
@@ -244,27 +243,26 @@ define([
                 });
             },
 
-            registerWPHooks:function (win) {
+            registerWPHooks:function (root) {
                 Firebug.CommandLine.evaluateInWebPage(
                     Http.getResource(bbhook_wp),
                     this.context,
-                    win);
+                    root);
             },
 
-            registerContentLoadedHook:function (win) {
+            registerContentLoadedHook:function (root) {
                 var self = this;
-                var win = this.context.window.wrappedJSObject;
                 var register = function () {
-                    self.registerBBHooks(win);
+                    self.registerBBHooks(root);
                 };
-                win.document.addEventListener("afterscriptexecute", register);
-                win.addEventListener("load", register);
-                win.addEventListener('Backbone_Eye:ADD', function (e) {
+                root.document.addEventListener("afterscriptexecute", register);
+                root.addEventListener("load", register);
+                root.addEventListener('Backbone_Eye:ADD', function (e) {
 
                     /*var viewInstanceFnWomb = function (womb, view) {
                      return function (id, oldval, newval) {
                      return function () {
-                     var args = [win, view, newval];
+                     var args = [root, view, newval];
                      args.push.apply(args, arguments);
                      return womb.apply(view, args);
                      }
@@ -273,7 +271,7 @@ define([
 
                     var viewInstanceFnWomb = function (womb, view, oldInstanceFn) {
                         return function () {
-                            var args = [win, view, oldInstanceFn];
+                            var args = [root, view, oldInstanceFn];
                             args.push.apply(args, arguments);
                             return womb.apply(view, args);
                         }
@@ -306,18 +304,18 @@ define([
 
             },
 
-            registerBBHooks:function (win) {
+            registerBBHooks:function (root) {
                 var spa_eyeObj = this.context.spa_eyeObj;
-                if (this.isBackboneInitialized(win)) {
+                if (this.isBackboneInitialized(root)) {
                     if (!this.hooked && !this.registering) {
                         try {
                             this.registering = true;
-                            this.win = win;
-                            this.Backbone = win.Backbone;
-                            this.UnderScore = win._;
-                            this.registerWPHooks(win);
-                            this.registerSetHooks(win);
-                            this.registerViewHooks(win);
+                            this.root = root;
+                            this.Backbone = root.Backbone;
+                            this.UnderScore = root._;
+                            this.registerWPHooks(root);
+                            this.registerSetHooks(root);
+                            this.registerViewHooks(root);
                             if (FBTrace.DBG_SPA_EYE) {
                                 FBTrace.sysout("spa_eye; Successfully registered Backbone hooks for spa-eye module");
                             }
@@ -336,11 +334,11 @@ define([
                 }
             },
 
-            isBackboneInitialized:function (win) {
-                return win.Backbone;
+            isBackboneInitialized:function (root) {
+                return root.Backbone;
             },
 
-            recordSequenceEvent:function (win, record) {
+            recordSequenceEvent:function (root, record) {
 
                 if (!this.context.spa_eyeObj.isRecord) {
                     return;
