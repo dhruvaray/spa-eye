@@ -116,7 +116,6 @@ define([
             }
             this.function_womb.TEMPLATE = function (root, script_id, fn, fnargs, data) {
                 var result;
-
                 var attachTemplatesToViews = function () {
                     var rendered = _cv;
                     if (rendered) {
@@ -126,37 +125,26 @@ define([
                         }
                     }
                 };
-
-                self.recordSequenceEvent(root, {
-                    operation:Operation.RENDER,
-                    cid:_cv ? _cv.cid : "",
-                    target:_cv,
-                    args:fnargs
-                });
-
                 if (data) {
                     attachTemplatesToViews();
                     result = fn.call(self.UnderScore, data);
                 }
-                Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [_cv, Operation.RENDER]);
                 return result;
             }
-
-            this.function_womb.VIEW = {};
-            this.function_womb.VIEW.render = function (root, view, fn, fnargs) {
+            this.function_womb.VIEW = function (root, view, type, fn, fnargs) {
                 _cv = view;
                 _path.push(_cv);
 
                 self.recordSequenceEvent(root, {
                     cid:view.cid,
                     target:view,
-                    operation:Operation.RENDER,
+                    operation:type,
                     args:fnargs
                 });
 
                 self.recordAuditEvent(view, {
                     cid:view.cid,
-                    operation:Operation.RENDER,
+                    operation:type,
                     target:view,
                     args:fnargs
                 });
@@ -170,12 +158,8 @@ define([
 
                 _path.pop();
 
-                return result;
-            };
-            this.function_womb.VIEW.remove = function (root, view, fn, fnargs) {
-                var result = fn && fn.apply(view, fnargs);
-                view.mfd = true;
-                Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [view, Operation.REMOVE]);
+                Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [view, type]);
+
                 return result;
             };
 
@@ -279,10 +263,10 @@ define([
                 root.addEventListener("load", register);
                 root.addEventListener('Backbone_Eye:ADD', function (e) {
 
-                    var viewInstanceFnWomb = function (womb, view) {
+                    var viewInstanceFnWomb = function (womb, view, key) {
                         return function (id, oldval, newval) {
                             return function () {
-                                var args = [root, view, newval];
+                                var args = [root, view, key, newval];
                                 args.push.apply(args, arguments);
                                 return womb.apply(view, args);
                             }
@@ -308,8 +292,7 @@ define([
                             if (target[key]) {
                                 _views[top].watch(
                                     key,
-                                    viewInstanceFnWomb(self.function_womb.VIEW[key], _views[top]
-                                    ));
+                                    viewInstanceFnWomb(self.function_womb.VIEW, _views[top], key));
                                 _views[top][key] = _views[top][key];
                             }
                         });
