@@ -50,11 +50,21 @@ define([
                 }
             },
 
+            getPanelNode:function () {
+                var context = Firebug.currentContext,
+                    cp = context.currentPanel;
+
+                return cp && cp.panelNode;
+            },
+
+            getSelectedRow:function () {
+                return ModelReps.getSelectedRow(this.getPanelNode());
+            },
+
             _expandKeyHandler:function (collapse) {
-                var selectedRow = ModelReps.getSelectedRow(this.panelNode);
-                if (!selectedRow) {
-                    return;
-                }
+                var selectedRow = this.getSelectedRow();
+                if (!selectedRow) return;
+
                 var flag = Css.hasClass(selectedRow, 'opened') ^ collapse;
                 if (!flag) {
                     ModelReps.DirTablePlate.toggleRow(selectedRow);
@@ -62,23 +72,24 @@ define([
             },
 
             _enterKeyHandler:function () {
-                var selectedRow = ModelReps.getSelectedRow(this.panelNode);
-                if (!selectedRow) {
-                    return;
-                }
+                var selectedRow = this.getSelectedRow();
+                if (!selectedRow) return;
                 ModelReps.DirTablePlate.toggleRow(selectedRow);
             },
 
             _navKeyHandler:function (jump) {
-                var selectedRow = ModelReps.getSelectedRow(this.panelNode);
+                var selectedRow = this.getSelectedRow(),
+                    panelNode = this.getPanelNode();
+                if (!panelNode) return;
+
                 if (!selectedRow) {
-                    var firstRow = this.panelNode.getElementsByClassName("0level").item(0);
-                    return ModelReps.selectRow(firstRow, this.panelNode);
+                    var firstRow = panelNode.getElementsByClassName("0level").item(0);
+                    return ModelReps.selectRow(firstRow, panelNode);
                 }
 
                 var n = Math.abs(jump),
-                    method = jump > 0 ? 'nextSibling' : 'previousSibling';
-                prev = null,
+                    method = jump > 0 ? 'nextSibling' : 'previousSibling',
+                    prev = null,
                     nr = null;
 
                 while (n > 0) {
@@ -86,14 +97,14 @@ define([
 
                     // If `nr` is undefined, select previously visited `prev`
                     if (!nr || !Css.hasClass(nr, "memberRow")) {
-                        prev && ModelReps.selectRow(prev, this.panelNode);
+                        prev && ModelReps.selectRow(prev, panelNode);
                         break;
                     }
 
                     if (parseInt(nr.getAttribute("level"), 10) === 0) {
                         n--;
                         if (n === 0) {
-                            ModelReps.selectRow(nr, this.panelNode);
+                            ModelReps.selectRow(nr, panelNode);
                             break;
                         }
                         prev = nr;

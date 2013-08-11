@@ -2,12 +2,11 @@ define([
     "firebug/firebug",
     "firebug/lib/object",
     "firebug/lib/trace",
+    "firebug/lib/events",
 
-    "spa_eye/lib/require/underscore",
-
-    "spa_eye/dom/keyPanel"
+    "spa_eye/lib/require/underscore"
 ],
-    function (Firebug, Obj, FBTrace, _, KeyPanel) {
+    function (Firebug, Obj, FBTrace, Events, _) {
 
         Firebug.registerStringBundle("chrome://spa_eye/locale/spa_eye.properties");
         Firebug.registerStylesheet("chrome://spa_eye/skin/spa_eye.css");
@@ -86,7 +85,7 @@ define([
         var BasePanel = function () {
         };
         BasePanel.extend = extend;
-        BasePanel.prototype = Obj.extend(Firebug.Panel, KeyPanel, {
+        BasePanel.prototype = Obj.extend(Firebug.Panel, {
             constructor:BasePanel,
             follows:[],
 
@@ -95,14 +94,14 @@ define([
                 var listener = this.context.spa_eyeObj._spaHook.listener;
                 listener.addListener(this);
 
-                // Attach key listeners
-                this.attachKeyListeners();
+                // Panel focus
+                this.onPanelFocus = this.onPanelFocus.bind(this);
+                Events.addEventListener(this.panelNode, "mousedown", this.onPanelFocus, true);
             },
 
             destroy:function () {
                 try {
-                    // Detach key listeners
-                    this.detachKeyListeners();
+                    Events.removeEventListener(this.panelNode, "mousedown", this.onPanelFocus, true);
 
                     var listener = this.context.spa_eyeObj._spaHook.listener;
                     listener.removeListener(this);
@@ -112,6 +111,13 @@ define([
                     }
                 } finally {
                     Firebug.Panel.destroy.apply(this, arguments);
+                }
+            },
+
+            onPanelFocus:function () {
+                if (Firebug.currentContext.currentPanel !== this) {
+                    Firebug.currentContext.previousPanel = Firebug.currentContext.currentPanel;
+                    Firebug.currentContext.currentPanel = this;
                 }
             },
 
@@ -125,8 +131,6 @@ define([
                         this.show();
                 }, this);
             }
-
-
         });
         return BasePanel;
     });
