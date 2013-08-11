@@ -49,84 +49,97 @@ define([
             var self = this;
             this.function_womb = {};
             this.function_womb.MODEL = function (root, model, type, fn, fnargs) {
-
-                _cm = model;
-
-                _path.push(model);
-
-                var state = ''
+                var result;
                 try {
-                    var state = model.toJSON();
+                    _cm = model;
+
+                    _path.push(model);
+
+                    var state = ''
+                    try {
+                        var state = model.toJSON();
+                    } catch (e) {
+                        //Could not serialize as we are probably early
+                        state = _.clone(model.attributes);
+                    }
+
+                    self.recordSequenceEvent(root, {
+                        cid:model.cid,
+                        target:state,
+                        operation:type,
+                        args:fnargs
+                    });
+
+                    self.recordAuditEvent(model, {
+                        cid:model.cid,
+                        operation:type,
+                        target:state,
+                        args:fnargs
+                    });
+
+                    Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [model, type]);
+                    result = fn.apply(model, Array.slice(fnargs));
+
+                    if (_cm === _msr)
+                        _msr = undefined;
+
+                    _cm = undefined;
+
+                    _path.pop();
                 } catch (e) {
-                    //Could not serialize as we are probably early
-                    state = _.clone(model.attributes);
+                    if (FBTrace.DBG_ERRORS)
+                        FBTrace.sysout("spa_eye; Unexpected error", e);
+                    //attempt on raw function
+                    result = fn.apply(model, Array.slice(fnargs));
                 }
-
-                self.recordSequenceEvent(root, {
-                    cid:model.cid,
-                    target:state,
-                    operation:type,
-                    args:fnargs
-                });
-
-                self.recordAuditEvent(model, {
-                    cid:model.cid,
-                    operation:type,
-                    target:state,
-                    args:fnargs
-                });
-
-                Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [model, type]);
-                var result = fn.apply(model, Array.slice(fnargs));
-
-                if (_cm === _msr)
-                    _msr = undefined;
-
-                _cm = undefined;
-
-                _path.pop();
 
                 return result;
             };
             this.function_womb.COLLECTION = function (root, collection, type, fn, fnargs) {
+                var result;
 
-                _cc = collection;
-
-                _path.push(collection);
-
-                var state = ''
                 try {
-                    var state = collection.toJSON();
+                    _cc = collection;
+
+                    _path.push(collection);
+
+                    var state = ''
+                    try {
+                        var state = collection.toJSON();
+                    } catch (e) {
+                        //Could not serialize as we are probably early
+                        state = _.clone(collection.attributes);
+                    }
+
+                    self.recordSequenceEvent(root, {
+                        cid:collection.cid,
+                        target:state,
+                        operation:type,
+                        args:fnargs
+                    });
+
+                    self.recordAuditEvent(collection, {
+                        cid:collection.cid,
+                        operation:type,
+                        target:state,
+                        args:fnargs
+                    });
+
+                    Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [collection, type]);
+                    result = fn.apply(collection, Array.slice(fnargs));
+
+                    if (_cc === _csr)
+                        _csr = undefined;
+
+                    _cc = undefined;
+
+                    _path.pop();
                 } catch (e) {
-                    //Could not serialize as we are probably early
-                    state = _.clone(collection.attributes);
+                    if (FBTrace.DBG_ERRORS)
+                        FBTrace.sysout("spa_eye; Unexpected error", e);
+                    //attempt on raw function
+                    result = fn.apply(collection, Array.slice(fnargs));
                 }
-
-
-                self.recordSequenceEvent(root, {
-                    cid:collection.cid,
-                    target:state,
-                    operation:type,
-                    args:fnargs
-                });
-
-                self.recordAuditEvent(collection, {
-                    cid:collection.cid,
-                    operation:type,
-                    target:state,
-                    args:fnargs
-                });
-
-                Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [collection, type]);
-                var result = fn.apply(collection, Array.slice(fnargs));
-
-                if (_cc === _csr)
-                    _csr = undefined;
-
-                _cc = undefined;
-
-                _path.pop();
-
                 return result;
             }
             this.function_womb.TEMPLATE = function (root, script_id, fn, fnargs, data) {
@@ -152,33 +165,41 @@ define([
                 return result;
             }
             this.function_womb.VIEW = function (root, view, type, fn, fnargs) {
-                _cv = view;
-                _path.push(_cv);
+                var result;
+                try {
+                    _cv = view;
+                    _path.push(_cv);
 
-                self.recordSequenceEvent(root, {
-                    cid:view.cid,
-                    target:view,
-                    operation:type,
-                    args:fnargs
-                });
+                    self.recordSequenceEvent(root, {
+                        cid:view.cid,
+                        target:view,
+                        operation:type,
+                        args:fnargs
+                    });
 
-                self.recordAuditEvent(view, {
-                    cid:view.cid,
-                    operation:type,
-                    target:view,
-                    args:fnargs
-                });
+                    self.recordAuditEvent(view, {
+                        cid:view.cid,
+                        operation:type,
+                        target:view,
+                        args:fnargs
+                    });
 
-                Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [view, type]);
+                    Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [view, type]);
 
-                var result = fn && fn.apply(view, fnargs);
+                    result = fn && fn.apply(view, fnargs);
 
-                if (_cv === _vsr)
-                    _vsr = undefined;
+                    if (_cv === _vsr)
+                        _vsr = undefined;
 
-                _cv = undefined;
+                    _cv = undefined;
 
-                _path.pop();
+                    _path.pop();
+                } catch (e) {
+                    if (FBTrace.DBG_ERRORS)
+                        FBTrace.sysout("spa_eye; Unexpected error", e);
+                    //attempt on raw function
+                    result = fn && fn.apply(view, fnargs);
+                }
 
                 return result;
             };
@@ -419,16 +440,19 @@ define([
                 // return if `record` is off
                 var spa_eyeObj = this.context.spa_eyeObj;
                 if (!spa_eyeObj.isRecording) return;
-
-                try {
-                    t = DateUtil.getFormattedTime(new Date());
-                    _auditRecords[model.cid] || (_auditRecords[model.cid] = []);
-                    var rec = {};
-                    rec[t] = record;
-                    _auditRecords[model.cid].push(rec);
-                } catch (e) {
-                    if (FBTrace.DBG_ERRORS)
-                        FBTrace.sysout("spa_eye; Unexpected error", e);
+                var rec = {};
+                if (model.cid) {
+                    try {
+                        t = DateUtil.getFormattedTime(new Date());
+                        _auditRecords[model.cid] || (_auditRecords[model.cid] = []);
+                        rec[t] = record;
+                        _auditRecords[model.cid].push(rec);
+                    } catch (e) {
+                        if (FBTrace.DBG_ERRORS)
+                            FBTrace.sysout("spa_eye; Unexpected error", e);
+                        t ? (rec[t] = e) : (rec[_.uniqueId('e')] = e)
+                        _auditRecords[model.cid].push();
+                    }
                 }
             },
 
