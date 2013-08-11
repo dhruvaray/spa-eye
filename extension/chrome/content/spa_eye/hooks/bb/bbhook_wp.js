@@ -13,10 +13,11 @@ if (window.Backbone) {
         (function (entity, proxy, proxyproto) {
             if (proxy) {
                 window.Backbone[entity] = function () {
-                    var result = proxy.apply(this, arguments);
-                    var event = new CustomEvent('Backbone_Eye:ADD', {'detail':{data:this}});
-                    window.dispatchEvent(event);
-                    return result;
+                    try{
+                        var event = new CustomEvent('Backbone_Eye:ADD', {'detail':{data:this}});
+                        window.dispatchEvent(event);
+                    } catch(e) {}
+                    return proxy.apply(this, arguments);
                 };
                 window.Backbone[entity].prototype = proxyproto;
                 _.extend(window.Backbone[entity], proxy);

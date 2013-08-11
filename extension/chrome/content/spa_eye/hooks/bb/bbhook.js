@@ -315,8 +315,7 @@ define([
                 var viewInstanceFnWomb = function (womb, view, key) {
                     return function (id, oldval, newval) {
                         return function () {
-                            var args = [root, view, key, newval];
-                            args.push.apply(args, arguments);
+                            var args = [root, view, key, newval, arguments];
                             return womb.apply(view, args);
                         }
                     };
@@ -335,11 +334,11 @@ define([
                         target.inferredTemplates = [];
                         _.each(Operation, function (key) {
                             if (target[key]) {
-                                _views[top].watch(
+                                target.watch(
                                     key,
-                                    viewInstanceFnWomb(self.function_womb.VIEW, _views[top], key)
+                                    viewInstanceFnWomb(self.function_womb.VIEW, target, key)
                                 );
-                                _views[top][key] = _views[top][key];
+                                target[key] = target[key];
                             }
                         });
                     }
