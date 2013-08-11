@@ -48,22 +48,23 @@ define([
                 var sections = [];
                 var self = this;
                 var liveViews = new ChildSection({
-                    name:'all_views',
+                    name:'live_views',
                     title:Locale.$STR('spa_eye.views.live'),
                     parent:this.parent.panelNode,
-                    container:'allViewsDiv',
-                    body:'allViewsDivBody',
+                    container:'liveViewsDiv',
+                    body:'liveViewsDivBody',
                     data:function () {
                         return self.spa_eyeObj.getViews({live:true})
                     }
                 });
 
                 var deadViews = new ChildSection({
-                    name:'all_views',
+                    name:'dead_views',
                     title:Locale.$STR('spa_eye.views.removed'),
                     parent:this.parent.panelNode,
-                    container:'allViewsDiv',
-                    body:'allViewsDivBody',
+                    container:'deadViewsDiv',
+                    body:'deadViewsDivBody',
+                    autoAdd:false,
                     data:function () {
                         return self.spa_eyeObj.getViews({live:false})
                     }
@@ -74,8 +75,15 @@ define([
                 return sections;
             },
 
-            onViewRender:function () {
-                this.render();
+            onViewRemove:function (view) {
+                view.mfd = true;
+
+                var liveSection = this.sections[0];
+                var deadSection = this.sections[1];
+                liveSection._onRowRemove(view);
+                deadSection._onRowAdd(view, {
+                    autoAdd: true
+                });
             },
 
             onSelectRow:function (row) {
