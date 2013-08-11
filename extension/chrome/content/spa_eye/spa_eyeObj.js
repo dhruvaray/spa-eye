@@ -12,7 +12,7 @@ define([
             this._currentSynced = {};
             this._pinned_models = {};
             this._spaHook = null;
-            this.isRecord = true;
+            this.isRecording = true;
             if (initObj) {
                 for (var key in initObj) {
                     this[key] = initObj[key];
@@ -59,7 +59,6 @@ define([
             },
 
             resetTrackingData:function () {
-                this.auditRecords = {};
                 this._spaHook.resetTrackingData();
                 Events.dispatch(spa_eyeObj._spaHook.listener.fbListeners, 'onTrackingDataCleared');
 

@@ -36,9 +36,9 @@ define([
 
             show:function () {
                 var spa_eyeObj = this.context.spa_eyeObj;
-                var moi = spa_eyeObj && spa_eyeObj.selectedEntity;
-                if (moi) {
-                    var result = spa_eyeObj.auditRecords && spa_eyeObj.auditRecords[moi.cid];
+                var selectedEntity = spa_eyeObj && spa_eyeObj.selectedEntity;
+                if (selectedEntity) {
+                    var result = spa_eyeObj._spaHook.journals()[selectedEntity.cid];
                     if (result) {
                         var audit = {};
                         _.each(result, function (item) {

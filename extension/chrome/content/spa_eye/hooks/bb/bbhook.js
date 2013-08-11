@@ -25,7 +25,7 @@ define([
         const Cr = Components.results;
         const bbhook_wp = "chrome://spa_eye/content/hooks/bb/bbhook_wp.js";
 
-        var _csr, _msr, _vsr, _cm, _cc, _cv, _path = [], _sequences = {}, _templates = {};
+        var _csr, _msr, _vsr, _cm, _cc, _cv, _path = [], _sequences = {}, _templates = {}, _auditRecords = {};
         var _models, _collections, _views;
 
         var Operation = Common.Operation;
@@ -131,18 +131,23 @@ define([
             }
             this.function_womb.TEMPLATE = function (root, script_id, fn, fnargs, data) {
                 var result;
-                var attachTemplatesToViews = function () {
-                    var rendered = _cv;
-                    if (rendered) {
-                        var templates = rendered.inferredTemplates;
-                        if (templates.indexOf(script_id) == -1) {
-                            templates.push(script_id);
+                try {
+                    var attachTemplatesToViews = function () {
+                        var rendered = _cv;
+                        if (rendered) {
+                            var templates = rendered.inferredTemplates;
+                            if (templates.indexOf(script_id) == -1) {
+                                templates.push(script_id);
+                            }
                         }
+                    };
+                    if (data) {
+                        attachTemplatesToViews();
+                        result = fn && fn.call(self.UnderScore, data);
                     }
-                };
-                if (data) {
-                    attachTemplatesToViews();
-                    result = fn.call(self.UnderScore, data);
+                } catch (e) {
+                    if (FBTrace.DBG_ERRORS)
+                        FBTrace.sysout("spa_eye; Unexpected error", e);
                 }
                 return result;
             }
@@ -364,28 +369,27 @@ define([
 
             recordSequenceEvent:function (root, record) {
 
-                if (!this.context.spa_eyeObj.isRecord) {
-                    return;
-                }
-                record.source = _path[_path.length - 2];
-
-                var csr = _csr;
-                var msr = _msr;
-                var vsr = _vsr;
-                var isNewInteractionModel = (!msr);
-                var isNewInteractionCollection = (!csr);
-                var isNewInteractionView = (!vsr);
-                _csr = csr || _cc;
-                _msr = msr || _cm;
-                _vsr = vsr || _cv;
-
-                var process = [];
-                _csr && (process.push(_csr));
-                _msr && (process.push(_msr));
-                _vsr && (process.push(_vsr));
-
+                if (!this.context.spa_eyeObj.isRecording) return;
 
                 try {
+
+                    record.source = _path[_path.length - 2];
+
+                    var csr = _csr;
+                    var msr = _msr;
+                    var vsr = _vsr;
+                    var isNewInteractionModel = (!msr);
+                    var isNewInteractionCollection = (!csr);
+                    var isNewInteractionView = (!vsr);
+                    _csr = csr || _cc;
+                    _msr = msr || _cm;
+                    _vsr = vsr || _cv;
+
+                    var process = [];
+                    _csr && (process.push(_csr));
+                    _msr && (process.push(_msr));
+                    _vsr && (process.push(_vsr));
+
                     _.each(process, function (sr) {
                         if (sr && sr.cid) {
                             _sequences[sr.cid] = _sequences[sr.cid] || [];
@@ -414,17 +418,18 @@ define([
             recordAuditEvent:function (model, record) {
                 // return if `record` is off
                 var spa_eyeObj = this.context.spa_eyeObj;
+                if (!spa_eyeObj.isRecording) return;
 
-                if (!spa_eyeObj.isRecord) {
-                    return;
+                try {
+                    t = DateUtil.getFormattedTime(new Date());
+                    _auditRecords[model.cid] || (_auditRecords[model.cid] = []);
+                    var rec = {};
+                    rec[t] = record;
+                    _auditRecords[model.cid].push(rec);
+                } catch (e) {
+                    if (FBTrace.DBG_ERRORS)
+                        FBTrace.sysout("spa_eye; Unexpected error", e);
                 }
-                t = DateUtil.getFormattedTime(new Date());
-                var records = spa_eyeObj.auditRecords = spa_eyeObj.auditRecords || {};
-
-                records[model.cid] || (records[model.cid] = []);
-                var rec = {};
-                rec[t] = record;
-                records[model.cid].splice(0, 0, rec);
             },
 
             cleanup:function () {
@@ -436,7 +441,9 @@ define([
             },
 
             resetTrackingData:function () {
-                _sequences = _templates = {};
+                _sequences = {}
+                _templates = {};
+                _auditRecords = {};
                 _path = [];
                 _csr = _msr = _vsr = undefined;
                 _cm = _cc = _cv = undefined;
@@ -456,6 +463,10 @@ define([
 
             templates:function () {
                 return _templates;
+            },
+
+            journals:function () {
+                return _auditRecords;
             },
 
             views:function (options) {

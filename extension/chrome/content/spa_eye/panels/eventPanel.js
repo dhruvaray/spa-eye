@@ -67,15 +67,15 @@ define([
 
             show:function () {
                 var spa_eyeObj = this.context.spa_eyeObj;
-                var moi = spa_eyeObj && spa_eyeObj.selectedEntity;
+                var selectedEntity = spa_eyeObj && spa_eyeObj.selectedEntity;
                 var idx = 0;
                 var id = undefined;
-                if (moi && moi.cid) {
-                    var sequence = this.context.spa_eyeObj._spaHook.sequences()[moi.cid];
+                if (selectedEntity && selectedEntity.cid) {
+                    var sequence = this.context.spa_eyeObj._spaHook.sequences()[selectedEntity.cid];
                     this.sequenceData = (sequence && sequence.flows) ? sequence.flows : [];
                     idx = this.sequenceData.length - 1;
                     this.plotData = idx >= 0 ? [this.sequenceData[idx]] : [];
-                    id = moi.cid;
+                    id = selectedEntity.cid;
                 } else {
                     this.sequenceData = [];
                     this.plotData = []
