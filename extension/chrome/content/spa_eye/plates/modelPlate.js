@@ -1,6 +1,4 @@
 /* See license.txt for terms of usage */
-/*jshint esnext:true, es5:true, curly:false */
-/*global FBTrace:true, XPCNativeWrapper:true, Window:true, define:true */
 
 define([
     "firebug/firebug",

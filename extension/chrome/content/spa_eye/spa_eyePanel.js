@@ -302,9 +302,6 @@ define([
 
         }));
 
-// ********************************************************************************************* //
-// Panel UI (Domplate)
-// ********************************************************************************************* //
         with (Domplate) {
             spa_eyePanel.prototype.WarningRep = domplate(Firebug.ScriptPanel.WarningRep, {
                 tag:DIV({"class":"disabledSPA_EyePanelBox"},
@@ -319,11 +316,6 @@ define([
             });
         }
 
-// ********************************************************************************************* //
-// Registration
-
         Firebug.registerPanel(Firebug.spa_eyePanel);
         return Firebug.spa_eyePanel;
-
-// ********************************************************************************************* //
     });

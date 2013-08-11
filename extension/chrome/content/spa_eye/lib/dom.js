@@ -3,7 +3,7 @@
 define([
     "firebug/lib/trace"
 ],
-    function(FBTrace) {
+    function (FBTrace) {
 
 // ********************************************************************************************* //
 // Constants
@@ -13,26 +13,26 @@ define([
 // ********************************************************************************************* //
 // Module Implementation
 
-        DOM.getMatchingNode = function(window,tag,tagbody){
+        DOM.getMatchingNode = function (window, tag, tagbody) {
             var elements = window.document.getElementsByTagName(tag);
             for (var i = 0; i < elements.length; i++) {
                 var val = elements[i].textContent;
-                if ( val == tagbody ) {
+                if (val == tagbody) {
                     return elements[i];
                 }
             }
             return undefined;
         }
 
-        DOM.appendExternalScriptTagToHead = function(document, path){
+        DOM.appendExternalScriptTagToHead = function (document, path) {
             var script = document.createElement("script");
-            script.src=path;
-            script.type="text/javascript";
+            script.src = path;
+            script.type = "text/javascript";
             script.async = false;
             document.head.appendChild(script);
         }
 
-        DOM.getAllWebContextStyleSheets = function(document){
+        DOM.getAllWebContextStyleSheets = function (document) {
             var links = document.getElementsByTagName("link");
             var hrefs = [];
             for (var i = 0; i < links.length; i++) {
@@ -42,11 +42,5 @@ define([
             return hrefs;
         }
 
-
-// ********************************************************************************************* //
-// Registration
-
         return DOM;
-
-// ********************************************************************************************* //
     });

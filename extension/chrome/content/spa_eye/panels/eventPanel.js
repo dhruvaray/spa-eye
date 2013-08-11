@@ -114,9 +114,6 @@ define([
             }
         });
 
-// ********************************************************************************************* //
-// Templates
-
         with (Domplate) {
             eventPanel.prototype.timeline = domplate(ModelReps.DirTablePlate, {
                 TIMELINE:IFRAME({src:"chrome://spa_eye/content/panels/eventPanel.xul",
@@ -131,12 +128,6 @@ define([
             });
         }
 
-// ********************************************************************************************* //
-// Registration
-
-
         return eventPanel;
-
-// ********************************************************************************************* //
 
     });

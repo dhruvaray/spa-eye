@@ -47,13 +47,8 @@ define([
             }
         });
 
-// ********************************************************************************************* //
-// Registration
-
         Firebug.registerStringBundle("chrome://spa_eye/locale/spa_eye.properties");
         Firebug.registerActivableModule(Firebug.spa_eyeModule);
 
         return Firebug.spa_eyeModule;
-
-// ********************************************************************************************* //
     });

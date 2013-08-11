@@ -16,8 +16,6 @@ define([
 ],
     function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, FirebugReps, URI, _, DOMReps, BasePanel) {
 
-// ********************************************************************************************* //
-
         var auditPanel = Firebug.auditPanel = BasePanel.extend({
             name:"spa_eye:audit",
             title:Locale.$STR("spa_eye.audit.title"),
@@ -59,15 +57,6 @@ define([
 
         });
 
-// ********************************************************************************************* //
-// Templates
-
-// ********************************************************************************************* //
-// Registration
-
-
         return Firebug.auditPanel;
-
-// ********************************************************************************************* //
 
     });

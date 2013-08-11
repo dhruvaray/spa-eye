@@ -4,26 +4,14 @@ define([
     "firebug/lib/trace",
     "spa_eye/lib/sha"
 ],
-function(FBTrace, SHA) {
-
-// ********************************************************************************************* //
-// Constants
+    function (FBTrace, SHA) {
 
         var URI = {};
 
-// ********************************************************************************************* //
-// Module Implementation
-
-        URI.getEndPoint = function(url){
+        URI.getEndPoint = function (url) {
             /*var tokens = url.split('/');
-            return tokens.length > 0 ? tokens[tokens.length-1] : url;*/
-            return encodeURIComponent(SHA.getTextHash(Firebug.currentContext.uid+url));
+             return tokens.length > 0 ? tokens[tokens.length-1] : url;*/
+            return encodeURIComponent(SHA.getTextHash(Firebug.currentContext.uid + url));
         }
-
-// ********************************************************************************************* //
-// Registration
-
         return URI;
-
-// ********************************************************************************************* //
     });
