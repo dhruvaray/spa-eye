@@ -30,8 +30,11 @@ define([
                     this.show(frame);
                 }
                 catch (exc) {
-                    if (FBTrace.DBG_ERRORS && FBTrace.DBG_STACK)
+                    if (FBTrace.DBG_ERRORS && FBTrace.DBG_STACK) {
+                        Events.dispatch(
+                            this.context.spa_eyeObj._spaHook.listener.fbListeners, 'onIntrospectionError', [exc]);
                         FBTrace.sysout("updateSelection FAILS " + exc, exc);
+                    }
                 }
             },
 

@@ -25,7 +25,7 @@ define([
         const Cr = Components.results;
         const bbhook_wp = "chrome://spa_eye/content/hooks/bb/bbhook_wp.js";
 
-        var _csr, _msr, _vsr, _cm, _cc, _cv, _path = [], _sequences = {}, _templates = {}, _auditRecords = {};
+        var _csr, _msr, _vsr, _cm, _cc, _cv, _path = [], _sequences = {}, _templates = {}, _auditRecords = {}, _errors = [];
         var _models, _collections, _views;
 
         var Operation = Common.Operation;
@@ -87,8 +87,10 @@ define([
 
                     _path.pop();
                 } catch (e) {
-                    if (FBTrace.DBG_ERRORS)
+                    if (FBTrace.DBG_ERRORS) {
+                        Events.dispatch(self.listener.fbListeners, 'onIntrospectionError', [e]);
                         FBTrace.sysout("spa_eye; Unexpected error", e);
+                    }
                     //attempt on raw function
                     result = fn.apply(model, Array.slice(fnargs));
                 }
@@ -135,8 +137,10 @@ define([
 
                     _path.pop();
                 } catch (e) {
-                    if (FBTrace.DBG_ERRORS)
+                    if (FBTrace.DBG_ERRORS) {
+                        Events.dispatch(self.listener.fbListeners, 'onIntrospectionError', [e]);
                         FBTrace.sysout("spa_eye; Unexpected error", e);
+                    }
                     //attempt on raw function
                     result = fn.apply(collection, Array.slice(fnargs));
                 }
@@ -159,8 +163,11 @@ define([
                         result = fn && fn.call(self.UnderScore, data);
                     }
                 } catch (e) {
-                    if (FBTrace.DBG_ERRORS)
+                    if (FBTrace.DBG_ERRORS) {
+                        Events.dispatch(self.listener.fbListeners, 'onIntrospectionError', [e]);
                         FBTrace.sysout("spa_eye; Unexpected error", e);
+                    }
+                    result = fn && fn.call(self.UnderScore, data);
                 }
                 return result;
             }
@@ -195,8 +202,10 @@ define([
 
                     _path.pop();
                 } catch (e) {
-                    if (FBTrace.DBG_ERRORS)
+                    if (FBTrace.DBG_ERRORS) {
+                        Events.dispatch(self.listener.fbListeners, 'onIntrospectionError', [e]);
                         FBTrace.sysout("spa_eye; Unexpected error", e);
+                    }
                     //attempt on raw function
                     result = fn && fn.apply(view, fnargs);
                 }
@@ -253,8 +262,10 @@ define([
                     if (result) return result;
 
                 } catch (e) {
-                    if (FBTrace.DBG_ERRORS)
+                    if (FBTrace.DBG_ERRORS) {
+                        Events.dispatch(self.listener.fbListeners, 'onIntrospectionError', [e]);
                         FBTrace.sysout("spa_eye; Unexpected error", e);
+                    }
                 }
                 return function (templateData) {
                     var render = root[proxiedTemplateRef] ? root[proxiedTemplateRef] : compiledTemplate;
@@ -377,8 +388,10 @@ define([
                         } catch (e) {
                             this.hooked = false;
                             this.registering = false;
-                            if (FBTrace.DBG_ERRORS)
+                            if (FBTrace.DBG_ERRORS) {
+                                Events.dispatch(this.listener.fbListeners, 'onIntrospectionError', [e]);
                                 FBTrace.sysout("Could not register Backbone hooks for spa_eye", e);
+                            }
                         }
                     }
                 }
@@ -431,8 +444,10 @@ define([
 
                     }, this);
                 } catch (e) {
-                    if (FBTrace.DBG_ERRORS)
+                    if (FBTrace.DBG_ERRORS) {
+                        Events.dispatch(this.listener.fbListeners, 'onIntrospectionError', [e]);
                         FBTrace.sysout("spa_eye; Unexpected error", e);
+                    }
                 }
             },
 
@@ -448,10 +463,12 @@ define([
                         rec[t] = record;
                         _auditRecords[model.cid].push(rec);
                     } catch (e) {
-                        if (FBTrace.DBG_ERRORS)
+                        if (FBTrace.DBG_ERRORS) {
+                            Events.dispatch(self.listener.fbListeners, 'onIntrospectionError', [e]);
                             FBTrace.sysout("spa_eye; Unexpected error", e);
-                        t ? (rec[t] = e) : (rec[_.uniqueId('e')] = e)
-                        _auditRecords[model.cid].push();
+                            t ? (rec[t] = e) : (rec[_.uniqueId('e')] = e)
+                            _auditRecords[model.cid].push();
+                        }
                     }
                 }
             },
@@ -461,6 +478,7 @@ define([
                 _models = [];
                 _collections = [];
                 _views = [];
+                _errors = [];
                 this.resetTrackingData();
             },
 
@@ -491,6 +509,10 @@ define([
 
             journals:function () {
                 return _auditRecords;
+            },
+
+            errors:function () {
+                return _errors;
             },
 
             views:function (options) {

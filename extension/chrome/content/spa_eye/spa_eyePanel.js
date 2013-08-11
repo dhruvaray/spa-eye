@@ -91,10 +91,12 @@ define([
                             define([
                                 "spa_eye/panels/viewPanel",
                                 "spa_eye/panels/auditPanel",
-                                "spa_eye/panels/eventPanel"
-                            ], function (ViewPanel, AuditPanel, EventPanel) {
+                                "spa_eye/panels/eventPanel",
+                                "spa_eye/panels/logPanel"
+                            ], function (ViewPanel, AuditPanel, EventPanel, LogPanel) {
                                 Firebug.registerPanel(Firebug.auditPanel);
                                 Firebug.registerPanel(Firebug.eventPanel);
+                                Firebug.registerPanel(Firebug.logPanel);
                                 Firebug.registerPanel(Firebug.viewPanel);
                                 Events.dispatch(Firebug.uiListeners, "updateSidePanels", [self]);
                             });
