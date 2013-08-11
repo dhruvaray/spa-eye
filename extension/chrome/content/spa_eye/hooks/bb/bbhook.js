@@ -54,9 +54,17 @@ define([
 
                 _path.push(model);
 
+                var state = ''
+                try {
+                    var state = model.toJSON();
+                } catch (e) {
+                    //Could not serialize as we are probably early
+                    state = _.clone(model.attributes);
+                }
+
                 self.recordSequenceEvent(root, {
                     cid:model.cid,
-                    target:model.toJSON(),
+                    target:state,
                     operation:type,
                     args:fnargs
                 });
@@ -64,10 +72,11 @@ define([
                 self.recordAuditEvent(model, {
                     cid:model.cid,
                     operation:type,
-                    target:model.toJSON(),
+                    target:state,
                     args:fnargs
                 });
 
+                Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [model, type]);
                 var result = fn.apply(model, Array.slice(fnargs));
 
                 if (_cm === _msr)
@@ -77,8 +86,6 @@ define([
 
                 _path.pop();
 
-                Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [model, type]);
-
                 return result;
             };
             this.function_womb.COLLECTION = function (root, collection, type, fn, fnargs) {
@@ -87,9 +94,18 @@ define([
 
                 _path.push(collection);
 
+                var state = ''
+                try {
+                    var state = collection.toJSON();
+                } catch (e) {
+                    //Could not serialize as we are probably early
+                    state = _.clone(collection.attributes);
+                }
+
+
                 self.recordSequenceEvent(root, {
                     cid:collection.cid,
-                    target:collection.toJSON(),
+                    target:state,
                     operation:type,
                     args:fnargs
                 });
@@ -97,10 +113,11 @@ define([
                 self.recordAuditEvent(collection, {
                     cid:collection.cid,
                     operation:type,
-                    target:collection.toJSON(),
+                    target:state,
                     args:fnargs
                 });
 
+                Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [collection, type]);
                 var result = fn.apply(collection, Array.slice(fnargs));
 
                 if (_cc === _csr)
@@ -109,8 +126,6 @@ define([
                 _cc = undefined;
 
                 _path.pop();
-
-                Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [collection, type]);
 
                 return result;
             }
@@ -149,6 +164,8 @@ define([
                     args:fnargs
                 });
 
+                Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [view, type]);
+
                 var result = fn && fn.apply(view, fnargs);
 
                 if (_cv === _vsr)
@@ -157,8 +174,6 @@ define([
                 _cv = undefined;
 
                 _path.pop();
-
-                Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [view, type]);
 
                 return result;
             };
