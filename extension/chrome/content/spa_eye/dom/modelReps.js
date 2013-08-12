@@ -263,7 +263,7 @@ define([
                                     el:repObj.el,
                                     $el:repObj.$el,
                                     tagName:repObj.tagName,
-                                    templates:repObj.templates
+                                    templates:repObj.__templates__
                                 };
                             }
                         }

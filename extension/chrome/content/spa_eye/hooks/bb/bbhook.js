@@ -144,13 +144,11 @@ define([
                 var result;
                 try {
                     var attachTemplatesToViews = function () {
-                        if (_cv) {
-                            var rendered = _.findWhere(_views, {cid:_cv.cid});
-                            if (rendered) {
-                                var templates = rendered.templates;
-                                if (templates.indexOf(script_id) == -1) {
-                                    templates.push(script_id);
-                                }
+                        var rendered = _cv;
+                        if (rendered) {// Is this being rendered in context of a view?
+                            var templates = rendered.__templates__;
+                            if (templates.indexOf(script_id) == -1) {
+                                templates.push(script_id);
                             }
                         }
                     };
@@ -183,6 +181,8 @@ define([
                         target:view,
                         args:fnargs
                     });
+
+                    (Operation.REMOVE == type) && (view.__mfd__ = true);
 
                     Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [view, type]);
 
@@ -321,7 +321,7 @@ define([
 
                     if (target instanceof self.Backbone.View) {
                         target.cid = target.cid || _.uniqueId('view');
-                        _views.push(_.extend({}, target, {templates:[], mfd:false}));
+                        _views.push(_.extend(target, {__templates__:[], __mfd__:false}));
                         _.each(Operation, function (key) {
                             if (target[key]) {
                                 target.watch(
@@ -331,12 +331,10 @@ define([
                                 target[key] = target[key];
                             }
                         });
-                    }
-                    if (target instanceof self.Backbone.Model) {
+                    } else if (target instanceof self.Backbone.Model) {
                         _models.push(target);
                         target.cid = target.cid || _.uniqueId('c');
-                    }
-                    if (target instanceof self.Backbone.Collection) {
+                    } else if (target instanceof self.Backbone.Collection) {
                         _collections.push(target);
                         target.cid = target.cid || _.uniqueId('col');
                     }
@@ -499,7 +497,7 @@ define([
                     return _views;
 
                 return _.filter(_views, function (view) {
-                    return !view.mfd == options.live;
+                    return !view.__mfd__ == options.live;
                 });
             },
 

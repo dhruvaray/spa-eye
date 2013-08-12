@@ -77,14 +77,12 @@ define([
             },
 
             onViewRemove:function (view) {
-                view.mfd = true;
-
                 var liveSection = this.sections[0];
                 var deadSection = this.sections[1];
                 liveSection._onRowRemove(view);
                 deadSection._onRowAdd(view, {
-                    autoAdd: true,
-                    type: Common.OperationClass[Common.Operation.REMOVE]
+                    autoAdd:true,
+                    type:Common.OperationClass[Common.Operation.REMOVE]
                 });
             },
 
