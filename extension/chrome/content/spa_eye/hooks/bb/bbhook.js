@@ -34,9 +34,6 @@ define([
 
         var Operation = Common.Operation;
 
-// ********************************************************************************************* //
-//  BBHook Class
-// ********************************************************************************************* //
         var BBHook = function (obj) {
             this.hooked = false;
             this.context = null;
@@ -49,112 +46,82 @@ define([
             }
             var self = this;
             this.function_womb = {};
-            this.function_womb.MODEL = function (root, model, type, fn, fnargs) {
+            this.function_womb.Operation = function (post, root, entity, type, fnargs) {
                 var result;
+                var state = ''
+
                 try {
-                    _cm = model;
 
-                    _path.push(model);
+                    if (entity instanceof self.Backbone.Model)
+                        _cm = entity;
+                    else if (entity instanceof self.Backbone.Collection)
+                        _cc = entity;
+                    else if (entity instanceof self.Backbone.View)
+                        _cv = entity;
 
-                    var state = ''
-                    try {
-                        var state = model.toJSON();
-                    } catch (e) {
-                        //Could not serialize as we are probably early
-                        state = _.clone(model.attributes);
+                    if (!post) {
+
+                        _path.push(entity);
+
+                        if (!(entity instanceof self.Backbone.View)) {
+                            try {
+                                var state = entity.toJSON();
+                            } catch (e) {
+                                //Could not serialize as we are probably early
+                                state = _.clone(entity.attributes);
+                            }
+                        } else {
+                            state = entity;
+                        }
+
+                        self.recordSequenceEvent(root, {
+                            cid:entity.cid,
+                            target:state,
+                            operation:type,
+                            args:fnargs
+                        });
+
+                        self.recordAuditEvent(entity, {
+                            cid:entity.cid,
+                            operation:type,
+                            target:state,
+                            args:fnargs
+                        });
+
+                        if (entity.__mfd__ && (!_zombies[entity.cid])) {
+                            _zombies[entity.cid] = entity;
+                        }
+                        ;
+
+                        (Operation.DESTROY == type || Operation.REMOVE == type) && (entity.__mfd__ = true);
+
+                        Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [entity, type]);
+
+                    } else {
+
+                        if (entity instanceof self.Backbone.Model) {
+                            if (_cm === _msr)
+                                _msr = undefined;
+                            _cm = undefined;
+                        }
+                        else if (entity instanceof self.Backbone.Collection) {
+                            if (_cc === _csr)
+                                _csr = undefined;
+                            _cc = undefined;
+                        }
+                        else if (entity instanceof self.Backbone.View) {
+                            if (_cv === _vsr)
+                                _vsr = undefined;
+                            _cv = undefined;
+                        }
+
+                        _path.pop();
                     }
-
-                    self.recordSequenceEvent(root, {
-                        cid:model.cid,
-                        target:state,
-                        operation:type,
-                        args:fnargs
-                    });
-
-                    self.recordAuditEvent(model, {
-                        cid:model.cid,
-                        operation:type,
-                        target:state,
-                        args:fnargs
-                    });
-
-                    if (model.__mfd__ && (!_zombies[model.cid])) {
-                        _zombies[model.cid] = model;
-                    }
-                    ;
-
-                    result = fn.apply(model, Array.slice(fnargs));
-
-                    if (_cm === _msr)
-                        _msr = undefined;
-
-                    _cm = undefined;
-
-                    _path.pop();
                 } catch (e) {
                     self.logError(e);
-                    //attempt on raw function
-                    result = fn.apply(model, Array.slice(fnargs));
-                } finally {
-                    (Operation.DESTROY == type) && (model.__mfd__ = true);
-                    Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [model, type]);
                 }
 
-                return result;
             };
-            this.function_womb.COLLECTION = function (root, collection, type, fn, fnargs) {
-                var result;
-
-                try {
-                    _cc = collection;
-
-                    _path.push(collection);
-
-                    var state = ''
-                    try {
-                        var state = collection.toJSON();
-                    } catch (e) {
-                        //Could not serialize as we are probably early
-                        state = _.clone(collection.attributes);
-                    }
-
-                    self.recordSequenceEvent(root, {
-                        cid:collection.cid,
-                        target:state,
-                        operation:type,
-                        args:fnargs
-                    });
-
-                    self.recordAuditEvent(collection, {
-                        cid:collection.cid,
-                        operation:type,
-                        target:state,
-                        args:fnargs
-                    });
-
-                    if (collection.__mfd__ && (!_zombies[collection.cid])) {
-                        _zombies[collection.cid] = collection;
-                    }
-                    ;
-
-                    result = fn.apply(collection, Array.slice(fnargs));
-
-                    if (_cc === _csr)
-                        _csr = undefined;
-
-                    _cc = undefined;
-
-                    _path.pop();
-                } catch (e) {
-                    self.logError(e);
-                    //attempt on raw function
-                    result = fn.apply(collection, Array.slice(fnargs));
-                } finally {
-                    (Operation.DESTROY == type) && (collection.__mfd__ = true);
-                    Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [collection, type]);
-                }
-                return result;
-            }
             this.function_womb.TEMPLATE = function (root, script_id, fn, fnargs, data) {
                 var result;
                 try {
@@ -177,50 +144,6 @@ define([
                 }
                 return result;
             }
-            this.function_womb.VIEW = function (root, view, type, fn, fnargs) {
-                var result;
-                try {
-                    _cv = view;
-                    _path.push(_cv);
-
-                    self.recordSequenceEvent(root, {
-                        cid:view.cid,
-                        target:view,
-                        operation:type,
-                        args:fnargs
-                    });
-
-                    self.recordAuditEvent(view, {
-                        cid:view.cid,
-                        operation:type,
-                        target:view,
-                        args:fnargs
-                    });
-
-                    if (view.__mfd__ && (!_zombies[view.cid])) {
-                        _zombies[view.cid] = view;
-                    }
-                    ;
-
-                    result = fn && fn.apply(view, fnargs);
-
-                    if (_cv === _vsr)
-                        _vsr = undefined;
-
-                    _cv = undefined;
-
-                    _path.pop();
-                } catch (e) {
-                    self.logError(e);
-                    //attempt on raw function
-                    result = fn && fn.apply(view, fnargs);
-                } finally {
-                    (Operation.REMOVE == type) && (view.__mfd__ = true);
-                    Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [view, type]);
-                }
-
-                return result;
-            };
 
         }
 
@@ -284,32 +207,6 @@ define([
                 };
             },
 
-            registerSetHooks:function (root) {
-                var self = this;
-                var ModelProto = self.Backbone.Model.prototype;
-                var CollectionProto = self.Backbone.Collection.prototype;
-
-                var getWatch = function (womb) {
-                    var watch = function (id, oldval, newval) {
-                        return function () {
-                            return womb.call(self, root, this, id, newval, arguments);
-                        }
-                    }
-                    return watch;
-                }
-
-                _.each(Operation, function (key) {
-                    if (ModelProto[key]) {
-                        ModelProto.watch(key, getWatch(self.function_womb.MODEL));
-                        ModelProto[key] = ModelProto[key];
-                    }
-                    if (CollectionProto[key]) {
-                        CollectionProto.watch(key, getWatch(self.function_womb.COLLECTION));
-                        CollectionProto[key] = CollectionProto[key];
-                    }
-                });
-            },
-
             registerWPHooks:function (root) {
                 Firebug.CommandLine.evaluateInWebPage(
                     Http.getResource(bbhook_wp),
@@ -323,15 +220,6 @@ define([
                     self.registerBBHooks(root);
                 };
 
-                var viewInstanceFnWomb = function (womb, view, key) {
-                    return function (id, oldval, newval) {
-                        return function () {
-                            var args = [root, view, key, newval, arguments];
-                            return womb.apply(view, args);
-                        }
-                    };
-                };
-
                 root.document && root.document.addEventListener("afterscriptexecute", register);
                 root.addEventListener("load", register);
                 root.addEventListener('Backbone_Eye:ADD', function (e) {
@@ -341,15 +229,6 @@ define([
                     if (target instanceof self.Backbone.View) {
                         target.cid = target.cid || _.uniqueId('view');
                         _views.push(_.extend(target, {__templates__:[], __mfd__:false}));
-                        _.each(Operation, function (key) {
-                            if (target[key]) {
-                                target.watch(
-                                    key,
-                                    viewInstanceFnWomb(self.function_womb.VIEW, target, key)
-                                );
-                                target[key] = target[key];
-                            }
-                        });
                     } else if (target instanceof self.Backbone.Model) {
                         _models.push(target);
                         target.cid = target.cid || _.uniqueId('c');
@@ -359,6 +238,19 @@ define([
                     }
 
                     Events.dispatch(self.listener.fbListeners, 'onBackboneEntityAdded', [e]);
+                });
+                root.addEventListener('Backbone_Eye:EXECUTE', function (e) {
+
+                    //{'detail':{entity:this, post:false, args:arguments, type:type}}
+                    if (e.detail)
+                        self.function_womb.Operation(
+                            e.detail.post,
+                            root,
+                            e.detail.entity,
+                            e.detail.type,
+                            e.detail.args
+                        )
+
                 });
 
             },
@@ -374,7 +266,6 @@ define([
                             this.Underscore = root._;
                             this.registerViewTemplateHook(root);
                             this.registerWPHooks(root);
-                            this.registerSetHooks(root);
                             if (FBTrace.DBG_SPA_EYE) {
                                 FBTrace.sysout("spa_eye; Successfully registered Backbone hooks for spa-eye module");
                             }
