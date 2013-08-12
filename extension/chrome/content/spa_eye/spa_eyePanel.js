@@ -290,6 +290,11 @@ define([
                 return p && p.search && p.search.apply(p, arguments);
             },
 
+            onSelectRow:function () {
+                var p = this.getCurrentPlate();
+                return p && p.onSelectRow && p.onSelectRow.apply(p, arguments);
+            },
+
             getEditor:function (target, value) {
                 if (!this.editor) {
                     this.editor = new DOMEditor(this.document);

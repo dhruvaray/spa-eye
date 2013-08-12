@@ -50,10 +50,12 @@ define([
                 }
             },
 
-            getPanelNode:function () {
-                var context = Firebug.currentContext,
-                    cp = context.currentPanel;
+            getCurrentPanel:function () {
+                return Firebug.currentContext.currentPanel;
+            },
 
+            getPanelNode:function () {
+                var cp = this.getCurrentPanel();
                 return cp && cp.panelNode;
             },
 
@@ -79,12 +81,14 @@ define([
 
             _navKeyHandler:function (jump) {
                 var selectedRow = this.getSelectedRow(),
-                    panelNode = this.getPanelNode();
-                if (!panelNode) return;
+                    panelNode = this.getPanelNode(),
+                    panel = this.getCurrentPanel();
+
+                if (!panel || !panelNode) return;
 
                 if (!selectedRow) {
                     var firstRow = panelNode.getElementsByClassName("0level").item(0);
-                    return ModelReps.selectRow(firstRow, panelNode);
+                    return ModelReps.selectRow(firstRow, panel);
                 }
 
                 var n = Math.abs(jump),
@@ -97,14 +101,14 @@ define([
 
                     // If `nr` is undefined, select previously visited `prev`
                     if (!nr || !Css.hasClass(nr, "memberRow")) {
-                        prev && ModelReps.selectRow(prev, panelNode);
+                        prev && ModelReps.selectRow(prev, panel);
                         break;
                     }
 
                     if (parseInt(nr.getAttribute("level"), 10) === 0) {
                         n--;
                         if (n === 0) {
-                            ModelReps.selectRow(nr, panelNode);
+                            ModelReps.selectRow(nr, panel);
                             break;
                         }
                         prev = nr;
