@@ -1,85 +1,86 @@
 if (window.Backbone) {
-    window.spa_eye = {};
 
-    //Fix : Duplicate with common.js
-    window.spa_eye.Operations = {
-        SAVE:"save", FETCH:"fetch", SET:"set", UNSET:"unset", CLEAR:"clear", ADD:"add", RESET:"reset", SORT:"sort",
-        DESTROY:"destroy", SYNC:"sync", CREATE:"create"
-    };
+    (function backbone_eye() {
 
-    window.spa_eye.proxyable = ['Model', 'Collection', 'View'];
-    window.spa_eye.proxy = [window.Backbone.Model, window.Backbone.Collection, window.Backbone.View];
-    window.spa_eye.proxyproto = [
-        window.Backbone.Model.prototype,
-        window.Backbone.Collection.prototype,
-        window.Backbone.View.prototype
-    ];
-    window.spa_eye.womb = function (type) {
+        //Fix : Duplicate with common.js
+        var operations = {
+            SAVE:"save", FETCH:"fetch", SET:"set", UNSET:"unset", CLEAR:"clear", ADD:"add", RESET:"reset", SORT:"sort",
+            DESTROY:"destroy", SYNC:"sync", CREATE:"create"
+        };
 
-        return function (id, oldval, newval) {
+        proxyable = ['Model', 'Collection', 'View'];
+        proxy = [window.Backbone.Model, window.Backbone.Collection, window.Backbone.View];
+        proxyproto = [
+            window.Backbone.Model.prototype,
+            window.Backbone.Collection.prototype,
+            window.Backbone.View.prototype
+        ];
+        womb = function (type) {
 
-            return function () {
+            return function (id, oldval, newval) {
 
-                var event = new CustomEvent(
-                    'Backbone_Eye:EXECUTE',
-                    {'detail':{entity:this, post:false, args:arguments, type:type}}
-                );
-                window.dispatchEvent(event);
+                return function () {
 
-                var result = newval.apply(this, arguments);
+                    var event = new CustomEvent(
+                        'Backbone_Eye:EXECUTE',
+                        {'detail':{entity:this, post:false, args:arguments, type:type}}
+                    );
+                    window.dispatchEvent(event);
 
-                var event = new CustomEvent(
-                    'Backbone_Eye:EXECUTE',
-                    {'detail':{entity:this, post:true, args:arguments, type:type}}
-                );
+                    var result = newval.apply(this, arguments);
 
-                window.dispatchEvent(event);
+                    var event = new CustomEvent(
+                        'Backbone_Eye:EXECUTE',
+                        {'detail':{entity:this, post:true, args:arguments, type:type}}
+                    );
 
-                return result;
-            }
-        }
-    };
+                    window.dispatchEvent(event);
 
-    for (var i = 0; i < window.spa_eye.proxyable.length; ++i) {
-        (function (entity, proxy, proxyproto) {
-            if (proxy) {
-                window.Backbone[entity] = function () {
-                    try {
-
-                        var event = new CustomEvent('Backbone_Eye:ADD', {'detail':{data:this}});
-                        window.dispatchEvent(event);
-
-                        if (this instanceof window.Backbone.View) {
-                            _.each(["remove", "render"], function (key) {
-                                if (this[key]) {
-                                    this.watch(key, window.spa_eye.womb(key));
-                                    this[key] = this[key];
-                                }
-                            }, this);
-                        }
-                    } catch (e) {
-
-                    }
-                    return proxy.apply(this, arguments);
-                };
-
-                window.Backbone[entity].prototype = proxyproto;
-                _.extend(window.Backbone[entity], proxy);
-
-                if (proxy !== window.Backbone.View) {
-
-                    _.each(window.spa_eye.Operations, function (key) {
-                        if (proxyproto[key]) {
-                            proxyproto.watch(key, window.spa_eye.womb(key));
-                            proxyproto[key] = proxyproto[key];
-                        }
-                    }, this);
+                    return result;
                 }
-
             }
-        })(window.spa_eye.proxyable[i], window.spa_eye.proxy[i], window.spa_eye.proxyproto[i]);
-    }
+        };
 
+        for (var i = 0; i < proxyable.length; ++i) {
+            (function (entity, proxy, proxyproto) {
+                if (proxy) {
+                    window.Backbone[entity] = function () {
+                        try {
+
+                            var event = new CustomEvent('Backbone_Eye:ADD', {'detail':{data:this}});
+                            window.dispatchEvent(event);
+
+                            if (this instanceof window.Backbone.View) {
+                                _.each(["remove", "render"], function (key) {
+                                    if (this[key]) {
+                                        this.watch(key, womb(key));
+                                        this[key] = this[key];
+                                    }
+                                }, this);
+                            }
+                        } catch (e) {
+
+                        }
+                        return proxy.apply(this, arguments);
+                    };
+
+                    window.Backbone[entity].prototype = proxyproto;
+                    _.extend(window.Backbone[entity], proxy);
+
+                    if (proxy !== window.Backbone.View) {
+
+                        _.each(operations, function (key) {
+                            if (proxyproto[key]) {
+                                proxyproto.watch(key, womb(key));
+                                proxyproto[key] = proxyproto[key];
+                            }
+                        }, this);
+                    }
+
+                }
+            })(proxyable[i], proxy[i], proxyproto[i]);
+        }
+    }).call(this);
 
 }
 
