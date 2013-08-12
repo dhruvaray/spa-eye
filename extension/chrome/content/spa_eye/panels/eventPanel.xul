@@ -65,7 +65,7 @@
                     document.getElementById("sequence").innerHTML = "";
                     sequenceDiagram = Diagram.parse(sequence);
                     sequenceDiagram.drawSVG("sequence", {theme:'simple'});
-                }, 200);
+                }, 10);
             } catch (e) {
 
             }

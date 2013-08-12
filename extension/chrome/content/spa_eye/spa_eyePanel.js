@@ -132,7 +132,7 @@ define([
 
             supportsObject:function (object, type) {
                 var views = this.context.spa_eyeObj.getViews();
-                this.inspectingObject = _.findWhere(views, {el:object.wrappedJSObject});
+                this.inspectingObject = _.findWhere(views, {el:object});
                 return this.inspectingObject;
             },
 
