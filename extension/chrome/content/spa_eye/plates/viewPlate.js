@@ -11,12 +11,13 @@ define([
     "spa_eye/lib/require/underscore",
 
     "spa_eye/plates/basePlate",
+    "spa_eye/util/common",
 
     "spa_eye/dom/section",
     "spa_eye/dom/modelReps"
 
 ],
-    function (Firebug, FBTrace, Locale, Events, Css, Str, Dom, _, BasePlate, ChildSection, ModelReps) {
+    function (Firebug, FBTrace, Locale, Events, Css, Str, Dom, _, BasePlate, Common, ChildSection, ModelReps) {
 
 
         var PANEL = BasePlate.extend({
@@ -82,7 +83,8 @@ define([
                 var deadSection = this.sections[1];
                 liveSection._onRowRemove(view);
                 deadSection._onRowAdd(view, {
-                    autoAdd: true
+                    autoAdd: true,
+                    type: Common.OperationClass[Common.Operation.REMOVE]
                 });
             },
 

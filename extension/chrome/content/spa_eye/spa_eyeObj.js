@@ -60,7 +60,7 @@ define([
 
             resetTrackingData:function () {
                 this._spaHook.resetTrackingData();
-                Events.dispatch(spa_eyeObj._spaHook.listener.fbListeners, 'onTrackingDataCleared');
+                Events.dispatch(this._spaHook.listener.fbListeners, 'onTrackingDataCleared');
 
             }
         };
