@@ -87,7 +87,7 @@ define([
 
                     _path.pop();
                 } catch (e) {
-                    logError(e);
+                    self.logError(e);
                     //attempt on raw function
                     result = fn.apply(model, Array.slice(fnargs));
                 }
@@ -134,7 +134,7 @@ define([
 
                     _path.pop();
                 } catch (e) {
-                    logError(e);
+                    self.logError(e);
                     //attempt on raw function
                     result = fn.apply(collection, Array.slice(fnargs));
                 }
@@ -157,7 +157,7 @@ define([
                         result = fn && fn.call(self.Underscore, data);
                     }
                 } catch (e) {
-                    logError(e);
+                    self.logError(e);
                     result = fn && fn.call(self.Underscore, data);
                 }
                 return result;
@@ -193,7 +193,7 @@ define([
 
                     _path.pop();
                 } catch (e) {
-                    logError(e);
+                    self.logError(e);
                     //attempt on raw function
                     result = fn && fn.apply(view, fnargs);
                 }
@@ -207,17 +207,21 @@ define([
             constructor:BBHook,
 
             registerViewTemplateHook:function (root) {
-                var self = this;
-                var watch = function (id, oldval, newval) {
-                    return function () {
-                        var args = [root, newval];
-                        args.push.apply(args, arguments);
-                        return self.registerTemplateHook.apply(self, args);
+
+                try {
+                    var watch = function (id, oldval, newval) {
+                        return function () {
+                            var args = [root, newval];
+                            args.push.apply(args, arguments);
+                            return self.registerTemplateHook.apply(self, args);
+                        }
                     }
-                }
-                if (root._) {
-                    root._.watch("template", watch);
-                    root._["template"] = root._["template"];
+                    if (root._) {
+                        root._.watch("template", watch);
+                        root._["template"] = root._["template"];
+                    }
+                } catch (e) {
+                    this.logError(e);
                 }
             },
 
@@ -250,7 +254,7 @@ define([
                     if (result) return result;
 
                 } catch (e) {
-                    logError(e);
+                    self.logError(e);
                 }
                 return function (templateData) {
                     var render = root[proxiedTemplateRef] ? root[proxiedTemplateRef] : compiledTemplate;
@@ -361,7 +365,7 @@ define([
                         } catch (e) {
                             this.hooked = false;
                             this.registering = false;
-                            logError(e);
+                            this.logError(e);
                         }
                     }
                 }
@@ -414,7 +418,7 @@ define([
 
                     }, this);
                 } catch (e) {
-                    logError(e);
+                    this.logError(e);
                 }
             },
 
@@ -428,7 +432,7 @@ define([
                         _auditRecords[model.cid] || (_auditRecords[model.cid] = {});
                         _auditRecords[model.cid][t] = record;
                     } catch (e) {
-                        logError(e);
+                        this.logError(e);
                         t ?
                             (_auditRecords[model.cid][t] = e) :
                             (_auditRecords[model.cid][_.uniqueId('e')] = e)
