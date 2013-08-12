@@ -144,15 +144,17 @@ define([
                 var result;
                 try {
                     var attachTemplatesToViews = function () {
-                        var rendered = _.findWhere(_views, {cid:_cv.cid});
-                        if (rendered) {
-                            var templates = rendered.templates;
-                            if (templates.indexOf(script_id) == -1) {
-                                templates.push(script_id);
+                        if (_cv) {
+                            var rendered = _.findWhere(_views, {cid:_cv.cid});
+                            if (rendered) {
+                                var templates = rendered.templates;
+                                if (templates.indexOf(script_id) == -1) {
+                                    templates.push(script_id);
+                                }
                             }
                         }
                     };
-                    if (data) {
+                    if (typeof data !== 'undefined') {
                         attachTemplatesToViews();
                         result = fn && fn.call(self.Underscore, data);
                     }
@@ -208,6 +210,7 @@ define([
 
             registerViewTemplateHook:function (root) {
 
+                var self = this;
                 try {
                     var watch = function (id, oldval, newval) {
                         return function () {
@@ -221,7 +224,7 @@ define([
                         root._["template"] = root._["template"];
                     }
                 } catch (e) {
-                    this.logError(e);
+                    self.logError(e);
                 }
             },
 
@@ -318,7 +321,7 @@ define([
 
                     if (target instanceof self.Backbone.View) {
                         target.cid = target.cid || _.uniqueId('view');
-                        _views.push(_.extend(target, {templates:[], mfd:false}));
+                        _views.push(_.extend({}, target, {templates:[], mfd:false}));
                         _.each(Operation, function (key) {
                             if (target[key]) {
                                 target.watch(
