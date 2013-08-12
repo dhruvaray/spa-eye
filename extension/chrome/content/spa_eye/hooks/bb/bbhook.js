@@ -122,7 +122,7 @@ define([
                 }
 
             };
-            this.function_womb.TEMPLATE = function (root, script_id, fn, fnargs, data) {
+            this.function_womb.TEMPLATE = function (script_id, fn, fnargs) {
                 var result;
                 try {
                     var attachTemplatesToViews = function () {
@@ -134,13 +134,11 @@ define([
                             }
                         }
                     };
-                    if (typeof data !== 'undefined') {
-                        attachTemplatesToViews();
-                        result = fn && fn.call(self.Underscore, data);
-                    }
+                    attachTemplatesToViews();
+                    result = fn && fn.apply(self.Underscore, fnargs);
                 } catch (e) {
                     self.logError(e);
-                    result = fn && fn.call(self.Underscore, data);
+                    result = fn && fn.apply(self.Underscore, fnargs);
                 }
                 return result;
             }
@@ -195,15 +193,17 @@ define([
                             _templates[script_id] = text;
                         }
                     }
-                    var result = self.function_womb.TEMPLATE(root, script_id, compiledTemplate, [text, data, settings], data);
-                    if (result) return result;
+
+                    if (typeof data !== 'undefined') //Data
+                        return self.function_womb.TEMPLATE(script_id, compiledTemplate, [data]);
+
 
                 } catch (e) {
                     self.logError(e);
                 }
                 return function (templateData) {
                     var render = root[proxiedTemplateRef] ? root[proxiedTemplateRef] : compiledTemplate;
-                    return self.function_womb.TEMPLATE(root, script_id, render, arguments, templateData);
+                    return self.function_womb.TEMPLATE(script_id, render, [templateData]);
                 };
             },
 
