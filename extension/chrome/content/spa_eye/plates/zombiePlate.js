@@ -22,13 +22,11 @@ define([
             createSections:function () {
                 var sections = [];
                 var all = new ChildSection({
-                    name:'all_collections',
+                    name:'all_zombies',
                     title:Locale.$STR('spa_eye.all'),
                     parent:this.parent.panelNode,
-                    order:0,
-                    container:'allCollectionsDiv',
-                    body:'allCollectionsDivBody',
-
+                    container:'allZombiesDiv',
+                    body:'allZombiesDivBody',
                     data:FBL.bindFixed(this.context.spa_eyeObj.getZombies, this.context.spa_eyeObj)
                 });
                 sections.push(all);
@@ -43,7 +41,6 @@ define([
                 spa_eyeObj.selectedEntity = m;
                 Events.dispatch(spa_eyeObj._spaHook.listener.fbListeners, 'onSelectedEntityChange', [m]);
             }
-
 
         });
 
