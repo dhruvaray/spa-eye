@@ -54,6 +54,11 @@ define([
                 return this._spaHook ? this._spaHook.collections() : [];
             },
 
+            getZombies:function () {
+                return this._spaHook ? this._spaHook.zombies() : [];
+            },
+
+
             removeCollection:function (col) {
                 return this._spaHook && this._spaHook.removeCollection(col);
             },

@@ -25,8 +25,12 @@ define([
         const Cr = Components.results;
         const bbhook_wp = "chrome://spa_eye/content/hooks/bb/bbhook_wp.js";
 
-        var _csr, _msr, _vsr, _cm, _cc, _cv, _path = [], _sequences = {}, _templates = {}, _auditRecords = {}, _errors = [];
-        var _models, _collections, _views;
+        var _csr, _msr, _vsr, _cm, _cc, _cv, _path = [], _sequences = {}, _templates = {}, _auditRecords = {},
+            _errors = [];
+        var _models = [];
+        var _collections = [];
+        var _views = [];
+        var _zombies = {};
 
         var Operation = Common.Operation;
 
@@ -38,9 +42,6 @@ define([
             this.context = null;
             this.listener = new Firebug.Listener();
             this.registering = false;
-            _models = [];
-            _collections = []
-            _views = [];
             if (obj) {
                 for (var key in obj) {
                     this[key] = obj[key];
@@ -77,7 +78,11 @@ define([
                         args:fnargs
                     });
 
-                    Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [model, type]);
+                    if (model.__mfd__ && (!_zombies[model.cid])) {
+                        _zombies[model.cid] = model;
+                    }
+                    ;
+
                     result = fn.apply(model, Array.slice(fnargs));
 
                     if (_cm === _msr)
@@ -90,6 +95,9 @@ define([
                     self.logError(e);
                     //attempt on raw function
                     result = fn.apply(model, Array.slice(fnargs));
+                } finally {
+                    (Operation.DESTROY == type) && (model.__mfd__ = true);
+                    Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [model, type]);
                 }
 
                 return result;
@@ -124,7 +132,11 @@ define([
                         args:fnargs
                     });
 
-                    Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [collection, type]);
+                    if (collection.__mfd__ && (!_zombies[collection.cid])) {
+                        _zombies[collection.cid] = collection;
+                    }
+                    ;
+
                     result = fn.apply(collection, Array.slice(fnargs));
 
                     if (_cc === _csr)
@@ -137,6 +149,9 @@ define([
                     self.logError(e);
                     //attempt on raw function
                     result = fn.apply(collection, Array.slice(fnargs));
+                } finally {
+                    (Operation.DESTROY == type) && (collection.__mfd__ = true);
+                    Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [collection, type]);
                 }
                 return result;
             }
@@ -182,9 +197,10 @@ define([
                         args:fnargs
                     });
 
-                    (Operation.REMOVE == type) && (view.__mfd__ = true);
-
-                    Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [view, type]);
+                    if (view.__mfd__ && (!_zombies[view.cid])) {
+                        _zombies[view.cid] = view;
+                    }
+                    ;
 
                     result = fn && fn.apply(view, fnargs);
 
@@ -198,6 +214,9 @@ define([
                     self.logError(e);
                     //attempt on raw function
                     result = fn && fn.apply(view, fnargs);
+                } finally {
+                    (Operation.REMOVE == type) && (view.__mfd__ = true);
+                    Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [view, type]);
                 }
 
                 return result;
@@ -448,6 +467,7 @@ define([
                 _collections = [];
                 _views = [];
                 _errors = [];
+                _zombies = {};
                 this.resetTrackingData();
             },
 
@@ -462,6 +482,10 @@ define([
 
             models:function () {
                 return _models;
+            },
+
+            zombies:function () {
+                return _zombies;
             },
 
             removeModel:function (model) {

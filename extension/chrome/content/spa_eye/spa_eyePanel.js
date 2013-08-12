@@ -19,16 +19,18 @@ define([
     "spa_eye/plates/modelPlate",
     "spa_eye/plates/collectionPlate",
     "spa_eye/plates/viewPlate",
+    "spa_eye/plates/zombiePlate",
 
     "spa_eye/panels/basePanel"
 
 ],
-    function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, Toolbar, DOMEditor, _, BasePanel, ModelPlate, CollectionPlate, ViewPlate) {
+    function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, Toolbar, DOMEditor, _, BasePanel, ModelPlate, CollectionPlate, ViewPlate, ZombiePlate) {
 
         var childPlate = {
             MODEL:'model',
             COLLECTION:'collection',
-            VIEW:'view'
+            VIEW:'view',
+            ZOMBIE:'zombie'
         };
         var spa_eyePanel = Firebug.spa_eyePanel = BasePanel.extend(Obj.extend(Firebug.ActivablePanel, {
             name:"spa_eye",
@@ -60,6 +62,7 @@ define([
                 this.plates.model = new ModelPlate(args);
                 this.plates.collection = new CollectionPlate(args);
                 this.plates.view = new ViewPlate(args);
+                this.plates.zombie = new ZombiePlate(args);
             },
 
             onBackboneLoaded:function () {
@@ -206,7 +209,16 @@ define([
                         className:"toolbar-text-button fbInternational",
                         tooltiptext:"spa_eye.views",
                         command:FBL.bindFixed(this.selectChildPlate, this, childPlate.VIEW)
-                    });
+                    },
+                    {
+                        id:"spa_eye_panel_button_zombie",
+                        label:"spa_eye.zombies",
+                        type:"radio",
+                        className:"toolbar-text-button fbInternational",
+                        tooltiptext:"spa_eye.zombies",
+                        command:FBL.bindFixed(this.selectChildPlate, this, childPlate.ZOMBIE)
+                    }
+                );
                 return buttons;
             },
 
