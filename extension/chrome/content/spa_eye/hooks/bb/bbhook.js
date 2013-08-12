@@ -144,9 +144,9 @@ define([
                 var result;
                 try {
                     var attachTemplatesToViews = function () {
-                        var rendered = _cv;
+                        var rendered = _.findWhere(_views, {cid:_cv.cid});
                         if (rendered) {
-                            var templates = rendered.inferredTemplates;
+                            var templates = rendered.templates;
                             if (templates.indexOf(script_id) == -1) {
                                 templates.push(script_id);
                             }
@@ -313,9 +313,8 @@ define([
                     var target = e.detail && e.detail.data;
 
                     if (target instanceof self.Backbone.View) {
-                        _views.push(target);
                         target.cid = target.cid || _.uniqueId('view');
-                        target.inferredTemplates = [];
+                        _views.push(_.extend(target, {templates:[], mfd:false}));
                         _.each(Operation, function (key) {
                             if (target[key]) {
                                 target.watch(

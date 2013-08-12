@@ -166,8 +166,8 @@ define([
                     data = obj();
                 }
                 return {
-                    data: data,
-                    section: section
+                    data:data,
+                    section:section
                 }
             },
 
@@ -263,7 +263,7 @@ define([
                                     el:repObj.el,
                                     $el:repObj.$el,
                                     tagName:repObj.tagName,
-                                    templates:repObj.inferredTemplates
+                                    templates:repObj.templates
                                 };
                             }
                         }
