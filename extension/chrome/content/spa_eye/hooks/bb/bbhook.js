@@ -102,89 +102,34 @@ define([
                 }
 
             };
-            this.function_womb.TEMPLATE = function (script_id, fn, fnargs) {
-                var result;
-                try {
-                    var attachTemplatesToViews = function () {
-                        var rendered = _current.View;
-                        if (rendered) {// Is this being rendered in context of a view?
-                            var templates = rendered.__templates__;
-                            if (templates.indexOf(script_id) == -1) {
-                                templates.push(script_id);
-                            }
-                        }
-                    };
-                    attachTemplatesToViews();
-                    result = fn && fn.apply(self.Underscore, fnargs);
-                } catch (e) {
-                    self.logError(e);
-                    result = fn && fn.apply(self.Underscore, fnargs);
-                }
-                return result;
-            }
 
         }
 
         BBHook.prototype = {
             constructor:BBHook,
 
-            registerViewTemplateHook:function (root) {
-
-                var self = this;
-                try {
-                    var watch = function (id, oldval, newval) {
-                        return function () {
-                            var args = [root, newval];
-                            args.push.apply(args, arguments);
-                            return self.registerTemplateHook.apply(self, args);
-                        }
+            inferScriptForView:function (script_id) {
+                var rendered = _current.View;
+                if (rendered) {// Is this being rendered in context of a view?
+                    var templates = rendered.__templates__;
+                    if (templates.indexOf(script_id) == -1) {
+                        templates.push(script_id);
                     }
-                    if (root._) {
-                        root._.watch("template", watch);
-                        root._["template"] = root._["template"];
-                    }
-                } catch (e) {
-                    self.logError(e);
                 }
             },
 
-            registerTemplateHook:function (root, original, text, data, settings) {
-
+            createDebuggableScript:function (root, script_id, text) {
                 var self = this;
                 try {
-                    if (!text) {
-                        if (FBTrace.DBG_SPA_EYE) {
-                            FBTrace.sysout("spa_eye; template text is empty ");
-                        }
-                        return false;
-                    }
-                    var script = DOM.getMatchingNode(root, "script", text)
-                    var script_id = (script && script.id) ? script.id : SHA.getTextHash(text);
+                    var source = _.template.call(_, text).source;
                     var proxiedTemplateRef = '_t' + script_id;
-                    var compiledTemplate = root[proxiedTemplateRef];
-
-                    if (!compiledTemplate) {
-                        compiledTemplate = original.call(root._, text);
-                        var source = _.template.call(_, text).source;
-                        if (source) {
-                            var f = escape("window['" + proxiedTemplateRef + "']=" + source);
-                            DOM.appendExternalScriptTagToHead(root.document,
-                                "data:text/javascript;fileName=" + script_id + ";," + f);
-                            _templates[script_id] = text;
-                        }
-                    }
-
-                    if (typeof data !== 'undefined') //Data
-                        return self.function_womb.TEMPLATE(script_id, compiledTemplate, [data]);
-
-
+                    var f = escape("window['" + proxiedTemplateRef + "']=" + source);
+                    DOM.appendExternalScriptTagToHead(root.document,
+                        "data:text/javascript;fileName=" + script_id + ";," + f);
+                    _templates[script_id] = text;
                 } catch (e) {
                     self.logError(e);
                 }
-                return function (templateData) {
-                    var render = root[proxiedTemplateRef] ? root[proxiedTemplateRef] : compiledTemplate;
-                    return self.function_womb.TEMPLATE(script_id, render, [templateData]);
-                };
             },
 
             registerWPHooks:function (root) {
@@ -233,11 +178,19 @@ define([
                     )
 
                 });
+                root.addEventListener('Backbone_Eye:ERROR', function (e) {
+                    self.logError(e.detail.error);
+                });
+                root.addEventListener('Backbone_Eye:TEMPLATE:ADD', function (e) {
+                    self.createDebuggableScript(root, e.detail.script_id, e.detail.text);
+                });
+                root.addEventListener('Backbone_Eye:TEMPLATE:INFER', function (e) {
+                    self.inferScriptForView(e.detail.script_id);
+                });
 
             },
 
             registerBBHooks:function (root) {
-                var spa_eyeObj = this.context.spa_eyeObj;
                 if (this.isBackboneInitialized(root)) {
                     if (!this.hooked && !this.registering) {
                         try {
@@ -245,7 +198,6 @@ define([
                             this.root = root;
                             this.Backbone = root.Backbone;
                             this.Underscore = root._;
-                            this.registerViewTemplateHook(root);
                             this.registerWPHooks(root);
                             if (FBTrace.DBG_SPA_EYE) {
                                 FBTrace.sysout("spa_eye; Successfully registered Backbone hooks for spa-eye module");

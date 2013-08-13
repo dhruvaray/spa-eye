@@ -33,8 +33,8 @@
                 );
                 root.dispatchEvent(event);
             } catch (e) {
-                console.log(e);
-            };
+                root.dispatchEvent(new CustomEvent('Backbone_Eye:ERROR', {'detail':{error:e}}));
+            }
         };
 
         var womb = function (entity_type, operation_type) {
@@ -48,6 +48,7 @@
                         _.extend(newval, wrapper);
                         result = newval.apply(this, arguments);
                     } catch (e) {
+                        root.dispatchEvent(new CustomEvent('Backbone_Eye:ERROR', {'detail':{error:e}}));
                     }
                     recordEvent(this, entity_type, true, arguments, operation_type);
                     return result;
@@ -55,6 +56,61 @@
                 return wrapper;
             }
         };
+
+
+        var createDebuggableScript = function (id, oldval, newval) {
+
+            var getMatchingNode = function (tag, tagbody) {
+                var elements = root.document.getElementsByTagName(tag);
+
+                for (var i = 0; i < elements.length; i++) {
+                    var val = elements[i].textContent;
+                    if (val == tagbody) {
+                        return elements[i];
+                    }
+                }
+                return undefined;
+            }
+
+            var wrapper = function (text, data, settings) {
+
+                _.extend(newval, wrapper);
+                if (text) {
+                    var script = getMatchingNode("script", text)
+                    var script_id = (script && script.id) ? script.id : _.uniqueId("template_");
+                    var proxiedTemplateRef = '_t' + script_id;
+                    var compiledTemplate = root[proxiedTemplateRef];
+                    if (!compiledTemplate) {
+                        root.dispatchEvent(new CustomEvent('Backbone_Eye:TEMPLATE:ADD', {'detail':{
+                            script_id:script_id,
+                            text:text}}));
+                        compiledTemplate = newval(text, undefined, settings);
+                    }
+                    if (typeof data !== 'undefined') {//Data
+                        root.dispatchEvent(
+                            new CustomEvent('Backbone_Eye:TEMPLATE:INFER', {'detail':{script_id:script_id}}));
+                        return compiledTemplate.call(_, data)
+                    }
+                    return function (tdata) {
+                        root.dispatchEvent(
+                            new CustomEvent('Backbone_Eye:TEMPLATE:INFER', {'detail':{script_id:script_id}}));
+
+                        return root[proxiedTemplateRef] ?
+                            root[proxiedTemplateRef].call(_, tdata) :
+                            compiledTemplate.call(_, tdata);
+                    }
+                } else {
+                    root.dispatchEvent(new CustomEvent('Backbone_Eye:ERROR',
+                        {'detail':{error:"Template Text is empty"}}));
+                    return newval(arguments);
+                }
+
+            }
+            return wrapper;
+        };
+
+        _.watch("template", createDebuggableScript);
+        _["template"] = _["template"];
 
         for (var i = 0; i < proxyable.length; ++i) {
             (function (entity, proxy, proxyproto, operation) {
@@ -72,7 +128,6 @@
                     };
 
                     Backbone[entity].prototype = proxyproto;
-                    Backbone[entity].prototype.constructor = Backbone[entity];
                     _.extend(Backbone[entity], proxy);
 
                     _.each(operation.proto, function (key) {
@@ -85,7 +140,7 @@
             })(proxyable[i], proxy[i], proxyproto[i], operations[i]);
         }
     } else {
-        root.console && root.console.log("Backbone not loaded...")
+        root.dispatchEvent(new CustomEvent('Backbone_Eye:ERROR', {'detail':{error:"Backbone not loaded..."}}));
     }
 })(window);
 
