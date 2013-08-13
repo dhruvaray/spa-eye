@@ -1,8 +1,5 @@
 (function backbone_eye(root) {
 
-    console.log("WEIRD");
-    console.log(root);
-
     if ((typeof root.Backbone !== 'undefined') && (typeof root._ !== 'undefined')) {
 
         var Backbone = root.Backbone;
@@ -37,8 +34,7 @@
                 root.dispatchEvent(event);
             } catch (e) {
                 console.log(e);
-            }
-            ;
+            };
         };
 
         var womb = function (entity_type, operation_type) {
@@ -76,6 +72,7 @@
                     };
 
                     Backbone[entity].prototype = proxyproto;
+                    Backbone[entity].prototype.constructor = Backbone[entity];
                     _.extend(Backbone[entity], proxy);
 
                     _.each(operation.proto, function (key) {
