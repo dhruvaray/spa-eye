@@ -1,6 +1,5 @@
 (function backbone_eye(root) {
 
-    console.log(root);
     if (root.Backbone && root._) {
 
         var proxyable = ['Model', 'Collection', 'View'];
@@ -32,27 +31,30 @@
                 root.dispatchEvent(event);
             } catch (e) {
                 console.log(e);
-            }
-            ;
+            };
         };
 
         var womb = function (entity_type, operation_type) {
 
             return function (id, oldval, newval) {
 
-                return function () {
+                var wrapper = function () {
                     recordEvent(this, entity_type, false, arguments, operation_type);
-                    var result = newval.apply(this, arguments);
+                    var result;
+                    try{
+                        root._.extend(newval, wrapper);
+                        result = newval.apply(this, arguments);
+                    } catch (e) {}
                     recordEvent(this, entity_type, true, arguments, operation_type);
                     return result;
                 }
+                return wrapper;
             }
         };
 
         for (var i = 0; i < proxyable.length; ++i) {
             (function (entity, proxy, proxyproto, operation) {
                 if (proxy) {
-                    console.log("came here...");
                     root.Backbone[entity] = function () {
                         var event = new CustomEvent('Backbone_Eye:ADD', {'detail':{data:this}});
                         root.dispatchEvent(event);
