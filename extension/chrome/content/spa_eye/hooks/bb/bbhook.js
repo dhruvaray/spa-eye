@@ -34,6 +34,7 @@ define([
         var _zombies = {};
         var _deleted = [];
 
+
         var Operation = Common.Operation;
 
         var BBHook = function (obj) {
@@ -49,7 +50,7 @@ define([
             this.function_womb = {};
             this.function_womb.Operation = function (post, entity, entity_type, operation_type, fnargs) {
                 var result;
-                var state = ''
+                var state = '';
 
                 try {
 
@@ -74,31 +75,23 @@ define([
                             args:fnargs
                         });
 
-                        self.recordAuditEvent(entity, {
+                        self.recordAuditEvent({
                             cid:entity.cid,
                             operation:operation_type,
                             target:state,
                             args:fnargs
                         });
 
-                        if (!_.contains(_deleted, entity.cid)) { //Not deleted in this operation set...
-                            if (entity.__mfd__ && (!_zombies[entity.cid])) { //Is it marked for deletion?
-                                _zombies[entity.cid] = entity;
+                        if (!_.contains(_deleted, entity.cid)) {
+                            self.markAsZombie(entity);
+                        }
+
+                        if (Operation.DESTROY === operation_type || Operation.REMOVE === operation_type) {
+                            if (!(entity instanceof self.Backbone.Collection)) {
+                                entity.__mfd__ = true;
+                                _deleted.push(entity.cid);
                             }
                         }
-                        ;
-
-                        if (Operation.DESTROY == operation_type || Operation.REMOVE == operation_type) {
-                            entity.__mfd__ = true;
-                            _deleted.push(entity.cid);
-                        }
-
-                        if (Operation.RENDER) {
-                            if (!entity.el) { //not anywhere
-
-                            }
-                        }
-
 
                         Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [entity, operation_type]);
 
@@ -123,6 +116,14 @@ define([
 
         BBHook.prototype = {
             constructor:BBHook,
+
+            markAsZombie:function (entity) {
+                if (entity.__mfd__) {
+                    _zombies[entity.cid] = entity;
+                    Events.dispatch(this.listener.fbListeners, 'onBackboneZombieDetected', [entity]);
+                }
+            },
+
 
             inferScriptForView:function (script_id) {
                 var rendered = _current.View;

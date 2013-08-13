@@ -40,6 +40,12 @@ define([
                 if (!m || !m.cid) return;
                 spa_eyeObj.selectedEntity = m;
                 Events.dispatch(spa_eyeObj._spaHook.listener.fbListeners, 'onSelectedEntityChange', [m]);
+            },
+
+            onBackboneZombieDetected:function (bbentity) {
+                this.sections && this.sections.forEach(function (section) {
+                    section._onRowAdd(bbentity);
+                }, this);
             }
 
         });
