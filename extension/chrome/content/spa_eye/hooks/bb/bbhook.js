@@ -32,6 +32,7 @@ define([
         var _collections = [];
         var _views = [];
         var _zombies = {};
+        var _deleted = [];
 
         var Operation = Common.Operation;
 
@@ -80,12 +81,25 @@ define([
                             args:fnargs
                         });
 
-                        if (entity.__mfd__ && (!_zombies[entity.cid])) {
-                            _zombies[entity.cid] = entity;
+                        if (!_.contains(_deleted, entity.cid)) { //Not deleted in this operation set...
+                            if (entity.__mfd__ && (!_zombies[entity.cid])) { //Is it marked for deletion?
+                                _zombies[entity.cid] = entity;
+                            }
                         }
                         ;
 
-                        (Operation.DESTROY == operation_type || Operation.REMOVE == operation_type) && (entity.__mfd__ = true);
+                        if (Operation.DESTROY == operation_type || Operation.REMOVE == operation_type) {
+                            entity.__mfd__ = true;
+                            _deleted.push(entity.cid);
+                        }
+
+                        if (Operation.RENDER) {
+                            if (!entity.el) { //not anywhere
+
+                            }
+                        }
+
+
                         Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [entity, operation_type]);
 
                     } else {
@@ -95,6 +109,9 @@ define([
 
                         _current[entity_type] = undefined;
                         _frame.pop();
+
+                        if (!_frame.length) //empty
+                            _deleted = [];
                     }
                 } catch (e) {
                     self.logError(e);
@@ -292,6 +309,7 @@ define([
                 _frame = [];
                 _current = {Model:undefined, Collection:undefined, View:undefined};
                 _sequence = {Model:undefined, Collection:undefined, View:undefined};
+                _deleted = [];
             },
 
             models:function () {
