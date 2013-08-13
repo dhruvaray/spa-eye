@@ -1,6 +1,12 @@
 (function backbone_eye(root) {
 
-    if (root.Backbone && root._) {
+    console.log("WEIRD");
+    console.log(root);
+
+    if ((typeof root.Backbone !== 'undefined') && (typeof root._ !== 'undefined')) {
+
+        var Backbone = root.Backbone;
+        var _ = root._;
 
         var proxyable = ['Model', 'Collection', 'View'];
         var operations = [
@@ -9,11 +15,11 @@
                 "add", "remove", "reset", "sort", "create"]},
             {instance:["render", "remove"], proto:[]}
         ];
-        var proxy = [root.Backbone.Model, root.Backbone.Collection, root.Backbone.View];
+        var proxy = [Backbone.Model, Backbone.Collection, Backbone.View];
         var proxyproto = [
-            root.Backbone.Model.prototype,
-            root.Backbone.Collection.prototype,
-            root.Backbone.View.prototype
+            Backbone.Model.prototype,
+            Backbone.Collection.prototype,
+            Backbone.View.prototype
         ];
 
         var recordEvent = function (entity, entity_type, post, args, operation_type) {
@@ -31,7 +37,8 @@
                 root.dispatchEvent(event);
             } catch (e) {
                 console.log(e);
-            };
+            }
+            ;
         };
 
         var womb = function (entity_type, operation_type) {
@@ -41,10 +48,11 @@
                 var wrapper = function () {
                     recordEvent(this, entity_type, false, arguments, operation_type);
                     var result;
-                    try{
-                        root._.extend(newval, wrapper);
+                    try {
+                        _.extend(newval, wrapper);
                         result = newval.apply(this, arguments);
-                    } catch (e) {}
+                    } catch (e) {
+                    }
                     recordEvent(this, entity_type, true, arguments, operation_type);
                     return result;
                 }
@@ -55,10 +63,10 @@
         for (var i = 0; i < proxyable.length; ++i) {
             (function (entity, proxy, proxyproto, operation) {
                 if (proxy) {
-                    root.Backbone[entity] = function () {
+                    Backbone[entity] = function () {
                         var event = new CustomEvent('Backbone_Eye:ADD', {'detail':{data:this}});
                         root.dispatchEvent(event);
-                        root._.each(operation.instance, function (key) {
+                        _.each(operation.instance, function (key) {
                             if (this[key]) {
                                 this.watch(key, womb(entity, key));
                                 this[key] = this[key];
@@ -67,10 +75,10 @@
                         return proxy.apply(this, arguments);
                     };
 
-                    root.Backbone[entity].prototype = proxyproto;
-                    root._.extend(root.Backbone[entity], proxy);
+                    Backbone[entity].prototype = proxyproto;
+                    _.extend(Backbone[entity], proxy);
 
-                    root._.each(operation.proto, function (key) {
+                    _.each(operation.proto, function (key) {
                         if (proxyproto[key]) {
                             proxyproto.watch(key, womb(entity, key));
                             proxyproto[key] = proxyproto[key];
