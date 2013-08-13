@@ -4,8 +4,8 @@ define([
     "firebug/lib/locale",
     "firebug/lib/domplate",
     "firebug/chrome/reps",
-    "firebug/dom/domReps",
 
+    "spa_eye/dom/domReps",
     "spa_eye/panels/basePanel"
 ],
     function (Firebug, FBTrace, Locale, Domplate, FirebugReps, DOMReps, BasePanel) {

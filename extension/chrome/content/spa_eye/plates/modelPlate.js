@@ -12,13 +12,10 @@ define([
 
     "spa_eye/lib/lru",
     "spa_eye/plates/basePlate",
-
     "spa_eye/dom/section",
-    "spa_eye/dom/modelReps",
-    "spa_eye/dom/domEditor"
-
+    "spa_eye/dom/modelReps"
 ],
-    function (Firebug, Obj, FBTrace, Locale, Events, Css, Str, Dom, MostUsed, BasePlate, ChildSection, ModelReps, DOMEditor) {
+    function (Firebug, Obj, FBTrace, Locale, Events, Css, Str, Dom, MostUsed, BasePlate, ChildSection, ModelReps) {
 
         var PANEL = BasePlate.extend({
             name:'model',
