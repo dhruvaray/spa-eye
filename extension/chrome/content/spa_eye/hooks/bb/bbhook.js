@@ -25,8 +25,9 @@ define([
         const Cr = Components.results;
         const bbhook_wp = "chrome://spa_eye/content/hooks/bb/bbhook_wp.js";
 
-        var _csr, _msr, _vsr, _cm, _cc, _cv, _path = [], _sequences = {}, _templates = {}, _auditRecords = {},
-            _errors = [];
+        var _frame = [], _sequences = {}, _templates = {}, _auditRecords = {}, _errors = [];
+        var _current = {Model:undefined, Collection:undefined, View:undefined};
+        var _sequence = {Model:undefined, Collection:undefined, View:undefined};
         var _models = [];
         var _collections = [];
         var _views = [];
@@ -46,44 +47,36 @@ define([
             }
             var self = this;
             this.function_womb = {};
-            this.function_womb.Operation = function (post, root, entity, type, fnargs) {
+            this.function_womb.Operation = function (post, entity, entity_type, operation_type, fnargs) {
                 var result;
                 var state = ''
 
                 try {
 
-                    if (entity instanceof self.Backbone.Model)
-                        _cm = entity;
-                    else if (entity instanceof self.Backbone.Collection)
-                        _cc = entity;
-                    else if (entity instanceof self.Backbone.View)
-                        _cv = entity;
+                    _current[entity_type] = entity;
 
                     if (!post) {
 
-                        _path.push(entity);
+                        _frame.push(entity);
 
-                        if (!(entity instanceof self.Backbone.View)) {
-                            try {
-                                var state = entity.toJSON();
-                            } catch (e) {
-                                //Could not serialize as we are probably early
-                                state = _.clone(entity.attributes);
-                            }
-                        } else {
+                        try {
+                            state = (typeof entity.attributes !== 'undefined') ?
+                                _.clone(entity.attributes) :
+                                entity
+                        } catch (e) {
                             state = entity;
                         }
 
-                        self.recordSequenceEvent(root, {
+                        self.recordSequenceEvent({
                             cid:entity.cid,
                             target:state,
-                            operation:type,
+                            operation:operation_type,
                             args:fnargs
                         });
 
                         self.recordAuditEvent(entity, {
                             cid:entity.cid,
-                            operation:type,
+                            operation:operation_type,
                             target:state,
                             args:fnargs
                         });
@@ -93,29 +86,16 @@ define([
                         }
                         ;
 
-                        (Operation.DESTROY == type || Operation.REMOVE == type) && (entity.__mfd__ = true);
-
-                        Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [entity, type]);
+                        (Operation.DESTROY == operation_type || Operation.REMOVE == operation_type) && (entity.__mfd__ = true);
+                        Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [entity, operation_type]);
 
                     } else {
 
-                        if (entity instanceof self.Backbone.Model) {
-                            if (_cm === _msr)
-                                _msr = undefined;
-                            _cm = undefined;
-                        }
-                        else if (entity instanceof self.Backbone.Collection) {
-                            if (_cc === _csr)
-                                _csr = undefined;
-                            _cc = undefined;
-                        }
-                        else if (entity instanceof self.Backbone.View) {
-                            if (_cv === _vsr)
-                                _vsr = undefined;
-                            _cv = undefined;
-                        }
+                        if (_current[entity_type] === _sequence[entity_type])
+                            _sequence[entity_type] = undefined;
 
-                        _path.pop();
+                        _current[entity_type] = undefined;
+                        _frame.pop();
                     }
                 } catch (e) {
                     self.logError(e);
@@ -126,7 +106,7 @@ define([
                 var result;
                 try {
                     var attachTemplatesToViews = function () {
-                        var rendered = _cv;
+                        var rendered = _current.View;
                         if (rendered) {// Is this being rendered in context of a view?
                             var templates = rendered.__templates__;
                             if (templates.indexOf(script_id) == -1) {
@@ -239,17 +219,18 @@ define([
 
                     Events.dispatch(self.listener.fbListeners, 'onBackboneEntityAdded', [e]);
                 });
-                root.addEventListener('Backbone_Eye:EXECUTE', function (e) {
+                root.addEventListener('Backbone_Eye:RECORD', function (e) {
 
                     //{'detail':{entity:this, post:false, args:arguments, type:type}}
                     if (e.detail)
-                        self.function_womb.Operation(
-                            e.detail.post,
-                            root,
-                            e.detail.entity,
-                            e.detail.type,
-                            e.detail.args
-                        )
+                        var data = e.detail;
+                    self.function_womb.Operation(
+                        data.post,
+                        data.entity,
+                        data.entity_type,
+                        data.operation_type,
+                        data.args
+                    )
 
                 });
 
@@ -286,30 +267,23 @@ define([
                 return root.Backbone;
             },
 
-            recordSequenceEvent:function (root, record) {
+            recordSequenceEvent:function (record) {
 
                 if (!this.context.spa_eyeObj.isRecording) return;
 
                 try {
 
-                    record.source = _path[_path.length - 2];
+                    record.source = _frame[_frame.length - 2];
 
-                    var csr = _csr;
-                    var msr = _msr;
-                    var vsr = _vsr;
-                    var isNewInteractionModel = (!msr);
-                    var isNewInteractionCollection = (!csr);
-                    var isNewInteractionView = (!vsr);
-                    _csr = csr || _cc;
-                    _msr = msr || _cm;
-                    _vsr = vsr || _cv;
+                    var isNewInteractionModel = (!_sequence.Model);
+                    var isNewInteractionCollection = (!_sequence.Collection);
+                    var isNewInteractionView = (!_sequence.View);
 
-                    var process = [];
-                    _csr && (process.push(_csr));
-                    _msr && (process.push(_msr));
-                    _vsr && (process.push(_vsr));
+                    _sequence.Model = _sequence.Model || _current.Model;
+                    _sequence.Collection = _sequence.Collection || _current.Collection;
+                    _sequence.View = _sequence.View || _current.View;
 
-                    _.each(process, function (sr) {
+                    _.each([_sequence.Model, _sequence.Collection, _sequence.View], function (sr) {
                         if (sr && sr.cid) {
                             _sequences[sr.cid] = _sequences[sr.cid] || [];
                             var flows =
@@ -333,20 +307,21 @@ define([
                 }
             },
 
-            recordAuditEvent:function (model, record) {
+            recordAuditEvent:function (record) {
                 // return if `record` is off
                 var spa_eyeObj = this.context.spa_eyeObj;
                 if (!spa_eyeObj.isRecording) return;
-                if (model.cid) {
+
+                if (record.cid) {
                     try {
                         t = DateUtil.getFormattedTime(new Date());
-                        _auditRecords[model.cid] || (_auditRecords[model.cid] = {});
-                        _auditRecords[model.cid][t] = record;
+                        _auditRecords[record.cid] || (_auditRecords[record.cid] = {});
+                        _auditRecords[record.cid][t] = record;
                     } catch (e) {
                         this.logError(e);
                         t ?
-                            (_auditRecords[model.cid][t] = e) :
-                            (_auditRecords[model.cid][_.uniqueId('e')] = e)
+                            (_auditRecords[record.cid][t] = e) :
+                            (_auditRecords[record.cid][_.uniqueId('e')] = e)
 
                     }
                 }
@@ -366,9 +341,9 @@ define([
                 _sequences = {}
                 _templates = {};
                 _auditRecords = {};
-                _path = [];
-                _csr = _msr = _vsr = undefined;
-                _cm = _cc = _cv = undefined;
+                _frame = [];
+                _current = {Model:undefined, Collection:undefined, View:undefined};
+                _sequence = {Model:undefined, Collection:undefined, View:undefined};
             },
 
             models:function () {

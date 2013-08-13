@@ -1,86 +1,84 @@
-if (window.Backbone) {
+(function backbone_eye(root) {
 
-    (function backbone_eye() {
+    console.log(root);
+    if (root.Backbone && root._) {
 
-        //Fix : Duplicate with common.js
-        var operations = {
-            SAVE:"save", FETCH:"fetch", SET:"set", UNSET:"unset", CLEAR:"clear", ADD:"add", RESET:"reset", SORT:"sort",
-            DESTROY:"destroy", SYNC:"sync", CREATE:"create"
+        var proxyable = ['Model', 'Collection', 'View'];
+        var operations = [
+            {instance:[], proto:["save", "fetch", "set", "unset", "clear", "destroy", "sync"]},
+            {instance:[], proto:["save", "fetch", "set", "unset", "clear", "destroy", "sync",
+                "add", "remove", "reset", "sort", "create"]},
+            {instance:["render", "remove"], proto:[]}
+        ];
+        var proxy = [root.Backbone.Model, root.Backbone.Collection, root.Backbone.View];
+        var proxyproto = [
+            root.Backbone.Model.prototype,
+            root.Backbone.Collection.prototype,
+            root.Backbone.View.prototype
+        ];
+
+        var recordEvent = function (entity, entity_type, post, args, operation_type) {
+            try {
+                var event = new CustomEvent(
+                    'Backbone_Eye:RECORD',
+                    {'detail':{
+                        entity:entity,
+                        entity_type:entity_type,
+                        post:post,
+                        args:args,
+                        operation_type:operation_type
+                    }}
+                );
+                root.dispatchEvent(event);
+            } catch (e) {
+                console.log(e);
+            }
+            ;
         };
 
-        proxyable = ['Model', 'Collection', 'View'];
-        proxy = [window.Backbone.Model, window.Backbone.Collection, window.Backbone.View];
-        proxyproto = [
-            window.Backbone.Model.prototype,
-            window.Backbone.Collection.prototype,
-            window.Backbone.View.prototype
-        ];
-        womb = function (type) {
+        var womb = function (entity_type, operation_type) {
 
             return function (id, oldval, newval) {
 
                 return function () {
-
-                    var event = new CustomEvent(
-                        'Backbone_Eye:EXECUTE',
-                        {'detail':{entity:this, post:false, args:arguments, type:type}}
-                    );
-                    window.dispatchEvent(event);
-
+                    recordEvent(this, entity_type, false, arguments, operation_type);
                     var result = newval.apply(this, arguments);
-
-                    var event = new CustomEvent(
-                        'Backbone_Eye:EXECUTE',
-                        {'detail':{entity:this, post:true, args:arguments, type:type}}
-                    );
-
-                    window.dispatchEvent(event);
-
+                    recordEvent(this, entity_type, true, arguments, operation_type);
                     return result;
                 }
             }
         };
 
         for (var i = 0; i < proxyable.length; ++i) {
-            (function (entity, proxy, proxyproto) {
+            (function (entity, proxy, proxyproto, operation) {
                 if (proxy) {
-                    window.Backbone[entity] = function () {
-                        try {
-
-                            var event = new CustomEvent('Backbone_Eye:ADD', {'detail':{data:this}});
-                            window.dispatchEvent(event);
-
-                            if (this instanceof window.Backbone.View) {
-                                _.each(["remove", "render"], function (key) {
-                                    if (this[key]) {
-                                        this.watch(key, womb(key));
-                                        this[key] = this[key];
-                                    }
-                                }, this);
+                    console.log("came here...");
+                    root.Backbone[entity] = function () {
+                        var event = new CustomEvent('Backbone_Eye:ADD', {'detail':{data:this}});
+                        root.dispatchEvent(event);
+                        root._.each(operation.instance, function (key) {
+                            if (this[key]) {
+                                this.watch(key, womb(entity, key));
+                                this[key] = this[key];
                             }
-                        } catch (e) {
-
-                        }
+                        }, this);
                         return proxy.apply(this, arguments);
                     };
 
-                    window.Backbone[entity].prototype = proxyproto;
-                    _.extend(window.Backbone[entity], proxy);
+                    root.Backbone[entity].prototype = proxyproto;
+                    root._.extend(root.Backbone[entity], proxy);
 
-                    if (proxy !== window.Backbone.View) {
-
-                        _.each(operations, function (key) {
-                            if (proxyproto[key]) {
-                                proxyproto.watch(key, womb(key));
-                                proxyproto[key] = proxyproto[key];
-                            }
-                        }, this);
-                    }
-
+                    root._.each(operation.proto, function (key) {
+                        if (proxyproto[key]) {
+                            proxyproto.watch(key, womb(entity, key));
+                            proxyproto[key] = proxyproto[key];
+                        }
+                    });
                 }
-            })(proxyable[i], proxy[i], proxyproto[i]);
+            })(proxyable[i], proxy[i], proxyproto[i], operations[i]);
         }
-    }).call(this);
-
-}
+    } else {
+        root.console && root.console.log("Backbone not loaded...")
+    }
+})(window);
 
