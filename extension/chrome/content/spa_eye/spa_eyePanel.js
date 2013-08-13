@@ -73,8 +73,7 @@ define([
                 var enabled = this.isEnabled();
                 if (!enabled) return;
 
-                var scriptPanel = this.context.getPanel('script');
-                var active = !this.showWarning() && !scriptPanel.showWarning();
+                var active = !this.showWarning();
                 var panelToolbar = Firebug.chrome.$("fbPanelToolbar");
 
                 if (active) {
@@ -140,8 +139,10 @@ define([
             },
 
             showWarning:function () {
-                var hooked = this.context.spa_eyeObj.hooked();
-                var warn = !hooked;
+                var scriptPanel = this.context.getPanel('script'),
+                    hooked = this.context.spa_eyeObj.hooked();
+
+                var warn = !(hooked && scriptPanel && !scriptPanel.showWarning());
                 return warn ? this.showNotHooked() : false;
             },
 
