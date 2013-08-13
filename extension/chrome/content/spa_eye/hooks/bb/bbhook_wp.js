@@ -128,6 +128,7 @@
                     };
 
                     Backbone[entity].prototype = proxyproto;
+                    Backbone[entity].prototype.constructor = Backbone[entity];
                     _.extend(Backbone[entity], proxy);
 
                     _.each(operation.proto, function (key) {

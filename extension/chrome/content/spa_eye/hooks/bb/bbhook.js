@@ -39,7 +39,6 @@ define([
             this.hooked = false;
             this.context = null;
             this.listener = new Firebug.Listener();
-            this.registering = false;
             if (obj) {
                 for (var key in obj) {
                     this[key] = obj[key];
@@ -192,9 +191,9 @@ define([
 
             registerBBHooks:function (root) {
                 if (this.isBackboneInitialized(root)) {
-                    if (!this.hooked && !this.registering) {
+                    if (!this.hooked) {
                         try {
-                            this.registering = true;
+                            this.hooked = true;
                             this.root = root;
                             this.Backbone = root.Backbone;
                             this.Underscore = root._;
@@ -202,13 +201,10 @@ define([
                             if (FBTrace.DBG_SPA_EYE) {
                                 FBTrace.sysout("spa_eye; Successfully registered Backbone hooks for spa-eye module");
                             }
-                            this.registering = false;
-                            this.hooked = true;
                             Events.dispatch(this.listener.fbListeners, 'onBackboneLoaded', [this]);
 
                         } catch (e) {
                             this.hooked = false;
-                            this.registering = false;
                             this.logError(e);
                         }
                     }
