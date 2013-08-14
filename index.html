@@ -41,31 +41,43 @@
     <div class="container-narrow" >
         <div class="jumbotron">
             <h1>Backbone Eye</h1>
-            <p class="lead">Introspect Backbone Applications</p>
+            <p class="lead">Understand application behavior without debugging JavaScript</p>
             <p><a class="btn btn-primary btn-lg">Download</a></p>
         </div>
 
         <div class="row marketing">
             <div class="col-lg-6">
-                <h4>Models & Collections List</h4>
-                <p>Shows a list of models which were created while Backbone-Eye was running. Each model shows application level attributes only. Quickly narrow down a model by searching for attribute values. Pin down models whose behavior needs further investigation. Or allow Backbone-Eye to present those models which have been accessed the most during introspection.</p>
+                <h4>Application layer debugging</h4>
+                <p>Understand Backbone application behavior without wading through JavaScript code. Backbone Eye is production-site friendly and can work off uglified and minified Javascript without needing any source maps.</p><br/>
 
-                <h4>View interaction trails and Journals</h4>
-                <p>Select a model or collection to see it's interaction trail and journal. The interaction trail shows the model (or collections) interaction with other Backbone entities. The journal logs activities which have happened on the selected model. Change an attribute value from the application (or Backbone-Eye) to see it's impact on other views and entities</p>
+                <h4>Work with application concepts</h4>
+                <p>Backbone Eye presents application specific models and views to introspect. Models show only application specific properties and shield away internal Backbone framework details. Search for models having certain attribute values, pin interesting models or use most-used models list to dig deeper.</p>
+
+                <h4>Encourages "What-if" exploration</h4>
+                <p>Change an application model attribute and see the impact of the change throughout the application in a graphical fashion. Or drill down to details about past state and operation arguments.</p>
 
             </div>
 
             <div class="col-lg-6">
-                <h4>View List</h4>
-                <p>A list of views which were created while Backbone-Eye was running. Identify views by hovering over your application screens. The underlying Backbone Views will automatically be highlighted. Similarly, click on Backbone Views to see what application screen they correspond to. Backbone-Eye also attempts to associate templates with views. </p>
 
-                <h4>Debug Templates</h4>
-                <p>Backbone-Eye allows for debugging of view templates. The id of the template is used to set a breakpoint in the view. Data passed to the template as well as incremental generation of the HTML string can be observed while stepping through the generated template code.</p>
+                <h4>Debug templates</h4>
+                <p>Backbone Eye makes underscore templates a debuggable unit. Put breakpoints in template generation code. At runtime, inspect model data being passed to the template, step through template code and observe template output being incrementally built.</p>
+
+                <h4>Detect Zombies</h4>
+                <p>Backbone Eye attempts to detect models and views which are used by the application - even after they have been destroyed. Leverage the model interaction trails and journals to piece together what may have triggered this behavior.</p><br/><br/>
+
+                <h4>View Interaction trails & Journals</h4>
+                <p>See how Backbone entities interact with each other using Interaction trails. Or checkout the journal of an individual Backbone entity to see it's behavior over time.
+
+
             </div>
         </div>
 
     </div>
 </div>
+
+<hr/>
+
 <div id="gs">
     <br/><br/><br/>
     <div class="panel panel-primary" >
