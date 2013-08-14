@@ -95,14 +95,15 @@ define([
 
                     } else {
 
-                        if (self._current[entity_type] === self._sequence[entity_type])
-                            self._sequence[entity_type] = undefined;
-
-                        self._current[entity_type] = undefined;
                         self._frame.pop();
+
+                        if (!_.contains(self._frame, self._current[entity_type]))
+                            self._sequence[entity_type] = undefined;
 
                         if (!self._frame.length) //empty
                             self._deleted = [];
+
+                        self._current[entity_type] = undefined;
                     }
                 } catch (e) {
                     self.logError(e);
