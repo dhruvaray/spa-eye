@@ -29,6 +29,7 @@
     overflow: hidden;
     cursor: pointer;
     line-height: 25px;
+    border: 1px solid #CCC;
 }
 
 .headerContent {

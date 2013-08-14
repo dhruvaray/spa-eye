@@ -1,6 +1,4 @@
 /* See license.txt for terms of usage */
-/*jshint esnext:true, es5:true, curly:false */
-/*global FBTrace:true, XPCNativeWrapper:true, Window:true, define:true */
 
 define([
     "firebug/firebug",
@@ -26,7 +24,7 @@ define([
                 Firebug.CommandLine.evaluate(value,
                     this.context,
                     object,
-                    this.context.getCurrentGlobal(),
+                    this.context.getCurrentGlobal && this.context.getCurrentGlobal(),
                     function success(result, context) {
                         if (FBTrace.DBG_SPA_EYE) {
                             FBTrace.sysout("spa_eye; setPropertyValue evaluate success " +
@@ -39,8 +37,10 @@ define([
                     function failed(exc, context) {
                         try {
                             self.setValue && self.setValue(object, name, value);
-                        } catch (exc) {
-
+                        } catch (e) {
+                            if (FBTrace.DBG_SPA_EYE) {
+                                FBTrace.sysout("spa_eye; Error while setValue", e);
+                            }
                         }
                     });
 
@@ -98,5 +98,3 @@ define([
         return E;
 
     });
-
-

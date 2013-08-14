@@ -58,15 +58,19 @@ define([
                 return this._spaHook ? this._spaHook.zombies() : [];
             },
 
-
             removeCollection:function (col) {
                 return this._spaHook && this._spaHook.removeCollection(col);
+            },
+
+            cleanup:function () {
+                this.selectedEntity = null;
+                this._spaHook.cleanup();
+                this.resetTrackingData();
             },
 
             resetTrackingData:function () {
                 this._spaHook.resetTrackingData();
                 Events.dispatch(this._spaHook.listener.fbListeners, 'onTrackingDataCleared');
-
             }
         };
 
