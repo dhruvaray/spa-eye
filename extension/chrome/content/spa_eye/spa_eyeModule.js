@@ -18,6 +18,16 @@ define([
 
         Firebug.spa_eyeModule = FBL.extend(Firebug.ActivableModule, {
 
+            initialize:function () {
+                // Attach key listener
+                KeyPanel.attachKeyListeners();
+            },
+
+            destroy:function () {
+                // Attach key listener
+                KeyPanel.detachKeyListeners();
+            },
+
             // Called when a new context is created but before the page is loaded.
             initContext:function (context, persistedState) {
                 // Initializing hooks
@@ -35,9 +45,6 @@ define([
                             spObj._spaHook,
                             context.window.wrappedJSObject);
                     }
-
-                    // Attach key listener
-                    KeyPanel.attachKeyListeners();
                 }
             },
 
@@ -48,9 +55,6 @@ define([
                 if (FBTrace.DBG_SPA_EYE) {
                     FBTrace.sysout("spa_eye; Successfully emptied maintenance collections for spa-eye module.");
                 }
-
-                // Attach key listener
-                KeyPanel.detachKeyListeners();
             }
         });
 
