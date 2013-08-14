@@ -1,26 +1,26 @@
 /*global define*/
 define([
-    'jquery',
-    'backbone',
-    'collections/todos',
-    'common'
+	'jquery',
+	'backbone',
+	'collections/todos',
+	'common'
 ], function ($, Backbone, Todos, Common) {
-    'use strict';
+	'use strict';
 
-    var Workspace = Backbone.Router.extend({
-        routes:{
-            '*filter':'setFilter'
-        },
+	var Workspace = Backbone.Router.extend({
+		routes: {
+			'*filter': 'setFilter'
+		},
 
-        setFilter:function (param) {
-            // Set the current filter to be used
-            Common.TodoFilter = param.trim() || '';
+		setFilter: function (param) {
+			// Set the current filter to be used
+			Common.TodoFilter = param.trim() || '';
 
-            // Trigger a collection filter event, causing hiding/unhiding
-            // of the Todo view items
-            Todos.trigger('filter');
-        }
-    });
+			// Trigger a collection filter event, causing hiding/unhiding
+			// of the Todo view items
+			Todos.trigger('filter');
+		}
+	});
 
-    return Workspace;
+	return Workspace;
 });

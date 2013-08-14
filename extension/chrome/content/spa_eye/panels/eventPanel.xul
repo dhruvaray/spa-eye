@@ -5,7 +5,6 @@
         >
 
     <hbox flex="1" style="overflow:scroll;">
-        <div id="loading">Generating...</div>
         <div id="sequence"></div>
     </hbox>
 
@@ -48,21 +47,25 @@
 
         function draw(flows, id, index) {
             if (flows.length) {
-                sequence = "Title: Interaction flow for model : " + id + " at t=" + index;
+                sequence = "Title: Interaction flow for " + id + " at t=" + index;
                 returnTo = [];
                 flows.forEach(genFlows);
             } else {
                 sequence = id ?
-                        "Title: No interaction flow data available for model : " + id :
-                        "Title: No interaction flow data available for selected model";
+                        "Title: No interaction flow data available for " + id :
+                        "Title: No interaction flow data available for selected entity";
             }
 
             try {
-                document.getElementById("loading").innerHTML = "Generating...";
                 document.getElementById("sequence").innerHTML = "";
-                sequenceDiagram = Diagram.parse(sequence);
+                sequenceDiagram = Diagram.parse("Title: Generating...");
                 sequenceDiagram.drawSVG("sequence", {theme:'simple'});
-                document.getElementById("loading").innerHTML = "";
+
+                setTimeout(function () {
+                    document.getElementById("sequence").innerHTML = "";
+                    sequenceDiagram = Diagram.parse(sequence);
+                    sequenceDiagram.drawSVG("sequence", {theme:'simple'});
+                }, 10);
             } catch (e) {
 
             }

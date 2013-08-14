@@ -28,6 +28,7 @@ define([
                     this.parent = options.parent;
                     this.sections = this.createSections();
                 }
+                this.spa_eyeObj = this.context.spa_eyeObj;
             },
 
             render:function () {
@@ -40,7 +41,7 @@ define([
 
                 ModelReps.DirTablePlate.tag.replace(args, this.parent.panelNode);
 
-                if (!this.context.spa_eyeObj._moi) {
+                if (!this.context.spa_eyeObj.selectedEntity) {
                     var firstRow = this.parent.panelNode.getElementsByClassName("0level").item(0);
                     return ModelReps.selectRow(firstRow, this);
                 }
@@ -110,7 +111,7 @@ define([
                                         el:repObj.el,
                                         $el:repObj.$el,
                                         tagName:repObj.tagName,
-                                        inferredTemplates:repObj.inferredTemplates
+                                        templates:repObj.__templates__
                                     };
                                 } else if (repObj.toJSON) {
                                     repObj = repObj.toJSON();
@@ -147,18 +148,24 @@ define([
                 }
             },
 
-            isValidValue:function (m) {
-                return false;
-            }
-        });
+            onBackboneEvent:function (bbentity, operation, args) {
+                if (!this.parent.isCurrentPanel()) return false;
 
-        _.each(Common.Operation, function (key) {
-            var cb = key.charAt(0).toUpperCase() + key.slice(1);
-            BasePlate.prototype['onModel' + cb] = function (m, t) {
-                if (this.isCurrentPlate() && this.isValidValue(m)) {
-                    this.sections && this.sections.forEach(function (p) {
-                        p._onRowAdd(m, {type:t || Common.OperationClass[key]});
+                //Note the case
+                var Operation = operation.charAt(0).toUpperCase() + operation.slice(1);
+                var type = '';
+                if (this.name)
+                    type = this.name.charAt(0).toUpperCase() + this.name.slice(1);
+
+                if (type && (bbentity instanceof this.spa_eyeObj._spaHook.Backbone[type])) {
+                    this.sections && this.sections.forEach(function (section) {
+                        section._onRowAdd(bbentity, {type:Common.OperationClass[operation]});
                     }, this);
+
+                    var catchall_args = [bbentity];
+                    catchall_args.push.apply(catchall_args, args);
+                    var method = 'on' + type + Operation;
+                    this[method] && this[method].apply(this, catchall_args);
                 }
             }
         });

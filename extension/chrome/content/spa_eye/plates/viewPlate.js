@@ -1,64 +1,88 @@
 /* See license.txt for terms of usage */
-/*jshint esnext:true, es5:true, curly:false */
-/*global FBTrace:true, XPCNativeWrapper:true, Window:true, define:true */
 
 define([
     "firebug/firebug",
     "firebug/lib/trace",
     "firebug/lib/locale",
+    "firebug/lib/events",
     "firebug/lib/css",
     "firebug/lib/string",
     "firebug/lib/dom",
     "spa_eye/lib/require/underscore",
 
     "spa_eye/plates/basePlate",
+    "spa_eye/util/common",
 
     "spa_eye/dom/section",
     "spa_eye/dom/modelReps"
 
 ],
-    function (Firebug, FBTrace, Locale, Css, Str, Dom, _, BasePlate, ChildSection, ModelReps) {
+    function (Firebug, FBTrace, Locale, Events, Css, Str, Dom, _, BasePlate, Common, ChildSection, ModelReps) {
+
 
         var PANEL = BasePlate.extend({
             name:'view',
 
-            expandSelectedView:function (index) {
+            expandSelectedView:function (highlight) {
                 var node = this.parent.panelNode;
                 var rows = node.getElementsByClassName('0level');
-                var row = rows[index];
-                if (row) {
-                    if (!Css.hasClass(row, "opened")) {
-                        ModelReps.DirTablePlate.toggleRow(row);
-                    }
-                    ModelReps.highlightRow(row, "row-warning");
-                    node.scrollTop = row.offsetTop;
-                }
+
                 for (var i = 0; i < rows.length; i++) {
-                    if (Css.hasClass(rows[i], "opened") && index !== i) {
-                        ModelReps.DirTablePlate.toggleRow(rows[i])
+                    var row = rows[i];
+                    var view = row.domObject.value;
+                    if (view === highlight) {
+                        if (!Css.hasClass(row, "opened")) {
+                            ModelReps.DirTablePlate.toggleRow(row);
+                        }
+                        ModelReps.highlightRow(row, "row-warning");
+                        node.scrollTop = row.offsetTop;
+
+                    } else {
+                        if (Css.hasClass(row, "opened")) {
+                            ModelReps.DirTablePlate.toggleRow(row)
+                        }
                     }
                 }
             },
 
             createSections:function () {
                 var sections = [];
-                //var data = this.getLiveViews();
-                var allViews = new ChildSection({
-                    name:'all_views',
-                    title:Locale.$STR('spa_eye.all'),
+                var self = this;
+                var liveViews = new ChildSection({
+                    name:'live_views',
+                    title:Locale.$STR('spa_eye.views.live'),
                     parent:this.parent.panelNode,
-                    container:'allViewsDiv',
-                    body:'allViewsDivBody',
-                    data:FBL.bindFixed(this.getliveViews, this)
+                    container:'liveViewsDiv',
+                    body:'liveViewsDivBody',
+                    data:function () {
+                        return self.spa_eyeObj.getViews({live:true})
+                    }
                 });
 
-                sections.push(allViews);
+                var deadViews = new ChildSection({
+                    name:'dead_views',
+                    title:Locale.$STR('spa_eye.views.removed'),
+                    parent:this.parent.panelNode,
+                    container:'deadViewsDiv',
+                    body:'deadViewsDivBody',
+                    autoAdd:false,
+                    data:function () {
+                        return self.spa_eyeObj.getViews({live:false})
+                    }
+                });
+
+                sections.push(liveViews);
+                sections.push(deadViews);
                 return sections;
             },
 
-            getliveViews:function () {
-                return _.filter(this.context.spa_eyeObj.getViews(), function (view) {
-                    return !view.mfd;
+            onViewRemove:function (view) {
+                var liveSection = this.sections[0];
+                var deadSection = this.sections[1];
+                liveSection._onRowRemove(view);
+                deadSection._onRowAdd(view, {
+                    autoAdd:true,
+                    type:Common.OperationClass[Common.Operation.REMOVE]
                 });
             },
 
@@ -71,8 +95,14 @@ define([
                     win.scroll(0, v.el.offsetTop);
                     Firebug.Inspector.highlightObject(v.el, this.context);
                 }
+                var spa_eyeObj = this.context.spa_eyeObj;
+                spa_eyeObj.selectedEntity = v;
+                Events.dispatch(spa_eyeObj._spaHook.listener.fbListeners, 'onSelectedEntityChange', [v]);
+
             }
+
         });
+
 
         return PANEL;
     });

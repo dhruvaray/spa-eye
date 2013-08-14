@@ -4,10 +4,8 @@ define([
     "firebug/lib/xpcom",
     "firebug/lib/trace"
 ],
-function(Xpcom, FBTrace) {
+    function (Xpcom, FBTrace) {
 
-// ********************************************************************************************* //
-// Constants
 
         const Cc = Components.classes;
         const Ci = Components.interfaces;
@@ -21,27 +19,20 @@ function(Xpcom, FBTrace) {
 
         var SHA = {};
 
-// ********************************************************************************************* //
-// Module Implementation
-
-        SHA.getTextHash = function(text){
-            try{
+        SHA.getTextHash = function (text) {
+            try {
                 nsHashService.init(nsICryptoHash.MD5);
                 var source = text;
 
                 var byteArray = [];
-                for (var j = 0; j < source.length; j++){
-                    byteArray.push( source.charCodeAt(j) );
+                for (var j = 0; j < source.length; j++) {
+                    byteArray.push(source.charCodeAt(j));
                 }
 
                 nsHashService.update(byteArray, byteArray.length);
                 return nsHashService.finish(true);
-            } catch (e) {}
+            } catch (e) {
+            }
         }
-// ********************************************************************************************* //
-// Registration
-
         return SHA;
-
-// ********************************************************************************************* //
-});
+    });

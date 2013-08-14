@@ -27,10 +27,10 @@ define([
                 );
 
                 // expand-collapse key handlers
-                this.keyListeners.push(
+                /*this.keyListeners.push(
                     chrome.keyCodeListen("RIGHT", null, Obj.bindFixed(this._expandKeyHandler, this, false)),
                     chrome.keyCodeListen("LEFT", null, Obj.bindFixed(this._expandKeyHandler, this, true))
-                );
+                );*/
 
                 this.keyListeners.push(
                     chrome.keyCodeListen("RETURN", null, Obj.bindFixed(this._enterKeyHandler, this))
@@ -50,11 +50,23 @@ define([
                 }
             },
 
+            getCurrentPanel:function () {
+                return Firebug.currentContext.currentPanel;
+            },
+
+            getPanelNode:function () {
+                var cp = this.getCurrentPanel();
+                return cp && cp.panelNode;
+            },
+
+            getSelectedRow:function () {
+                return ModelReps.getSelectedRow(this.getPanelNode());
+            },
+
             _expandKeyHandler:function (collapse) {
-                var selectedRow = ModelReps.getSelectedRow(this.panelNode);
-                if (!selectedRow) {
-                    return;
-                }
+                var selectedRow = this.getSelectedRow();
+                if (!selectedRow) return;
+
                 var flag = Css.hasClass(selectedRow, 'opened') ^ collapse;
                 if (!flag) {
                     ModelReps.DirTablePlate.toggleRow(selectedRow);
@@ -62,23 +74,26 @@ define([
             },
 
             _enterKeyHandler:function () {
-                var selectedRow = ModelReps.getSelectedRow(this.panelNode);
-                if (!selectedRow) {
-                    return;
-                }
+                var selectedRow = this.getSelectedRow();
+                if (!selectedRow) return;
                 ModelReps.DirTablePlate.toggleRow(selectedRow);
             },
 
             _navKeyHandler:function (jump) {
-                var selectedRow = ModelReps.getSelectedRow(this.panelNode);
+                var selectedRow = this.getSelectedRow(),
+                    panelNode = this.getPanelNode(),
+                    panel = this.getCurrentPanel();
+
+                if (!panel || !panelNode) return;
+
                 if (!selectedRow) {
-                    var firstRow = this.panelNode.getElementsByClassName("0level").item(0);
-                    return ModelReps.selectRow(firstRow, this.panelNode);
+                    var firstRow = panelNode.getElementsByClassName("0level").item(0);
+                    return ModelReps.selectRow(firstRow, panel);
                 }
 
                 var n = Math.abs(jump),
-                    method = jump > 0 ? 'nextSibling' : 'previousSibling';
-                prev = null,
+                    method = jump > 0 ? 'nextSibling' : 'previousSibling',
+                    prev = null,
                     nr = null;
 
                 while (n > 0) {
@@ -86,14 +101,14 @@ define([
 
                     // If `nr` is undefined, select previously visited `prev`
                     if (!nr || !Css.hasClass(nr, "memberRow")) {
-                        prev && ModelReps.selectRow(prev, this.panelNode);
+                        prev && ModelReps.selectRow(prev, panel);
                         break;
                     }
 
                     if (parseInt(nr.getAttribute("level"), 10) === 0) {
                         n--;
                         if (n === 0) {
-                            ModelReps.selectRow(nr, this.panelNode);
+                            ModelReps.selectRow(nr, panel);
                             break;
                         }
                         prev = nr;
