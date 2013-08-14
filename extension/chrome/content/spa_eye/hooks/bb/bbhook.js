@@ -25,27 +25,25 @@ define([
         const Cr = Components.results;
         const bbhook_wp = "chrome://spa_eye/content/hooks/bb/bbhook_wp.js";
 
-        var _frame = [], _sequences = {}, _templates = {}, _auditRecords = {}, _errors = [];
-        var _current = {Model:undefined, Collection:undefined, View:undefined};
-        var _sequence = {Model:undefined, Collection:undefined, View:undefined};
-        var _models = [];
-        var _collections = [];
-        var _views = [];
-        var _zombies = {};
-        var _deleted = [];
-
-
         var Operation = Common.Operation;
 
         var BBHook = function (obj) {
-            this.hooked = false;
             this.context = null;
+
+            // Data container cleanup
+            this.cleanup();
+
+            // Creating new listener
             this.listener = new Firebug.Listener();
+
+            // Options
             if (obj) {
                 for (var key in obj) {
                     this[key] = obj[key];
                 }
             }
+
+            // Womb initialization
             var self = this;
             this.function_womb = {};
             this.function_womb.Operation = function (post, entity, entity_type, operation_type, fnargs) {
@@ -54,11 +52,11 @@ define([
 
                 try {
 
-                    _current[entity_type] = entity;
+                    self._current[entity_type] = entity;
 
                     if (!post) {
 
-                        _frame.push(entity);
+                        self._frame.push(entity);
 
                         try {
                             state = (typeof entity.attributes !== 'undefined') ?
@@ -82,14 +80,14 @@ define([
                             args:fnargs
                         });
 
-                        if (!_.contains(_deleted, entity.cid)) {
+                        if (!_.contains(self._deleted, entity.cid)) {
                             self.markAsZombie(entity);
                         }
 
                         if (Operation.DESTROY === operation_type || Operation.REMOVE === operation_type) {
                             if (!(entity instanceof self.Backbone.Collection)) {
                                 entity.__mfd__ = true;
-                                _deleted.push(entity.cid);
+                                self._deleted.push(entity.cid);
                             }
                         }
 
@@ -97,21 +95,20 @@ define([
 
                     } else {
 
-                        if (_current[entity_type] === _sequence[entity_type])
-                            _sequence[entity_type] = undefined;
+                        if (self._current[entity_type] === self._sequence[entity_type])
+                            self._sequence[entity_type] = undefined;
 
-                        _current[entity_type] = undefined;
-                        _frame.pop();
+                        self._current[entity_type] = undefined;
+                        self._frame.pop();
 
-                        if (!_frame.length) //empty
-                            _deleted = [];
+                        if (!self._frame.length) //empty
+                            self._deleted = [];
                     }
                 } catch (e) {
                     self.logError(e);
                 }
 
             };
-
         }
 
         BBHook.prototype = {
@@ -119,14 +116,14 @@ define([
 
             markAsZombie:function (entity) {
                 if (entity.__mfd__) {
-                    _zombies[entity.cid] = entity;
+                    this._zombies[entity.cid] = entity;
                     Events.dispatch(this.listener.fbListeners, 'onBackboneZombieDetected', [entity]);
                 }
             },
 
 
             inferScriptForView:function (script_id) {
-                var rendered = _current.View;
+                var rendered = this._current.View;
                 if (rendered) {// Is this being rendered in context of a view?
                     var templates = rendered.__templates__;
                     if (templates.indexOf(script_id) == -1) {
@@ -143,7 +140,7 @@ define([
                     var f = escape("window['" + proxiedTemplateRef + "']=" + source);
                     DOM.appendExternalScriptTagToHead(root.document,
                         "data:text/javascript;fileName=" + script_id + ";," + f);
-                    _templates[script_id] = text;
+                    this._templates[script_id] = text;
                 } catch (e) {
                     self.logError(e);
                 }
@@ -170,12 +167,12 @@ define([
 
                     if (target instanceof self.Backbone.View) {
                         target.cid = target.cid || _.uniqueId('view');
-                        _views.push(_.extend(target, {__templates__:[], __mfd__:false}));
+                        self._views.push(_.extend(target, {__templates__:[], __mfd__:false}));
                     } else if (target instanceof self.Backbone.Model) {
-                        _models.push(target);
+                        self._models.push(target);
                         target.cid = target.cid || _.uniqueId('c');
                     } else if (target instanceof self.Backbone.Collection) {
-                        _collections.push(target);
+                        self._collections.push(target);
                         target.cid = target.cid || _.uniqueId('col');
                     }
 
@@ -239,22 +236,22 @@ define([
 
                 try {
 
-                    record.source = _frame[_frame.length - 2];
+                    record.source = this._frame[this._frame.length - 2];
 
-                    var isNewInteractionModel = (!_sequence.Model);
-                    var isNewInteractionCollection = (!_sequence.Collection);
-                    var isNewInteractionView = (!_sequence.View);
+                    var isNewInteractionModel = (!this._sequence.Model);
+                    var isNewInteractionCollection = (!this._sequence.Collection);
+                    var isNewInteractionView = (!this._sequence.View);
 
-                    _sequence.Model = _sequence.Model || _current.Model;
-                    _sequence.Collection = _sequence.Collection || _current.Collection;
-                    _sequence.View = _sequence.View || _current.View;
+                    this._sequence.Model = this._sequence.Model || this._current.Model;
+                    this._sequence.Collection = this._sequence.Collection || this._current.Collection;
+                    this._sequence.View = this._sequence.View || this._current.View;
 
-                    _.each([_sequence.Model, _sequence.Collection, _sequence.View], function (sr) {
+                    _.each([this._sequence.Model, this._sequence.Collection, this._sequence.View], function (sr) {
                         if (sr && sr.cid) {
-                            _sequences[sr.cid] = _sequences[sr.cid] || [];
+                            this._sequences[sr.cid] = this._sequences[sr.cid] || [];
                             var flows =
-                                (_sequences[sr.cid].flows =
-                                    _sequences[sr.cid].flows || []);
+                                (this._sequences[sr.cid].flows =
+                                    this._sequences[sr.cid].flows || []);
                             var isNewInteraction = false;
 
                             if (sr instanceof this.Backbone.Model)
@@ -281,93 +278,89 @@ define([
                 if (record.cid) {
                     try {
                         t = DateUtil.getFormattedTime(new Date());
-                        _auditRecords[record.cid] || (_auditRecords[record.cid] = {});
-                        _auditRecords[record.cid][t] = record;
+                        this._auditRecords[record.cid] || (this._auditRecords[record.cid] = {});
+                        this._auditRecords[record.cid][t] = record;
                     } catch (e) {
                         this.logError(e);
-                        t ?
-                            (_auditRecords[record.cid][t] = e) :
-                            (_auditRecords[record.cid][_.uniqueId('e')] = e)
-
+                        t ? (this._auditRecords[record.cid][t] = e) :
+                            (this._auditRecords[record.cid][_.uniqueId('e')] = e)
                     }
                 }
             },
 
             cleanup:function () {
                 this.hooked = false;
-                _models = [];
-                _collections = [];
-                _views = [];
-                _errors = [];
-                _zombies = {};
+                this._models = [];
+                this._collections = [];
+                this._views = [];
+                this._errors = [];
+                this._zombies = {};
                 this.resetTrackingData();
             },
 
             resetTrackingData:function () {
-                _sequences = {}
-                _templates = {};
-                _auditRecords = {};
-                _frame = [];
-                _current = {Model:undefined, Collection:undefined, View:undefined};
-                _sequence = {Model:undefined, Collection:undefined, View:undefined};
-                _deleted = [];
+                this._sequences = {}
+                this._templates = {};
+                this._auditRecords = {};
+                this._frame = [];
+                this._current = {Model:undefined, Collection:undefined, View:undefined};
+                this._sequence = {Model:undefined, Collection:undefined, View:undefined};
+                this._deleted = [];
             },
 
             models:function () {
-                return _models;
+                return this._models;
             },
 
             zombies:function () {
-                return _zombies;
+                return this._zombies;
             },
 
             removeModel:function (model) {
-                return this._removeElement(_models, model);
+                return this._removeElement(this._models, model);
             },
 
             sequences:function () {
-                return _sequences;
+                return this._sequences;
             },
 
             templates:function () {
-                return _templates;
+                return this._templates;
             },
 
             journals:function () {
-                return _auditRecords;
+                return this._auditRecords;
             },
 
             errors:function () {
-                return _errors;
+                return this._errors;
             },
 
             logError:function (e) {
-                //if (FBTrace.DBG_ERRORS) {
-                _errors.push(e);
+                this._errors.push(e);
                 Events.dispatch(self.listener.fbListeners, 'onIntrospectionError', [e]);
                 FBTrace.sysout("spa_eye; Unexpected error", e);
-                //}
             },
 
             views:function (options) {
                 if (!options || options.all)
-                    return _views;
+                    return this._views;
 
-                return _.filter(_views, function (view) {
+                return _.filter(this._views, function (view) {
                     return !view.__mfd__ == options.live;
                 });
             },
 
             removeView:function (view) {
-                return this._removeElement(_views, view);
+                return this._removeElement(this._views, view);
             },
 
             collections:function () {
-                return _collections;
+                return this._collections;
             },
 
             removeCollection:function (col) {
-                return this._removeElement(_collections, col);
+                return this._removeElement(this._collections, col);
             },
 
             _removeElement:function (list, model) {
