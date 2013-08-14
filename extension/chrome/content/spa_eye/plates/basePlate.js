@@ -7,19 +7,18 @@ define([
     "firebug/lib/options",
 
     "spa_eye/lib/require/underscore",
-
     "spa_eye/util/common",
     "spa_eye/panels/basePanel",
     "spa_eye/dom/modelReps",
-    "spa_eye/dom/domEditor"
+    "spa_eye/dom/editablePanel"
 ],
-    function (Firebug, Obj, FBTrace, Dom, Css, Options, _, Common, BasePanel, ModelReps, DOMEditor) {
+    function (Firebug, Obj, FBTrace, Dom, Css, Options, _, Common, BasePanel, ModelReps, EditablePanel) {
 
         var BasePlate = function (options) {
             this.initialize && this.initialize(options);
         };
         BasePlate.extend = BasePanel.extend;
-        BasePlate.prototype = Obj.extend(DOMEditor, {
+        BasePlate.prototype = Obj.extend(EditablePanel, {
             constructor:BasePlate,
 
             initialize:function (options) {
