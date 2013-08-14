@@ -13,16 +13,12 @@ define([
     "firebug/dom/domEditor",
 
     "spa_eye/lib/require/underscore",
-
     "spa_eye/panels/basePanel",
-
     "spa_eye/plates/modelPlate",
     "spa_eye/plates/collectionPlate",
     "spa_eye/plates/viewPlate",
     "spa_eye/plates/zombiePlate",
-
     "spa_eye/panels/basePanel"
-
 ],
     function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, Toolbar, DOMEditor, _, BasePanel, ModelPlate, CollectionPlate, ViewPlate, ZombiePlate) {
 
@@ -107,6 +103,7 @@ define([
                     }
 
                 } else {
+                    this.cleanup();
                     Dom.collapse(panelToolbar, true);
                     this.activated = false;
                 }
@@ -253,6 +250,10 @@ define([
                         : "chrome://spa_eye/skin/norecording.svg";
                     spa_eyeObj.isRecording = recordButton.checked;
                 }
+            },
+
+            cleanup:function () {
+                this.context.spa_eyeObj.cleanup();
             },
 
             resetTrackingData:function () {
