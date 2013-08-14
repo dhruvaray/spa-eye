@@ -58,13 +58,16 @@ define([
 
                         self._frame.push(entity);
 
-                        try {
-                            state = (typeof entity.attributes !== 'undefined') ?
-                                _.clone(entity.attributes) :
-                                entity
-                        } catch (e) {
-                            state = entity;
-                        }
+                        if (entity instanceof self.Backbone.Model) {
+                            try {
+                                state = (typeof entity.attributes !== 'undefined') ?
+                                    _.clone(entity.attributes) :
+                                    entity
+                            } catch (e) {
+                                state = entity;
+                            }
+                        } else
+                            state = entity.cid;
 
                         self.recordSequenceEvent({
                             cid:entity.cid,
