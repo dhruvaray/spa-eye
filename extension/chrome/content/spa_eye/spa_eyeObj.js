@@ -12,7 +12,7 @@ define([
             this._currentSynced = {};
             this._pinned_models = {};
             this._spaHook = null;
-            this.isRecord = true;
+            this.isRecording = true;
             if (initObj) {
                 for (var key in initObj) {
                     this[key] = initObj[key];
@@ -42,8 +42,8 @@ define([
                 return this._spaHook && this._spaHook.removeModel(model);
             },
 
-            getViews:function () {
-                return this._spaHook ? this._spaHook.views() : [];
+            getViews:function (options) {
+                return this._spaHook ? this._spaHook.views(options) : [];
             },
 
             removeView:function (view) {
@@ -54,14 +54,21 @@ define([
                 return this._spaHook ? this._spaHook.collections() : [];
             },
 
+            getZombies:function () {
+                return this._spaHook ? this._spaHook.zombies() : [];
+            },
+
+
             removeCollection:function (col) {
                 return this._spaHook && this._spaHook.removeCollection(col);
+            },
+
+            resetTrackingData:function () {
+                this._spaHook.resetTrackingData();
+                Events.dispatch(this._spaHook.listener.fbListeners, 'onTrackingDataCleared');
+
             }
         };
 
-
-// ********************************************************************************************* //
         return spa_eyeObj;
-
-// ********************************************************************************************* //
     });

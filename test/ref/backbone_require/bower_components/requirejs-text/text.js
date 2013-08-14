@@ -5,8 +5,8 @@
  */
 /*jslint regexp: true */
 /*global require: false, XMLHttpRequest: false, ActiveXObject: false,
- define: false, window: false, process: false, Packages: false,
- java: false, location: false */
+  define: false, window: false, process: false, Packages: false,
+  java: false, location: false */
 
 define(['module'], function (module) {
     'use strict';
@@ -23,9 +23,9 @@ define(['module'], function (module) {
         masterConfig = (module.config && module.config()) || {};
 
     text = {
-        version:'2.0.5',
+        version: '2.0.5',
 
-        strip:function (content) {
+        strip: function (content) {
             //Strips <?xml ...?> declarations so that external SVG and XML
             //documents can be added to a document without worry. Also, if the string
             //is an HTML document, only the part inside the body tag is returned.
@@ -41,7 +41,7 @@ define(['module'], function (module) {
             return content;
         },
 
-        jsEscape:function (content) {
+        jsEscape: function (content) {
             return content.replace(/(['\\])/g, '\\$1')
                 .replace(/[\f]/g, "\\f")
                 .replace(/[\b]/g, "\\b")
@@ -52,7 +52,7 @@ define(['module'], function (module) {
                 .replace(/[\u2029]/g, "\\u2029");
         },
 
-        createXhr:masterConfig.createXhr || function () {
+        createXhr: masterConfig.createXhr || function () {
             //Would love to dump the ActiveX crap in here. Need IE 6 to die first.
             var xhr, i, progId;
             if (typeof XMLHttpRequest !== "undefined") {
@@ -62,8 +62,7 @@ define(['module'], function (module) {
                     progId = progIds[i];
                     try {
                         xhr = new ActiveXObject(progId);
-                    } catch (e) {
-                    }
+                    } catch (e) {}
 
                     if (xhr) {
                         progIds = [progId];  // so faster next time
@@ -83,12 +82,12 @@ define(['module'], function (module) {
          * @returns {Object} with properties "moduleName", "ext" and "strip"
          * where strip is a boolean.
          */
-        parseName:function (name) {
+        parseName: function (name) {
             var modName, ext, temp,
                 strip = false,
                 index = name.indexOf("."),
                 isRelative = name.indexOf('./') === 0 ||
-                    name.indexOf('../') === 0;
+                             name.indexOf('../') === 0;
 
             if (index !== -1 && (!isRelative || index > 1)) {
                 modName = name.substring(0, index);
@@ -111,13 +110,13 @@ define(['module'], function (module) {
             }
 
             return {
-                moduleName:modName,
-                ext:ext,
-                strip:strip
+                moduleName: modName,
+                ext: ext,
+                strip: strip
             };
         },
 
-        xdRegExp:/^((\w+)\:)?\/\/([^\/\\]+)/,
+        xdRegExp: /^((\w+)\:)?\/\/([^\/\\]+)/,
 
         /**
          * Is an URL on another domain. Only works for browser use, returns
@@ -127,7 +126,7 @@ define(['module'], function (module) {
          * @param {String} url
          * @returns Boolean
          */
-        useXhr:function (url, protocol, hostname, port) {
+        useXhr: function (url, protocol, hostname, port) {
             var uProtocol, uHostName, uPort,
                 match = text.xdRegExp.exec(url);
             if (!match) {
@@ -141,11 +140,11 @@ define(['module'], function (module) {
             uHostName = uHostName[0];
 
             return (!uProtocol || uProtocol === protocol) &&
-                (!uHostName || uHostName.toLowerCase() === hostname.toLowerCase()) &&
-                ((!uPort && !uHostName) || uPort === port);
+                   (!uHostName || uHostName.toLowerCase() === hostname.toLowerCase()) &&
+                   ((!uPort && !uHostName) || uPort === port);
         },
 
-        finishLoad:function (name, strip, content, onLoad) {
+        finishLoad: function (name, strip, content, onLoad) {
             content = strip ? text.strip(content) : content;
             if (masterConfig.isBuild) {
                 buildMap[name] = content;
@@ -153,7 +152,7 @@ define(['module'], function (module) {
             onLoad(content);
         },
 
-        load:function (name, req, onLoad, config) {
+        load: function (name, req, onLoad, config) {
             //Name has format: some.module.filext!strip
             //The strip part is optional.
             //if strip is present, then that means only get the string contents
@@ -175,7 +174,7 @@ define(['module'], function (module) {
                     (parsed.ext ? '.' + parsed.ext : ''),
                 url = req.toUrl(nonStripName),
                 useXhr = (masterConfig.useXhr) ||
-                    text.useXhr;
+                         text.useXhr;
 
             //Load the text. Use XHR if possible and in a browser.
             if (!hasLocation || useXhr(url, defaultProtocol, defaultHostName, defaultPort)) {
@@ -193,27 +192,27 @@ define(['module'], function (module) {
                 //!strip part to avoid file system issues.
                 req([nonStripName], function (content) {
                     text.finishLoad(parsed.moduleName + '.' + parsed.ext,
-                        parsed.strip, content, onLoad);
+                                    parsed.strip, content, onLoad);
                 });
             }
         },
 
-        write:function (pluginName, moduleName, write, config) {
+        write: function (pluginName, moduleName, write, config) {
             if (buildMap.hasOwnProperty(moduleName)) {
                 var content = text.jsEscape(buildMap[moduleName]);
                 write.asModule(pluginName + "!" + moduleName,
-                    "define(function () { return '" +
-                        content +
-                        "';});\n");
+                               "define(function () { return '" +
+                                   content +
+                               "';});\n");
             }
         },
 
-        writeFile:function (pluginName, moduleName, req, write, config) {
+        writeFile: function (pluginName, moduleName, req, write, config) {
             var parsed = text.parseName(moduleName),
                 extPart = parsed.ext ? '.' + parsed.ext : '',
                 nonStripName = parsed.moduleName + extPart,
-            //Use a '.js' file name so that it indicates it is a
-            //script that can be loaded across domains.
+                //Use a '.js' file name so that it indicates it is a
+                //script that can be loaded across domains.
                 fileName = req.toUrl(parsed.moduleName + extPart) + '.js';
 
             //Leverage own load() method to load plugin value, but only
@@ -236,8 +235,9 @@ define(['module'], function (module) {
     };
 
     if (masterConfig.env === 'node' || (!masterConfig.env &&
-        typeof process !== "undefined" &&
-        process.versions && !!process.versions.node)) {
+            typeof process !== "undefined" &&
+            process.versions &&
+            !!process.versions.node)) {
         //Using special require.nodeRequire, something added by r.js.
         fs = require.nodeRequire('fs');
 
@@ -250,7 +250,7 @@ define(['module'], function (module) {
             callback(file);
         };
     } else if (masterConfig.env === 'xhr' || (!masterConfig.env &&
-        text.createXhr())) {
+            text.createXhr())) {
         text.get = function (url, callback, errback, headers) {
             var xhr = text.createXhr(), header;
             xhr.open('GET', url, true);
@@ -288,7 +288,7 @@ define(['module'], function (module) {
             xhr.send(null);
         };
     } else if (masterConfig.env === 'rhino' || (!masterConfig.env &&
-        typeof Packages !== 'undefined' && typeof java !== 'undefined')) {
+            typeof Packages !== 'undefined' && typeof java !== 'undefined')) {
         //Why Java, why is this so awkward?
         text.get = function (url, callback) {
             var stringBuffer, line,

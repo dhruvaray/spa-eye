@@ -17,20 +17,19 @@ define([
     function (Firebug, FBTrace, Locale, Events, Css, Str, Dom, BasePlate, ChildSection, ModelReps) {
 
         var PANEL = BasePlate.extend({
-            name:'collection',
+            name:'zombie',
 
             createSections:function () {
                 var sections = [];
-                var allCollections = new ChildSection({
-                    name:'all_collections',
+                var all = new ChildSection({
+                    name:'all_zombies',
                     title:Locale.$STR('spa_eye.all'),
                     parent:this.parent.panelNode,
-                    order:0,
-                    container:'allCollectionsDiv',
-                    body:'allCollectionsDivBody',
-                    data:FBL.bindFixed(this.context.spa_eyeObj.getCollections, this.context.spa_eyeObj)
+                    container:'allZombiesDiv',
+                    body:'allZombiesDivBody',
+                    data:FBL.bindFixed(this.context.spa_eyeObj.getZombies, this.context.spa_eyeObj)
                 });
-                sections.push(allCollections);
+                sections.push(all);
                 return sections;
             },
 
@@ -41,8 +40,13 @@ define([
                 if (!m || !m.cid) return;
                 spa_eyeObj.selectedEntity = m;
                 Events.dispatch(spa_eyeObj._spaHook.listener.fbListeners, 'onSelectedEntityChange', [m]);
-            }
+            },
 
+            onBackboneZombieDetected:function (bbentity) {
+                this.sections && this.sections.forEach(function (section) {
+                    section._onRowAdd(bbentity);
+                }, this);
+            }
 
         });
 

@@ -4,8 +4,8 @@ define([
     "firebug/lib/locale",
     "firebug/lib/domplate",
     "firebug/chrome/reps",
-    "firebug/dom/domReps",
 
+    "spa_eye/dom/domReps",
     "spa_eye/panels/basePanel"
 ],
     function (Firebug, FBTrace, Locale, Domplate, FirebugReps, DOMReps, BasePanel) {
@@ -29,9 +29,8 @@ define([
                 try {
                     this.show(frame);
                 }
-                catch (exc) {
-                    if (FBTrace.DBG_ERRORS && FBTrace.DBG_STACK)
-                        FBTrace.sysout("updateSelection FAILS " + exc, exc);
+                catch (e) {
+                    this.context.spa_eyeObj._spaHook.logError(e);
                 }
             },
 
@@ -43,9 +42,8 @@ define([
                     Locale.$STR("spa_eye.script.view.template.transform")
                 ];
                 var context = this.context;
-                var win = context.window.wrappedJSObject;
                 var data = {};
-                data[attr[0]] = win.spa_eye.templates[this.templateName];
+                data[attr[0]] = this.context.spa_eyeObj._spaHook.templates()[this.templateName];
                 data[attr[1]] = source[0];
                 data[attr[2]] = source[1];
 

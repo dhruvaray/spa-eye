@@ -19,16 +19,18 @@ define([
     "spa_eye/plates/modelPlate",
     "spa_eye/plates/collectionPlate",
     "spa_eye/plates/viewPlate",
+    "spa_eye/plates/zombiePlate",
 
     "spa_eye/panels/basePanel"
 
 ],
-    function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, Toolbar, DOMEditor, _, BasePanel, ModelPlate, CollectionPlate, ViewPlate) {
+    function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, Toolbar, DOMEditor, _, BasePanel, ModelPlate, CollectionPlate, ViewPlate, ZombiePlate) {
 
         var childPlate = {
             MODEL:'model',
             COLLECTION:'collection',
-            VIEW:'view'
+            VIEW:'view',
+            ZOMBIE:'zombie'
         };
         var spa_eyePanel = Firebug.spa_eyePanel = BasePanel.extend(Obj.extend(Firebug.ActivablePanel, {
             name:"spa_eye",
@@ -60,6 +62,7 @@ define([
                 this.plates.model = new ModelPlate(args);
                 this.plates.collection = new CollectionPlate(args);
                 this.plates.view = new ViewPlate(args);
+                this.plates.zombie = new ZombiePlate(args);
             },
 
             onBackboneLoaded:function () {
@@ -70,8 +73,7 @@ define([
                 var enabled = this.isEnabled();
                 if (!enabled) return;
 
-                var scriptPanel = this.context.getPanel('script');
-                var active = !this.showWarning() && !scriptPanel.showWarning();
+                var active = !this.showWarning();
                 var panelToolbar = Firebug.chrome.$("fbPanelToolbar");
 
                 if (active) {
@@ -91,10 +93,12 @@ define([
                             define([
                                 "spa_eye/panels/viewPanel",
                                 "spa_eye/panels/auditPanel",
-                                "spa_eye/panels/eventPanel"
-                            ], function (ViewPanel, AuditPanel, EventPanel) {
+                                "spa_eye/panels/eventPanel",
+                                "spa_eye/panels/logPanel"
+                            ], function (ViewPanel, AuditPanel, EventPanel, LogPanel) {
                                 Firebug.registerPanel(Firebug.auditPanel);
                                 Firebug.registerPanel(Firebug.eventPanel);
+                                Firebug.registerPanel(Firebug.logPanel);
                                 Firebug.registerPanel(Firebug.viewPanel);
                                 Events.dispatch(Firebug.uiListeners, "updateSidePanels", [self]);
                             });
@@ -109,34 +113,36 @@ define([
             },
 
             onActivationChanged:function (enable) {
-                if (enable)
+                if (enable) {
                     Firebug.spa_eyeModule.addObserver(this);
-                else
+                    Firebug.currentContext.spa_eyeObj._spaHook.registerContentLoadedHook.call(
+                        Firebug.currentContext.spa_eyeObj._spaHook,
+                        Firebug.currentContext.window.wrappedJSObject
+                    );
+                } else {
                     Firebug.spa_eyeModule.removeObserver(this);
+                }
             },
 
 
             inspectNode:function (node) {
-                if (this.currentPlate === childPlate.VIEW) {
-                    this.plates.view.expandSelectedView(this.inspectedViewIndex);
+                if (this.currentPlate === childPlate.VIEW && this.inspectingObject) {
+                    this.plates.view.expandSelectedView(this.inspectingObject);
                 }
                 return false;
             },
 
             supportsObject:function (object, type) {
                 var views = this.context.spa_eyeObj.getViews();
-                for (i = 0; i < views.length; ++i) {
-                    if (views[i].el.innerHTML === object.innerHTML) {
-                        this.inspectedViewIndex = i;
-                        return 1;
-                    }
-                }
-                return 0;
+                this.inspectingObject = _.findWhere(views, {el:object});
+                return this.inspectingObject;
             },
 
             showWarning:function () {
-                var hooked = this.context.spa_eyeObj.hooked();
-                var warn = !hooked;
+                var scriptPanel = this.context.getPanel('script'),
+                    hooked = this.context.spa_eyeObj.hooked();
+
+                var warn = !(hooked && scriptPanel && !scriptPanel.showWarning());
                 return warn ? this.showNotHooked() : false;
             },
 
@@ -159,17 +165,16 @@ define([
 
                 var buttons = [];
 
-                var isRecord = !!this.context.spa_eyeObj.isRecord;
+                var isRecording = !!this.context.spa_eyeObj.isRecording;
                 buttons.push(
                     {
                         id:"spa_eye_panel_button_record",
-                        tooltiptext:isRecord ?
-                            Locale.$STR("spa_eye.record_events.yes") : Locale.$STR("spa_eye.record_events.no"),
-                        image:isRecord
+                        tooltiptext:Locale.$STR("spa_eye.record_events"),
+                        image:isRecording
                             ? "chrome://spa_eye/skin/recording.svg"
                             : "chrome://spa_eye/skin/norecording.svg",
                         type:"checkbox",
-                        checked:isRecord,
+                        checked:isRecording,
                         className:"toolbar-image-button fbInternational",
                         command:FBL.bindFixed(this.toggleRecord, this)
                     },
@@ -205,7 +210,16 @@ define([
                         className:"toolbar-text-button fbInternational",
                         tooltiptext:"spa_eye.views",
                         command:FBL.bindFixed(this.selectChildPlate, this, childPlate.VIEW)
-                    });
+                    },
+                    {
+                        id:"spa_eye_panel_button_zombie",
+                        label:"spa_eye.zombies",
+                        type:"radio",
+                        className:"toolbar-text-button fbInternational",
+                        tooltiptext:"spa_eye.zombies",
+                        command:FBL.bindFixed(this.selectChildPlate, this, childPlate.ZOMBIE)
+                    }
+                );
                 return buttons;
             },
 
@@ -237,18 +251,12 @@ define([
                     recordButton.image = recordButton.checked
                         ? "chrome://spa_eye/skin/recording.svg"
                         : "chrome://spa_eye/skin/norecording.svg";
-                    recordButton.tooltiptext = recordButton.checked ?
-                        Locale.$STR("spa_eye.record_events.yes") : Locale.$STR("spa_eye.record_events.no");
-                    spa_eyeObj.isRecord = recordButton.checked;
+                    spa_eyeObj.isRecording = recordButton.checked;
                 }
             },
 
             resetTrackingData:function () {
-                var spa_eyeObj = this.context.spa_eyeObj;
-                var win = this.context.window.wrappedJSObject;
-                win.spa_eye.sequence = {};
-                spa_eyeObj.auditRecords = {};
-                Events.dispatch(spa_eyeObj._spaHook.listener.fbListeners, 'onTrackingDataCleared');
+                this.context.spa_eyeObj.resetTrackingData();
             },
 
             getCurrentPlate:function (plateName) {
@@ -295,6 +303,11 @@ define([
                 return p && p.search && p.search.apply(p, arguments);
             },
 
+            onSelectRow:function () {
+                var p = this.getCurrentPlate();
+                return p && p.onSelectRow && p.onSelectRow.apply(p, arguments);
+            },
+
             getEditor:function (target, value) {
                 if (!this.editor) {
                     this.editor = new DOMEditor(this.document);
@@ -309,9 +322,6 @@ define([
 
         }));
 
-// ********************************************************************************************* //
-// Panel UI (Domplate)
-// ********************************************************************************************* //
         with (Domplate) {
             spa_eyePanel.prototype.WarningRep = domplate(Firebug.ScriptPanel.WarningRep, {
                 tag:DIV({"class":"disabledSPA_EyePanelBox"},
@@ -326,11 +336,6 @@ define([
             });
         }
 
-// ********************************************************************************************* //
-// Registration
-
         Firebug.registerPanel(Firebug.spa_eyePanel);
         return Firebug.spa_eyePanel;
-
-// ********************************************************************************************* //
     });

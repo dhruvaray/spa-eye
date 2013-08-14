@@ -1,6 +1,4 @@
 /* See license.txt for terms of usage */
-/*jshint esnext:true, es5:true, curly:false */
-/*global FBTrace:true, XPCNativeWrapper:true, Window:true, define:true */
 
 define([
     "firebug/firebug",
@@ -14,13 +12,10 @@ define([
 
     "spa_eye/lib/lru",
     "spa_eye/plates/basePlate",
-
     "spa_eye/dom/section",
-    "spa_eye/dom/modelReps",
-    "spa_eye/dom/domEditor"
-
+    "spa_eye/dom/modelReps"
 ],
-    function (Firebug, Obj, FBTrace, Locale, Events, Css, Str, Dom, MostUsed, BasePlate, ChildSection, ModelReps, DOMEditor) {
+    function (Firebug, Obj, FBTrace, Locale, Events, Css, Str, Dom, MostUsed, BasePlate, ChildSection, ModelReps) {
 
         var PANEL = BasePlate.extend({
             name:'model',
@@ -104,8 +99,8 @@ define([
                 if (!row || !row.domObject.value) return;
                 var m = row.domObject.value;
                 if (!m || !m.cid) return;
-                spa_eyeObj._moi = m;
-                Events.dispatch(spa_eyeObj._spaHook.listener.fbListeners, 'onModelOfInterestChange', [m]);
+                spa_eyeObj.selectedEntity = m;
+                Events.dispatch(spa_eyeObj._spaHook.listener.fbListeners, 'onSelectedEntityChange', [m]);
             },
 
 // ********************************************************************************************* //
@@ -132,19 +127,10 @@ define([
                 }
                 try {
                     this.context.spa_eyeObj._pinned_models[model.cid] = model;
-                    var tbody = Dom.getElementByClass(this.parent.panelNode, 'pinnedModelsDivBody');
-                    var noObjectRow = Dom.getChildByClass(tbody, 'noMemberRow');
-
-                    if (noObjectRow) {
-                        Css.removeClass(noObjectRow, 'hide');
-                        Css.setClass(noObjectRow, 'hide');
-                    }
-
-                    var obj = {};
-                    obj[model.cid] = model;
-                    var members = ModelReps.DirTablePlate.memberIterator(obj);
-                    ModelReps.DirTablePlate.rowTag.insertRows({members:members}, tbody);
-
+                    var pinSection = this.sections[0];
+                    pinSection._onRowAdd(model, {
+                        autoAdd:true
+                    });
                 } catch (e) {
                     if (FBTrace.DBG_SPA_EYE) {
                         FBTrace.sysout("Error: model.cid - " + model.cid, e);
@@ -168,26 +154,14 @@ define([
 // ********************************************************************************************* //
 // onModelSet and onModelSave
 // ********************************************************************************************* //
-
-            isValidValue:function(model) {
-                if (!model || !model.cid) return false;
-                var models = this.context.spa_eyeObj.getModels() || [];
-                return models.indexOf(model) !== -1;
-            },
-
             onModelSet:function (model) {
-                if (this.isCurrentPlate() && this.isValidValue(model)) {
-                    this.context.spa_eyeObj._mostused_models.add(model.cid, model, 'set');
-                    this._super.apply(this, arguments);
-                }
+                this.context.spa_eyeObj._mostused_models.add(model.cid, model, 'set');
             },
 
             onModelSave:function (model) {
-                if (this.isCurrentPlate() && this.isValidValue(model)) {
-                    this.context.spa_eyeObj._mostused_models.add(model.cid, model, 'save');
-                    this._super.apply(this, arguments);
-                }
+                this.context.spa_eyeObj._mostused_models.add(model.cid, model, 'save');
             }
+
         });
 
         return PANEL;

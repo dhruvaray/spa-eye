@@ -1,82 +1,147 @@
-if (window.Backbone) {
-    window.spa_eye = {};
-    window.spa_eye.sequence = {};
-    window.spa_eye.path = [];
-    window.spa_eye.idCounter = 0;
-    window.spa_eye.uniqueId = function (prefix) {
-        var id = ++this.idCounter + '';
-        return prefix ? prefix + id : id;
-    };
-    var _ModelProxy = window.Backbone.Model;
-    if (_ModelProxy) {
-        var _ModelProxyProto = window.Backbone.Model.prototype;
-        window.Backbone.Model = function (attributes, options) {
+(function backbone_eye(root) {
+
+    if ((typeof root.Backbone !== 'undefined') && (typeof root._ !== 'undefined')) {
+
+        var Backbone = root.Backbone;
+        var _ = root._;
+
+        var proxyable = ['Model', 'Collection', 'View'];
+        var operations = [
+            {instance:[], proto:["save", "fetch", "set", "unset", "clear", "destroy", "sync"]},
+            {instance:[], proto:["save", "fetch", "set", "unset", "clear", "destroy", "sync",
+                "add", "remove", "reset", "sort", "create"]},
+            {instance:["render", "remove"], proto:[]}
+        ];
+        var proxy = [Backbone.Model, Backbone.Collection, Backbone.View];
+        var proxyproto = [
+            Backbone.Model.prototype,
+            Backbone.Collection.prototype,
+            Backbone.View.prototype
+        ];
+
+        var recordEvent = function (entity, entity_type, post, args, operation_type) {
             try {
-                window.spa_eye.models = window.spa_eye.models || [];
-                window.spa_eye.models.push(this);
+                var event = new CustomEvent(
+                    'Backbone_Eye:RECORD',
+                    {'detail':{
+                        entity:entity,
+                        entity_type:entity_type,
+                        post:post,
+                        args:args,
+                        operation_type:operation_type
+                    }}
+                );
+                root.dispatchEvent(event);
             } catch (e) {
-            } finally {
-                _ModelProxy.apply(this, arguments);
+                root.dispatchEvent(new CustomEvent('Backbone_Eye:ERROR', {'detail':{error:e}}));
             }
         };
-        window.Backbone.Model.prototype = _ModelProxyProto;
-        _.extend(window.Backbone.Model, _ModelProxy);
-    }
-    ;
 
-    var _colProxy = window.Backbone.Collection;
-    if (_colProxy) {
-        var _colProxyProto = window.Backbone.Collection.prototype;
-        window.Backbone.Collection = function (attributes, options) {
-            try {
-                this.cid = this.cid || (typeof(window._) === "undefined")
-                    ? window.spa_eye.uniqueId('col')
-                    : window._.uniqueId('col');
-                window.spa_eye.collections = window.spa_eye.collections || [];
-                window.spa_eye.collections.push(this);
-            } catch (e) {
-            } finally {
-                _colProxy.apply(this, arguments);
-            }
-        };
-        window.Backbone.Collection.prototype = _colProxyProto;
-        _.extend(window.Backbone.Collection, _colProxy);
-    }
-    ;
+        var womb = function (entity_type, operation_type) {
 
-    var _viewProxy = window.Backbone.View;
-    if (_viewProxy) {
-        var _viewProxyProto = window.Backbone.View.prototype;
-        window.Backbone.View = function (attributes, options) {
-            var renderProxy = this.render;
-            var removeProxy = this.remove;
-            try{
-                this.render = function () {
-                    window.spa_eye.cv = this;
-                    this.inferredTemplates = this.inferredTemplates || [];
-                    window.spa_eye.path.push(this);
-                    var result = renderProxy.apply(this, arguments);
-                    window.spa_eye.path.pop();
-                    window.spa_eye.cv = undefined;
+            return function (id, oldval, newval) {
+
+                var wrapper = function () {
+                    recordEvent(this, entity_type, false, arguments, operation_type);
+                    var result;
+                    try {
+                        _.extend(newval, wrapper);
+                        result = newval.apply(this, arguments);
+                    } catch (e) {
+                        root.dispatchEvent(new CustomEvent('Backbone_Eye:ERROR', {'detail':{error:e}}));
+                    }
+                    recordEvent(this, entity_type, true, arguments, operation_type);
                     return result;
-                };
-
-                this.remove = function () {
-                    this.mfd = true;
-                    return removeProxy.apply(this, arguments);
-                };
-
-                window.spa_eye.views = window.spa_eye.views || [];
-                window.spa_eye.views.push(this);
-            } catch (e) {
-            } finally {
-                _viewProxy.apply(this, arguments);
+                }
+                return wrapper;
             }
         };
-        window.Backbone.View.prototype = _viewProxyProto;
-        _.extend(window.Backbone.View, _viewProxy);
 
+
+        var createDebuggableScript = function (id, oldval, newval) {
+
+            var getMatchingNode = function (tag, tagbody) {
+                var elements = root.document.getElementsByTagName(tag);
+
+                for (var i = 0; i < elements.length; i++) {
+                    var val = elements[i].textContent;
+                    if (val == tagbody) {
+                        return elements[i];
+                    }
+                }
+                return undefined;
+            }
+
+            var wrapper = function (text, data, settings) {
+
+                _.extend(newval, wrapper);
+                if (text) {
+                    var script = getMatchingNode("script", text)
+                    var script_id = (script && script.id) ? script.id : _.uniqueId("template_");
+                    var proxiedTemplateRef = '_t' + script_id;
+                    var compiledTemplate = root[proxiedTemplateRef];
+                    if (!compiledTemplate) {
+                        root.dispatchEvent(new CustomEvent('Backbone_Eye:TEMPLATE:ADD', {'detail':{
+                            script_id:script_id,
+                            text:text}}));
+                        compiledTemplate = newval(text, undefined, settings);
+                    }
+                    if (typeof data !== 'undefined') {//Data
+                        root.dispatchEvent(
+                            new CustomEvent('Backbone_Eye:TEMPLATE:INFER', {'detail':{script_id:script_id}}));
+                        return compiledTemplate.call(_, data)
+                    }
+                    return function (tdata) {
+                        root.dispatchEvent(
+                            new CustomEvent('Backbone_Eye:TEMPLATE:INFER', {'detail':{script_id:script_id}}));
+
+                        return root[proxiedTemplateRef] ?
+                            root[proxiedTemplateRef].call(_, tdata) :
+                            compiledTemplate.call(_, tdata);
+                    }
+                } else {
+                    root.dispatchEvent(new CustomEvent('Backbone_Eye:ERROR',
+                        {'detail':{error:"Template Text is empty"}}));
+                    return newval(arguments);
+                }
+
+            }
+            return wrapper;
+        };
+
+        _.watch("template", createDebuggableScript);
+        _["template"] = _["template"];
+
+        for (var i = 0; i < proxyable.length; ++i) {
+            (function (entity, proxy, proxyproto, operation) {
+                if (proxy) {
+                    Backbone[entity] = function () {
+                        var event = new CustomEvent('Backbone_Eye:ADD', {'detail':{data:this}});
+                        root.dispatchEvent(event);
+                        _.each(operation.instance, function (key) {
+                            if (this[key]) {
+                                this.watch(key, womb(entity, key));
+                                this[key] = this[key];
+                            }
+                        }, this);
+                        return proxy.apply(this, arguments);
+                    };
+
+                    Backbone[entity].prototype = proxyproto;
+                    Backbone[entity].prototype.constructor = Backbone[entity];
+                    _.extend(Backbone[entity], proxy);
+
+                    _.each(operation.proto, function (key) {
+                        if (proxyproto[key]) {
+                            proxyproto.watch(key, womb(entity, key));
+                            proxyproto[key] = proxyproto[key];
+                        }
+                    });
+                }
+            })(proxyable[i], proxy[i], proxyproto[i], operations[i]);
+        }
+    } else {
+        root.dispatchEvent(new CustomEvent('Backbone_Eye:ERROR', {'detail':{error:"Backbone not loaded..."}}));
     }
-    ;
-}
-;
+})(window);
+

@@ -8,11 +8,10 @@ define([
     "firebug/lib/css",
     "firebug/lib/events",
     "firebug/chrome/reps",
+
     "spa_eye/dom/section",
     "spa_eye/dom/modelReps",
-
-    "firebug/dom/domReps",
-
+    "spa_eye/dom/domReps",
     "spa_eye/panels/basePanel"
 ],
     function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, FirebugReps, ChildSection, ModelReps, DOMReps, BasePanel) {
@@ -24,42 +23,22 @@ define([
 
             parentPanel:"spa_eye",
             order:1,
+            follows:['Model', 'Collection'],
 
 
             initialize:function () {
                 this._super.apply(this, arguments);
-                //var splitter = Firebug.chrome.window.document.createElement("hr");
-                /*splitter.setAttribute("orient","horizontal");
-                 splitter.setAttribute("id","eventSplitter");
-                 splitter.setAttribute("collapse","none");
-                 splitter.setAttribute("tooltip","hello there");*/
-
                 this.timeline.TIMELINE.replace({object:[]}, this.panelNode);
                 this.timeline.TABLE.append({}, this.panelNode);
                 this.timeline.tag.append({sections:[], mainPanel:this.panelNode}, this.panelNode.lastChild);
-                //this.panelNode.parentNode.insertBefore(splitter, this.panelNode.lastChild);
-
                 this.sequenceEditor = this.panelNode.firstChild.contentWindow;
                 var self = this;
                 this.panelNode.firstChild.onload = function () {
                     self.show();
                 }
-
             },
 
-            onModelOfInterestChange:function (m) {
-                this.show();
-            },
-
-            onModelSet:function () {
-                this.show();
-            },
-
-            onModelFetch:function () {
-                this.show();
-            },
-
-            onModelSave:function () {
+            onSelectedEntityChange:function (m) {
                 this.show();
             },
 
@@ -78,9 +57,8 @@ define([
                     }
                     var data = section.data;
                     var cid = data[0] && data[0].cid;
-                    var win = this.context.window.wrappedJSObject;
-                    this.plotData = win.spa_eye.sequence[cid] ?
-                        [win.spa_eye.sequence[cid].flows[idx]] : [];
+                    var sequence = this.context.spa_eyeObj._spaHook.sequences()[cid];
+                    this.plotData = sequence ? [sequence.flows[idx]] : [];
                     this.plotFlow(cid, idx);
                 }
 
@@ -88,16 +66,15 @@ define([
 
             show:function () {
                 var spa_eyeObj = this.context.spa_eyeObj;
-                var moi = spa_eyeObj && spa_eyeObj._moi;
+                var selectedEntity = spa_eyeObj && spa_eyeObj.selectedEntity;
                 var idx = 0;
                 var id = undefined;
-                if (moi && moi.cid) {
-                    var win = this.context.window.wrappedJSObject;
-                    var sequence = win.spa_eye.sequence[moi.cid];
+                if (selectedEntity && selectedEntity.cid) {
+                    var sequence = this.context.spa_eyeObj._spaHook.sequences()[selectedEntity.cid];
                     this.sequenceData = (sequence && sequence.flows) ? sequence.flows : [];
                     idx = this.sequenceData.length - 1;
                     this.plotData = idx >= 0 ? [this.sequenceData[idx]] : [];
-                    id = moi.cid;
+                    id = selectedEntity.cid;
                 } else {
                     this.sequenceData = [];
                     this.plotData = []
@@ -121,6 +98,7 @@ define([
                             parent:this.panelNode,
                             autoAdd:false,
                             collapse:true,
+                            ignoreKey:true,
                             data:this.sequenceData[i]
                         }));
                     }
@@ -134,9 +112,6 @@ define([
                 }
             }
         });
-
-// ********************************************************************************************* //
-// Templates
 
         with (Domplate) {
             eventPanel.prototype.timeline = domplate(ModelReps.DirTablePlate, {
@@ -152,12 +127,6 @@ define([
             });
         }
 
-// ********************************************************************************************* //
-// Registration
-
-
         return eventPanel;
-
-// ********************************************************************************************* //
 
     });

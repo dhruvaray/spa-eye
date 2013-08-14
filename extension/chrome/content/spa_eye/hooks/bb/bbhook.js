@@ -25,363 +25,349 @@ define([
         const Cr = Components.results;
         const bbhook_wp = "chrome://spa_eye/content/hooks/bb/bbhook_wp.js";
 
+        var _frame = [], _sequences = {}, _templates = {}, _auditRecords = {}, _errors = [];
+        var _current = {Model:undefined, Collection:undefined, View:undefined};
+        var _sequence = {Model:undefined, Collection:undefined, View:undefined};
+        var _models = [];
+        var _collections = [];
+        var _views = [];
+        var _zombies = {};
+        var _deleted = [];
+
+
         var Operation = Common.Operation;
 
-// ********************************************************************************************* //
-//  BBHook Class
-// ********************************************************************************************* //
         var BBHook = function (obj) {
             this.hooked = false;
             this.context = null;
             this.listener = new Firebug.Listener();
-            this.registering = false;
             if (obj) {
                 for (var key in obj) {
                     this[key] = obj[key];
                 }
             }
+            var self = this;
+            this.function_womb = {};
+            this.function_womb.Operation = function (post, entity, entity_type, operation_type, fnargs) {
+                var result;
+                var state = '';
 
-            this._modelProxies = {};
-            this._collectionProxies = {};
+                try {
+
+                    _current[entity_type] = entity;
+
+                    if (!post) {
+
+                        _frame.push(entity);
+
+                        try {
+                            state = (typeof entity.attributes !== 'undefined') ?
+                                _.clone(entity.attributes) :
+                                entity
+                        } catch (e) {
+                            state = entity;
+                        }
+
+                        self.recordSequenceEvent({
+                            cid:entity.cid,
+                            target:state,
+                            operation:operation_type,
+                            args:fnargs
+                        });
+
+                        self.recordAuditEvent({
+                            cid:entity.cid,
+                            operation:operation_type,
+                            target:state,
+                            args:fnargs
+                        });
+
+                        if (!_.contains(_deleted, entity.cid)) {
+                            self.markAsZombie(entity);
+                        }
+
+                        if (Operation.DESTROY === operation_type || Operation.REMOVE === operation_type) {
+                            if (!(entity instanceof self.Backbone.Collection)) {
+                                entity.__mfd__ = true;
+                                _deleted.push(entity.cid);
+                            }
+                        }
+
+                        Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [entity, operation_type]);
+
+                    } else {
+
+                        if (_current[entity_type] === _sequence[entity_type])
+                            _sequence[entity_type] = undefined;
+
+                        _current[entity_type] = undefined;
+                        _frame.pop();
+
+                        if (!_frame.length) //empty
+                            _deleted = [];
+                    }
+                } catch (e) {
+                    self.logError(e);
+                }
+
+            };
+
         }
 
         BBHook.prototype = {
             constructor:BBHook,
 
-            registerViewHooks:function (win) {
-                var self = this;
-
-                var _templateProxy = win._ && win._.template;
-                if (!_templateProxy) {
-                    if (FBTrace.DBG_SPA_EYE) {
-                        FBTrace.sysout("spa_eye; Could not add hook.Either _/_.template is not found. _ = " +
-                            win._);
-                    }
-                    return false;
+            markAsZombie:function (entity) {
+                if (entity.__mfd__) {
+                    _zombies[entity.cid] = entity;
+                    Events.dispatch(this.listener.fbListeners, 'onBackboneZombieDetected', [entity]);
                 }
-
-                win.spa_eye.templates = win.spa_eye.templates || {};
-
-                win._.template = function (text, data, settings) {
-
-                    try {
-                        if (!text) {
-                            if (FBTrace.DBG_SPA_EYE) {
-                                FBTrace.sysout("spa_eye; template text is empty ");
-                            }
-                            return false;
-                        }
-                        var script = DOM.getMatchingNode(win, "script", text)
-                        var script_id = (script && script.id) ? script.id : SHA.getTextHash(text);
-                        var proxiedTemplateRef = '_t' + script_id;
-                        var compiledTemplate = win[proxiedTemplateRef];
-
-                        if (!compiledTemplate) {
-                            compiledTemplate = _templateProxy.call(win._, text);
-                            var source = _.template.call(_, text).source;
-                            if (source) {
-                                var f = escape("window['" + proxiedTemplateRef + "']=" + source);
-
-                                // Attach to body
-                                DOM.appendExternalScriptTagToHead(win.document,
-                                    "data:text/javascript;fileName=" + script_id + ";," + f);
-
-                                // Record using script_id
-                                win.spa_eye.templates[script_id] = text;
-
-                            }
-                        }
-
-                        var attachTemplatesToViews = function () {
-                            var rendered = win.spa_eye.cv;
-                            if (rendered) {
-                                var templates = rendered.inferredTemplates;
-                                if (templates.indexOf(script_id) == -1) {
-                                    templates.push(script_id);
-                                }
-                            }
-                        };
-
-
-                        self.recordSequenceEvent(win, {
-                            operation:Operation.VIEW,
-                            cid:win.spa_eye.cv ? win.spa_eye.cv.cid : "",
-                            target:win.spa_eye.cv,
-                            args:arguments
-                        });
-
-                        if (data) {
-                            attachTemplatesToViews();
-                            return compiledTemplate.call(win._, data);
-                        }
-                        Events.dispatch(self.listener.fbListeners, 'onViewRender', [win.spa_eye.cv]);
-
-                    } catch (e) {
-                        if (FBTrace.DBG_ERRORS)
-                            FBTrace.sysout("spa_eye; Unexpected error", e);
-                    }
-
-                    return function (data) {
-                        var render = win[proxiedTemplateRef] ? win[proxiedTemplateRef] : compiledTemplate;
-                        render.source = render.source || source;
-                        self.recordSequenceEvent(win, {
-                            operation:Operation.VIEW,
-                            cid:win.spa_eye.cv ? win.spa_eye.cv.cid : "",
-                            target:win.spa_eye.cv,
-                            args:arguments
-                        });
-                        attachTemplatesToViews();
-                        Events.dispatch(self.listener.fbListeners, 'onViewRender', [win.spa_eye.cv]);
-                        return render.call(win._, data);
-                    };
-                }
-
             },
 
-            registerSetHooks:function (win) {
-                var self = this;
-                var spa_eyeObj = this.context.spa_eyeObj;
-                var ModelProto = spa_eyeObj.Backbone.Model.prototype;
-                var CollectionProto = spa_eyeObj.Backbone.Collection.prototype;
 
-                _.each(Operation, function (key) {
-                    if (ModelProto[key]) {
-                        self._modelProxies[key] = ModelProto[key];
-                        ModelProto[key] = function () {
-                            return self.modelFnWomb(win, this, key, self._modelProxies[key], arguments);
-                        }
+            inferScriptForView:function (script_id) {
+                var rendered = _current.View;
+                if (rendered) {// Is this being rendered in context of a view?
+                    var templates = rendered.__templates__;
+                    if (templates.indexOf(script_id) == -1) {
+                        templates.push(script_id);
                     }
-
-                    if (CollectionProto[key]) {
-                        self._collectionProxies[key] = CollectionProto[key];
-                        CollectionProto[key] = function () {
-                            return self.collectionFnWomb(win, this, key, self._collectionProxies[key], arguments);
-                        }
-                    }
-                });
+                }
             },
 
-            registerWPHooks:function (win) {
+            createDebuggableScript:function (root, script_id, text) {
+                var self = this;
+                try {
+                    var source = _.template.call(_, text).source;
+                    var proxiedTemplateRef = '_t' + script_id;
+                    var f = escape("window['" + proxiedTemplateRef + "']=" + source);
+                    DOM.appendExternalScriptTagToHead(root.document,
+                        "data:text/javascript;fileName=" + script_id + ";," + f);
+                    _templates[script_id] = text;
+                } catch (e) {
+                    self.logError(e);
+                }
+            },
+
+            registerWPHooks:function (root) {
                 Firebug.CommandLine.evaluateInWebPage(
                     Http.getResource(bbhook_wp),
                     this.context,
-                    win);
+                    root);
             },
 
-            registerContentLoadedHook:function () {
+            registerContentLoadedHook:function (root) {
                 var self = this;
-                var win = this.context.window.wrappedJSObject;
                 var register = function () {
-                    self.registerBBHooks(win);
+                    self.registerBBHooks(root);
                 };
-                win.document.addEventListener("afterscriptexecute", register);
-                //probably not required.
-                win.addEventListener("load", register);
+
+                root.document && root.document.addEventListener("afterscriptexecute", register);
+                root.addEventListener("load", register);
+                root.addEventListener('Backbone_Eye:ADD', function (e) {
+
+                    var target = e.detail && e.detail.data;
+
+                    if (target instanceof self.Backbone.View) {
+                        target.cid = target.cid || _.uniqueId('view');
+                        _views.push(_.extend(target, {__templates__:[], __mfd__:false}));
+                    } else if (target instanceof self.Backbone.Model) {
+                        _models.push(target);
+                        target.cid = target.cid || _.uniqueId('c');
+                    } else if (target instanceof self.Backbone.Collection) {
+                        _collections.push(target);
+                        target.cid = target.cid || _.uniqueId('col');
+                    }
+
+                    Events.dispatch(self.listener.fbListeners, 'onBackboneEntityAdded', [e]);
+                });
+                root.addEventListener('Backbone_Eye:RECORD', function (e) {
+
+                    //{'detail':{entity:this, post:false, args:arguments, type:type}}
+                    if (e.detail)
+                        var data = e.detail;
+                    self.function_womb.Operation(
+                        data.post,
+                        data.entity,
+                        data.entity_type,
+                        data.operation_type,
+                        data.args
+                    )
+
+                });
+                root.addEventListener('Backbone_Eye:ERROR', function (e) {
+                    self.logError(e.detail.error);
+                });
+                root.addEventListener('Backbone_Eye:TEMPLATE:ADD', function (e) {
+                    self.createDebuggableScript(root, e.detail.script_id, e.detail.text);
+                });
+                root.addEventListener('Backbone_Eye:TEMPLATE:INFER', function (e) {
+                    self.inferScriptForView(e.detail.script_id);
+                });
+
             },
 
-            registerBBHooks:function (win) {
-                var spa_eyeObj = this.context.spa_eyeObj;
-                if (this.isBackboneInitialized(win)) {
-                    spa_eyeObj.Backbone = win.Backbone;
-                    if (!this.hooked && !this.registering) {
+            registerBBHooks:function (root) {
+                if (this.isBackboneInitialized(root)) {
+                    if (!this.hooked) {
                         try {
-                            this.win = win;
-                            this.registering = true;
-                            this.registerWPHooks(win);
-                            this.registerSetHooks(win);
-                            this.registerViewHooks(win);
+                            this.hooked = true;
+                            this.root = root;
+                            this.Backbone = root.Backbone;
+                            this.Underscore = root._;
+                            this.registerWPHooks(root);
                             if (FBTrace.DBG_SPA_EYE) {
                                 FBTrace.sysout("spa_eye; Successfully registered Backbone hooks for spa-eye module");
                             }
-                            this.registering = false;
-                            this.hooked = true;
                             Events.dispatch(this.listener.fbListeners, 'onBackboneLoaded', [this]);
-
 
                         } catch (e) {
                             this.hooked = false;
-                            this.registering = false;
-                            if (FBTrace.DBG_ERRORS)
-                                FBTrace.sysout("Could not register Backbone hooks for spa_eye", e);
+                            this.logError(e);
                         }
                     }
                 }
             },
 
-            isBackboneInitialized:function (win) {
-                return win.Backbone;
+            isBackboneInitialized:function (root) {
+                return root.Backbone;
             },
 
-            modelFnWomb:function (win, model, type, fn, fnargs) {
+            recordSequenceEvent:function (record) {
 
-                win.spa_eye.cm = model;
-
-                win.spa_eye.path.push(model);
-
-                this.recordSequenceEvent(win, {
-                    cid:model.cid,
-                    target:model.toJSON(),
-                    operation:type,
-                    args:fnargs
-                });
-
-                this.recordModelAudit(model, {
-                    cid:model.cid,
-                    operation:type,
-                    target:model.toJSON(),
-                    args:fnargs
-                });
-
-                var result = fn.apply(model, Array.slice(fnargs));
-
-                if (win.spa_eye.cm === win.spa_eye.msr)
-                    win.spa_eye.msr = undefined;
-
-                win.spa_eye.cm = undefined;
-
-                win.spa_eye.path.pop();
-
-                var cb = type.charAt(0).toUpperCase() + type.slice(1);
-                Events.dispatch(this.listener.fbListeners, 'onModel' + cb, [model]);
-
-                return result;
-            },
-
-            collectionFnWomb:function (win, collection, type, fn, fnargs) {
-
-                win.spa_eye.cc = collection;
-
-                win.spa_eye.path.push(collection);
-
-                this.recordSequenceEvent(win, {
-                    cid:collection.cid,
-                    target:collection.toJSON(),
-                    operation:type,
-                    args:fnargs
-                });
-
-                this.recordModelAudit(collection, {
-                    cid:collection.cid,
-                    operation:type,
-                    target:collection.toJSON(),
-                    args:fnargs
-                });
-
-                var result = fn.apply(collection, Array.slice(fnargs));
-
-                if (win.spa_eye.cc === win.spa_eye.csr)
-                    win.spa_eye.csr = undefined;
-
-                win.spa_eye.cc = undefined;
-
-                win.spa_eye.path.pop();
-
-                var cb = type.charAt(0).toUpperCase() + type.slice(1);
-                Events.dispatch(this.listener.fbListeners, 'onModel' + cb, [collection]);
-
-                return result;
-            },
-
-            recordSequenceEvent:function (win, record) {
-
-                if (!this.context.spa_eyeObj.isRecord) {
-                    return;
-                }
-                record.source = win.spa_eye.path[win.spa_eye.path.length - 2];
-
-                var csr = win.spa_eye.csr;
-                var msr = win.spa_eye.msr;
-                var isNewInteractionModel = (!msr);
-                var isNewInteractionCollection = (!csr);
-                win.spa_eye.csr = csr || win.spa_eye.cc;
-                win.spa_eye.msr = msr || win.spa_eye.cm;
-
-                var process = [];
-                win.spa_eye.csr && (process.push(win.spa_eye.csr));
-                win.spa_eye.msr && (process.push(win.spa_eye.msr));
-
+                if (!this.context.spa_eyeObj.isRecording) return;
 
                 try {
-                    _.each(process, function (sr) {
+
+                    record.source = _frame[_frame.length - 2];
+
+                    var isNewInteractionModel = (!_sequence.Model);
+                    var isNewInteractionCollection = (!_sequence.Collection);
+                    var isNewInteractionView = (!_sequence.View);
+
+                    _sequence.Model = _sequence.Model || _current.Model;
+                    _sequence.Collection = _sequence.Collection || _current.Collection;
+                    _sequence.View = _sequence.View || _current.View;
+
+                    _.each([_sequence.Model, _sequence.Collection, _sequence.View], function (sr) {
                         if (sr && sr.cid) {
-                            win.spa_eye.sequence[sr.cid] = win.spa_eye.sequence[sr.cid] || [];
+                            _sequences[sr.cid] = _sequences[sr.cid] || [];
                             var flows =
-                                (win.spa_eye.sequence[sr.cid].flows =
-                                    win.spa_eye.sequence[sr.cid].flows || []);
-                            var isNewInteraction = sr instanceof this.context.spa_eyeObj.Backbone.Model ?
-                                isNewInteractionModel :
-                                isNewInteractionCollection;
+                                (_sequences[sr.cid].flows =
+                                    _sequences[sr.cid].flows || []);
+                            var isNewInteraction = false;
+
+                            if (sr instanceof this.Backbone.Model)
+                                isNewInteraction = isNewInteractionModel;
+                            if (sr instanceof this.Backbone.Collection)
+                                isNewInteraction = isNewInteractionCollection;
+                            if (sr instanceof this.Backbone.View)
+                                isNewInteraction = isNewInteractionView;
 
                             isNewInteraction ? flows.push([record]) : flows[flows.length - 1].push(record);
                         }
 
                     }, this);
                 } catch (e) {
-                    if (FBTrace.DBG_ERRORS)
-                        FBTrace.sysout("spa_eye; Unexpected error", e);
+                    this.logError(e);
                 }
             },
 
-            recordModelAudit:function (model, record) {
+            recordAuditEvent:function (record) {
                 // return if `record` is off
                 var spa_eyeObj = this.context.spa_eyeObj;
+                if (!spa_eyeObj.isRecording) return;
 
-                if (!spa_eyeObj.isRecord) {
-                    return;
+                if (record.cid) {
+                    try {
+                        t = DateUtil.getFormattedTime(new Date());
+                        _auditRecords[record.cid] || (_auditRecords[record.cid] = {});
+                        _auditRecords[record.cid][t] = record;
+                    } catch (e) {
+                        this.logError(e);
+                        t ?
+                            (_auditRecords[record.cid][t] = e) :
+                            (_auditRecords[record.cid][_.uniqueId('e')] = e)
+
+                    }
                 }
-                t = DateUtil.getFormattedTime(new Date());
-                var records = spa_eyeObj.auditRecords = spa_eyeObj.auditRecords || {};
-
-                records[model.cid] || (records[model.cid] = []);
-                var rec = {};
-                rec[t] = record;
-                records[model.cid].splice(0, 0, rec);
             },
 
             cleanup:function () {
                 this.hooked = false;
-                if (this.win) {
-                    this.win.spa_eye.templates = [];
-                    this.win.spa_eye.models = [];
-                    this.win.spa_eye.views = [];
-                    this.win.spa_eye.collections = [];
-                }
+                _models = [];
+                _collections = [];
+                _views = [];
+                _errors = [];
+                _zombies = {};
+                this.resetTrackingData();
+            },
+
+            resetTrackingData:function () {
+                _sequences = {}
+                _templates = {};
+                _auditRecords = {};
+                _frame = [];
+                _current = {Model:undefined, Collection:undefined, View:undefined};
+                _sequence = {Model:undefined, Collection:undefined, View:undefined};
+                _deleted = [];
             },
 
             models:function () {
-                if (this.win) {
-                    return this.win.spa_eye.models;
-                }
-                return [];
+                return _models;
+            },
+
+            zombies:function () {
+                return _zombies;
             },
 
             removeModel:function (model) {
-                return this._removeElement(this.win && this.win.spa_eye.models,
-                    model);
+                return this._removeElement(_models, model);
             },
 
-            views:function () {
-                if (this.win) {
-                    return this.win.spa_eye.views;
-                }
-                return [];
+            sequences:function () {
+                return _sequences;
+            },
+
+            templates:function () {
+                return _templates;
+            },
+
+            journals:function () {
+                return _auditRecords;
+            },
+
+            errors:function () {
+                return _errors;
+            },
+
+            logError:function (e) {
+                //if (FBTrace.DBG_ERRORS) {
+                _errors.push(e);
+                Events.dispatch(self.listener.fbListeners, 'onIntrospectionError', [e]);
+                FBTrace.sysout("spa_eye; Unexpected error", e);
+                //}
+            },
+
+            views:function (options) {
+                if (!options || options.all)
+                    return _views;
+
+                return _.filter(_views, function (view) {
+                    return !view.__mfd__ == options.live;
+                });
             },
 
             removeView:function (view) {
-                return this._removeElement(this.win && this.win.spa_eye.views,
-                    view);
+                return this._removeElement(_views, view);
             },
 
             collections:function () {
-                if (this.win) {
-                    return this.win.spa_eye.collections;
-                }
-                return [];
+                return _collections;
             },
 
             removeCollection:function (col) {
-                return this._removeElement(this.win && this.win.spa_eye.collections,
-                    col);
+                return this._removeElement(_collections, col);
             },
 
             _removeElement:function (list, model) {
@@ -394,10 +380,5 @@ define([
             }
         };
 
-
-// ********************************************************************************************* //
-
         return BBHook;
-
-// ********************************************************************************************* //
     });
