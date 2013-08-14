@@ -232,7 +232,7 @@ define([
 
             recordSequenceEvent:function (record) {
 
-                if (!this.context.spa_eyeObj.isRecording) return;
+                if (!Firebug.Options.get("spa_eye.record")) return;
 
                 try {
 
@@ -273,7 +273,7 @@ define([
             recordAuditEvent:function (record) {
                 // return if `record` is off
                 var spa_eyeObj = this.context.spa_eyeObj;
-                if (!spa_eyeObj.isRecording) return;
+                if (!Firebug.Options.get("spa_eye.record")) return;
 
                 if (record.cid) {
                     try {

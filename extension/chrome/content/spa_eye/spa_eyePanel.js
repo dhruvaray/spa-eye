@@ -162,7 +162,7 @@ define([
 
                 var buttons = [];
 
-                var isRecording = !!this.context.spa_eyeObj.isRecording;
+                var isRecording = Firebug.Options.get("spa_eye.record");
                 buttons.push(
                     {
                         id:"spa_eye_panel_button_record",
@@ -248,7 +248,7 @@ define([
                     recordButton.image = recordButton.checked
                         ? "chrome://spa_eye/skin/recording.svg"
                         : "chrome://spa_eye/skin/norecording.svg";
-                    spa_eyeObj.isRecording = recordButton.checked;
+                    Firebug.Options.set("spa_eye.record", !!recordButton.checked);
                 }
             },
 

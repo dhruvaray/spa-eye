@@ -12,7 +12,6 @@ define([
             this._currentSynced = {};
             this._pinned_models = {};
             this._spaHook = null;
-            this.isRecording = true;
             if (initObj) {
                 for (var key in initObj) {
                     this[key] = initObj[key];
