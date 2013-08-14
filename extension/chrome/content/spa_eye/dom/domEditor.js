@@ -1,102 +1,71 @@
 /* See license.txt for terms of usage */
-/*jshint esnext:true, es5:true, curly:false */
-/*global FBTrace:true, XPCNativeWrapper:true, Window:true, define:true */
 
 define([
     "firebug/firebug",
     "firebug/lib/trace",
+    "firebug/lib/events",
+    "firebug/lib/domplate",
+    "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/string"
 ],
-    function (Firebug, FBTrace, Css, Str) {
+function (Firebug, FBTrace, Events, D, Dom, Css, Str) {
+    if (/^1\.12/.test(Firebug.version)) {
+        try{
+            return require("firebug/dom/domEditor");
+        } catch(e) {
+            FBTrace.sysout("spa_eye; DomEditor load error", e);
+        }
+    }
 
-        "use strict";
-        var E = {
+    // ********************************************************************************************* //
+    // DOM Inline Editor
 
-            setPropertyValue:function (row, value) {
-                var member = row.domObject;
-                var name = member.name;
-                var key = this._getRowName(row);
-                var self = this;
+    function DOMEditor(doc) {
+        this.box = this.tag.replace({}, doc, this);
+        this.input = this.box.childNodes[1];
 
-                var object = Firebug.DOMBasePanel.prototype.getRowObject(row);
-                if (name === 'this')
-                    return;
-
-                Firebug.CommandLine.evaluate(value,
-                    this.context,
-                    object,
-                    this.context.getCurrentGlobal(),
-                    function success(result, context) {
-                        if (FBTrace.DBG_SPA_EYE) {
-                            FBTrace.sysout("spa_eye; setPropertyValue evaluate success " +
-                                "object.set(" + name + ", " + result + ");");
-
-                        }
-                        self.setValue && self.setValue(object, name, result);
-
-                    },
-                    function failed(exc, context) {
-                        try {
-                            self.setValue && self.setValue(object, name, value);
-                        } catch (exc) {
-
-                        }
-                    });
-
-                this.refresh && this.refresh(this._getLogicalParentRow(row) || row);
-            },
-
-            editProperty:function (row, editValue) {
-                var model = row.domObject;
-                var object = Firebug.DOMBasePanel.prototype.getRowObject(row);
-                if (!editValue) {
-                    var propName = this._getRowName(row);
-                    var propValue = object && (object.attributes ? object.attributes[propName] : object[propName]);
-
-                    var type = typeof propValue;
-
-                    if (type === "undefined" || type === "number" || type === "boolean")
-                        editValue = "" + propValue;
-                    else if (type === "string")
-                        editValue = "\"" + Str.escapeJS(propValue) + "\"";
-                    else if (propValue === null)
-                        editValue = "null";
-                    else if (object instanceof window.Window || object instanceof StackFrame.StackFrame)
-                        editValue = this._getRowName(row);
-                    else
-                        editValue = "this." + this._getRowName(row);
-                }
-                Firebug.Editor.startEditing(row, editValue);
-            },
-
-            _getLogicalParentRow:function (row) {
-                var row_level = parseInt(row.getAttribute("level"), 10);
-                if (row_level === 0) {
-                    return null;
-                }
-
-                var parent = row;
-                while (parent && parseInt(parent.getAttribute("level"), 10) !== (row_level - 1)) {
-                    parent = parent.previousSibling;
-                }
-                return parent;
-            },
-
-            _getRowName:function (row) {
-                var labelNode = row.getElementsByClassName("memberLabelCell").item(0);
-                return labelNode.textContent;
-            },
-
-            _getRowValue:function (row) {
-                var valueNode = row.getElementsByClassName("memberValueCell").item(0);
-                return valueNode.firstChild.repObject;
-            }
-
+        var completionBox = this.box.childNodes[0];
+        var options = {
+            includeCurrentScope: true
         };
 
-        return E;
+        this.setupCompleter(completionBox, options);
+    }
 
+    DOMEditor.prototype = D.domplate(Firebug.JSEditor.prototype, {
+        tag:
+            D.DIV({style: "position: absolute;"},
+                D.INPUT({"class": "fixedWidthEditor completionBox", type: "text",
+                    tabindex: "-1"}),
+                D.INPUT({"class": "fixedWidthEditor completionInput", type: "text",
+                    oninput: "$onInput", onkeypress: "$onKeyPress"})),
+
+        // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+        endEditing: function(target, value, cancel) {
+            delete this.panel.context.thisValue;
+
+            if (cancel || value === "")
+                return;
+
+            var row = Dom.getAncestorByClass(target, "memberRow");
+
+            Events.dispatch(this.panel.fbListeners, "onWatchEndEditing", [this.panel]);
+
+            if (!row)
+                this.panel.addWatch(value);
+            else if (Css.hasClass(row, "watchRow"))
+                this.panel.setWatchValue(row, value);
+            else
+                this.panel.setPropertyValue(row, value);
+        }
     });
 
+    // ********************************************************************************************* //
+    // Registration
 
+    return DOMEditor;
+
+    // ********************************************************************************************* //
+});
