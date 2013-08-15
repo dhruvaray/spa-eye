@@ -5,7 +5,7 @@
 
     <Description about="urn:mozilla:install-manifest">
         <em:id>spa_eye@dhruvaray.github.com</em:id>
-        <em:version>0.1</em:version>
+        <em:version>v0.1.0</em:version>
         <em:bootstrap>true</em:bootstrap>
 
         <!-- Firefox -->
@@ -19,8 +19,9 @@
 
         <!-- Front End MetaData -->
         <em:name>SPA-eye</em:name>
-        <em:description>Firebug Extension to spy on SPA applications</em:description>
-        <em:creator>Dhruva Ray</em:creator>
+        <em:description>Firebug Extension to debug Backbone Applications</em:description>
         <em:homepageURL>http://github.com/dhruvaray</em:homepageURL>
+        <em:creator>Dhruva Ray</em:creator>
+        <em:creator>Jaynti Kanani</em:creator>
     </Description>      
 </RDF>
