@@ -26,7 +26,7 @@
 
         function genSequenceString(val, idx, list) {
             if (returnTo.length) {
-                var top = returnTo.length - 1;
+                var top = returnTo[returnTo.length - 1];
                 if (list[top].cid !== list[idx].source.cid) {
                     var pid = returnTo.pop();
                     sequence = sequence + "\n" + (list[pid].cid + "-->" + (list[pid].source ? list[pid].source.cid : "App") + ": ");
