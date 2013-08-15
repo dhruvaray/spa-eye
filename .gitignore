@@ -5,7 +5,6 @@
 # Build Files
 build/
 nightly/
-releases/
 
 # Files from `npm`
 node_modules/
