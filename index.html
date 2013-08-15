@@ -123,6 +123,10 @@
             explain the various features of Backbone Eye, we will use the <a
                 href="http://todomvc.com/architecture-examples/backbone/">Backbone TODO application</a> as our reference
             application.
+
+            <br/><br/><span class="label label-danger">Note</span> Backbone Eye works with Firefox 23+<br/>
+            <br/><span class="label label-danger">Note</span> Edit model attribute values works only with Firebug v1.12+. Download <a href="https://addons.mozilla.org/firefox/downloads/file/224322/firebug-1.12.0b6-fx.xpi">from here.</a><br/>
+
         </div>
     </div>
 </div>
@@ -142,21 +146,21 @@
                              alt="Pinned, Most Used and All subsections in Models perspective"/></td>
                     <td>
                         This section has three sub sections.
-                        <dl class="dl-horizontal">
-                            <dt>Pinned</dt>
-                            <dd>Right click and select "Pin model" to nail down a model (among all application models)
+                        <table>
+                            <tr><td>Pinned</td></tr>
+                            <tr><td>Right click and select "Pin model" to nail down a model (among all application models)
                                 to investigate. All pinned models will reside in this section. Which model to pin may be
                                 discovered by using the Backbone Eye <a href="#model.search">search</a> functionality
-                            </dd>
-                            <dt>Most Used</dt>
-                            <dd>Backbone Eye attempts to identify the models that are most used by the application
+                            </td></tr>
+                            <tr><td>Most Used</td></tr>
+                            <tr><td>Backbone Eye attempts to identify the models that are most used by the application
                                 (based on write access counts). In real world applications which could have a large
                                 number of models, this list can be used as a starting point for investigating
                                 application behavior.
-                            </dd>
-                            <dt>All</dt>
-                            <dd>Lists all the models which were discovered.</dd>
-                        </dl>
+                            </td></tr>
+                            <tr><td>All</td></tr>
+                            <tr><td>Lists all the models which were discovered.</td></tr>
+                        </table>
                     </td>
                 </tr>
             </table>
@@ -352,14 +356,14 @@
                     <td><img src="./site/img/view_sections.png" alt="All, Removed subsections in Views perspective"/>
                     </td>
                     <td>This section has two sub sections.
-                        <dl class="dl-horizontal">
-                            <dt>Removed</dt>
-                            <dd>Lists all the views which have been removed (inferred when view.remove is invoked by the
+                        <table>
+                            <tr><td>Removed</td></tr>
+                            <tr><td>Lists all the views which have been removed (inferred when view.remove is invoked by the
                                 application)
-                            </dd>
-                            <dt>All</dt>
-                            <dd>Lists all the views which were discovered.</dd>
-                        </dl>
+                            </td></tr>
+                            <tr><td>All</td></tr>
+                            <tr><td>Lists all the views which were discovered.</td></tr>
+                        </table>
                     </td>
                 </tr>
             </table>
