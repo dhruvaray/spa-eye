@@ -156,7 +156,9 @@ define([
                 if (this.name)
                     type = this.name.charAt(0).toUpperCase() + this.name.slice(1);
 
-                if (type && (bbentity instanceof this.spa_eyeObj._spaHook.Backbone[type])) {
+                if (type &&
+                    this.spa_eyeObj._spaHook.Backbone[type] &&
+                    (bbentity instanceof this.spa_eyeObj._spaHook.Backbone[type])) {
                     this.sections && this.sections.forEach(function (section) {
                         section._onRowAdd(bbentity, {type:Common.OperationClass[operation]});
                     }, this);
