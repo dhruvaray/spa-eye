@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Backbone debugger extension for Firebug">
     <meta name="author" content="Dhruva Ray">
-    <meta name="keywords" content="backbone debugger,application layer debugging,firebug extension, debugging backbone applications">
+    <meta name="keywords"
+          content="backbone debugger,application layer debugging,firebug extension, debugging backbone applications">
 
     <title>Backbone debugger for Firebug.</title>
 
@@ -14,10 +15,17 @@
     <link href="./site/css/jumbotron-narrow.css" rel="stylesheet">
 
     <script>
-        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-                m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+        (function (i, s, o, g, r, a, m) {
+            i['GoogleAnalyticsObject'] = r;
+            i[r] = i[r] || function () {
+                (i[r].q = i[r].q || []).push(arguments)
+            }, i[r].l = 1 * new Date();
+            a = s.createElement(o),
+                    m = s.getElementsByTagName(o)[0];
+            a.async = 1;
+            a.src = g;
+            m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
 
         ga('create', 'UA-43200032-1', 'dhruvaray.github.io');
         ga('send', 'pageview');
@@ -59,7 +67,9 @@
 
             <p class="lead">Understand application behavior without debugging JavaScript</p>
 
-            <p><a class="btn btn-primary btn-lg" href="./releases/spa_eye-v0.1.0-pre.xpi">Download</a></p>
+            <p><a class="btn btn-primary btn-lg"
+                  href="https://github.com/dhruvaray/spa-eye/releases/download/v0.1.0-pre/spa_eye-v0.1.0-pre.xpi">Download</a>
+            </p>
         </div>
 
         <div class="row marketing">
@@ -94,7 +104,8 @@
 
                 <h4>Debug templates</h4>
 
-                <p>Backbone Eye makes underscore templates a debuggable unit. Put breakpoints in template code. At runtime, inspect model data being passed to the template, step through template code and
+                <p>Backbone Eye makes underscore templates a debuggable unit. Put breakpoints in template code. At
+                    runtime, inspect model data being passed to the template, step through template code and
                     observe template output being incrementally built.</p>
 
                 <h4>View Interaction trails & Journals</h4>
@@ -120,13 +131,16 @@
             Backbone Eye extends the popular <a
                 href="https://addons.mozilla.org/en-US/firefox/addon/firebug/">Firebug</a> plugin for Firefox. Once
             installed successfully, a new tab called Backbone Eye will appear in Firebug.
-            <br/><br/><img src="./site/img/get_started.png" alt="Getting started"/><br/>Navigate to an URL to begin introspecting. To
+            <br/><br/><img src="./site/img/get_started.png" alt="Getting started"/><br/>Navigate to an URL to begin
+            introspecting. To
             explain the various features of Backbone Eye, we will use the <a
                 href="http://todomvc.com/architecture-examples/backbone/">Backbone TODO application</a> as our reference
             application.
 
             <br/><br/><span class="label label-danger">Note</span> Backbone Eye works with Firefox 23+<br/>
-            <br/><span class="label label-danger">Note</span> Edit model attribute values works only with Firebug v1.12+. Download <a href="https://addons.mozilla.org/firefox/downloads/file/224322/firebug-1.12.0b6-fx.xpi">from here.</a><br/>
+            <br/><span class="label label-danger">Note</span> Edit model attribute values works only with Firebug
+            v1.12+. Download <a href="https://addons.mozilla.org/firefox/downloads/file/224322/firebug-1.12.0b6-fx.xpi">from
+            here.</a><br/>
 
         </div>
     </div>
@@ -148,19 +162,34 @@
                     <td>
                         This section has three sub sections.
                         <table>
-                            <tr><td><b>Pinned</b></td></tr>
-                            <tr><td>Right click and select "Pin model" to nail down a model (among all application models)
-                                to investigate. All pinned models will reside in this section. Which model to pin may be
-                                discovered by using the Backbone Eye <a href="#model.search">search</a> functionality
-                            </td></tr>
-                            <tr><td><b>Most Used</b></td></tr>
-                            <tr><td>Backbone Eye attempts to identify the models that are most used by the application
-                                (based on write access counts). In real world applications which could have a large
-                                number of models, this list can be used as a starting point for investigating
-                                application behavior.
-                            </td></tr>
-                            <tr><td><b>All</b></td></tr>
-                            <tr><td>Lists all the models which were discovered.</td></tr>
+                            <tr>
+                                <td><b>Pinned</b></td>
+                            </tr>
+                            <tr>
+                                <td>Right click and select "Pin model" to nail down a model (among all application
+                                    models)
+                                    to investigate. All pinned models will reside in this section. Which model to pin
+                                    may be
+                                    discovered by using the Backbone Eye <a href="#model.search">search</a>
+                                    functionality
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><b>Most Used</b></td>
+                            </tr>
+                            <tr>
+                                <td>Backbone Eye attempts to identify the models that are most used by the application
+                                    (based on write access counts). In real world applications which could have a large
+                                    number of models, this list can be used as a starting point for investigating
+                                    application behavior.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><b>All</b></td>
+                            </tr>
+                            <tr>
+                                <td>Lists all the models which were discovered.</td>
+                            </tr>
                         </table>
                     </td>
                 </tr>
@@ -176,16 +205,16 @@
             Backbone Eye allows you to edit the value of a model attribute to see the ripple effect - that model change
             - has on the entire application. To edit any attribute value, double click on the attribute name of the
             specific model and change it to a new value.<br/>
-            <br/><span class="label label-danger">Note</span> Works only with Firebug v1.12+. Download <a href="https://addons.mozilla.org/firefox/downloads/file/224322/firebug-1.12.0b6-fx.xpi">from here.</a><br/>
+            <br/><span class="label label-danger">Note</span> Works only with Firebug v1.12+. Download <a
+                href="https://addons.mozilla.org/firefox/downloads/file/224322/firebug-1.12.0b6-fx.xpi">from
+            here.</a><br/>
             <br/><span class="label label-info">Internals</span> This maps to model.set({attribute_name:value})<br/>
-            <br/><span class="label label-success">Simulate "what-if" scenarios</span>  In the todo example, it is
+            <br/><span class="label label-success">Simulate "what-if" scenarios</span> In the todo example, it is
             possible to change the model value from the UI as well (Primarily because it is editable, visible on the
             screen etc). But in the general case, it may be difficult to use application screens to edit model values.
             This feature will help you simulate what-if scenarios by allowing to update model attributes directly. To
             see the impact of the update, use the model <a href="#trails">interaction trails</a>.<br/></span><br/>
             <br/><img src="./site/img/model_editattributes.png" alt="Edit attributes"/><br/>
-
-
 
 
             <br id="model.search"/>
@@ -288,11 +317,13 @@
             <br/><img src="./site/img/interaction_plot_table.png" alt="Model interaction trail"/><br/>
 
             <br/>The view shows the interactions which have happened at time t = 0, 1, 2 ... n. To view a interaction at
-            t = m, click on the t = m header. The interaction trail is updated to show the flow at t=m. Expand the t=m section to
-            see detailed info about the state of various participating entities, message name and parameters. By default, the last interaction is shown when you navigate to the interaction trails view.
+            t = m, click on the t = m header. The interaction trail is updated to show the flow at t=m. Expand the t=m
+            section to
+            see detailed info about the state of various participating entities, message name and parameters. By
+            default, the last interaction is shown when you navigate to the interaction trails view.
 
             <br/>
-            <br id="cleardata"/><br/><br/><h4 >Clear Interaction Trails and Journal data</h4><br/>
+            <br id="cleardata"/><br/><br/><h4>Clear Interaction Trails and Journal data</h4><br/>
 
             <div id="clear">
                 For complex applications, this data can grow and Backbone Eye can become sluggish. Click on the clear
@@ -301,7 +332,8 @@
                 <br/>This will cause both the journal and interaction data collected so far to be wiped out.<br/>
                 <br/><img src="./site/img/clear_it.png" alt="Clear interaction trail data"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 <img src="./site/img/clear_j.png" alt="Clear journal data"/><br/>
-                It is also possible to <b>not</b> record this data altogether. Toggle the eye button to stop or start recording
+                It is also possible to <b>not</b> record this data altogether. Toggle the eye button to stop or start
+                recording
                 this data<br/>
                 <br/>
                 <table>
@@ -317,7 +349,9 @@
                     </tr>
                 </table>
                 <br/>
-                <br/><span class="label label-success">Tip</span> Leverage this feature in real applications to improve debugger performance. Switch off recording and load the application URL. When you want to watch interesting (or weird perhaps!) application behavior, start recording.<br/>
+                <br/><span class="label label-success">Tip</span> Leverage this feature in real applications to improve
+                debugger performance. Switch off recording and load the application URL. When you want to watch
+                interesting (or weird perhaps!) application behavior, start recording.<br/>
             </div>
         </div>
     </div>
@@ -330,7 +364,8 @@
 
         <div class="well-lg">
             <div class="panel-heading">Journal</div>
-            <br/>Unlike <a href="#trails">interaction trails</a>, the journal shows all activities which have happened on
+            <br/>Unlike <a href="#trails">interaction trails</a>, the journal shows all activities which have happened
+            on
             a specific model (or collection or view) at various time slots. It can be used to quickly check the
             evolution of model state over a period of time - as well as the various operation details which caused the
             state change.<br/>
@@ -358,12 +393,21 @@
                     </td>
                     <td>This section has two sub sections.
                         <table>
-                            <tr><td><b>Removed</b></td></tr>
-                            <tr><td>Lists all the views which have been removed (inferred when view.remove is invoked by the
-                                application)
-                            </td></tr>
-                            <tr><td><b>All</b></td></tr>
-                            <tr><td>Lists all the views which were discovered.</td></tr>
+                            <tr>
+                                <td><b>Removed</b></td>
+                            </tr>
+                            <tr>
+                                <td>Lists all the views which have been removed (inferred when view.remove is invoked by
+                                    the
+                                    application)
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><b>All</b></td>
+                            </tr>
+                            <tr>
+                                <td>Lists all the views which were discovered.</td>
+                            </tr>
                         </table>
                     </td>
                 </tr>
@@ -378,23 +422,32 @@
                       alt="View Templates shown in the source box of Firebug script panel"/><br/>
 
             <br/><h4>Debug the view generation process</h4><br/>
-            View template can now be debugged - just like regular JavaScript code. The list of templates discovered by Backbone Eye are now present in the Script panel of Firebug.<br/><br/><img src="./site/img/view_templatelisting.png"
-                                   alt="View Templates shown in the source box of Firebug script panel"/><br/><br/>The
-            Javascript code to transform the the template (with data values) is shown in the source box. The source is commented with the
+            View template can now be debugged - just like regular JavaScript code. The list of templates discovered by
+            Backbone Eye are now present in the Script panel of Firebug.<br/><br/><img
+                src="./site/img/view_templatelisting.png"
+                alt="View Templates shown in the source box of Firebug script panel"/><br/><br/>The
+            Javascript code to transform the the template (with data values) is shown in the source box. The source is
+            commented with the
             template tags so it is easy to see what JavaScript maps to that template snippet. The Script panel has a new
-            side-panel : <b>Views</b>. When a view template is being debugged, this panel becomes active and shows the data
+            side-panel : <b>Views</b>. When a view template is being debugged, this panel becomes active and shows the
+            data
             being passed to the template, the source template and the incremental template string being populated with
             data as the debugger steps through the template generation process.<br/><br/><img
                 src="./site/img/view_debug.png" alt="Debug a view template"/><br/>
 
             <br/><h4>Identify a View</h4><br/>
-            It may be necessary to identify a Backbone View from an application screen. Conversely, it may be interesting to know what application screen a Backbone view corresponds to. Backbone Eye allows for both kinds of discovery.
-           <br/><br/>
-            Click on a view in Backbone Eye to see the corresponding screen highlighted in the application.
-            <br/><br/><img src="./site/img/view_click.png" alt="Click on a view to see it in the application screen"/><br/>
+            It may be necessary to identify a Backbone View from an application screen. Conversely, it may be
+            interesting to know what application screen a Backbone view corresponds to. Backbone Eye allows for both
+            kinds of discovery.
             <br/><br/>
-            Using the Firebug inspector to select a screen in the application. The corresponding Backbone view in Backbone
-            Eye will be highlighted and expanded.<br/><br/><img src="./site/img/view_iclick.png" alt="Click on inspector to see the application screen in the view section"/><br/>
+            Click on a view in Backbone Eye to see the corresponding screen highlighted in the application.
+            <br/><br/><img src="./site/img/view_click.png"
+                           alt="Click on a view to see it in the application screen"/><br/>
+            <br/><br/>
+            Using the Firebug inspector to select a screen in the application. The corresponding Backbone view in
+            Backbone
+            Eye will be highlighted and expanded.<br/><br/><img src="./site/img/view_iclick.png"
+                                                                alt="Click on inspector to see the application screen in the view section"/><br/>
         </div>
     </div>
 </div>
@@ -408,21 +461,36 @@
             <br/><span class="label label-success">Labs Feature</span> Feedback will be appreciated!<br/>
 
             <br/>Contains a listing of objects which are in use - even after they have been removed from the application
-            - via Backbone remove or destroy calls. This section will simulate zombie creation in the reference application to demonstrate Backbone Eye Zombie detection.<br/><br/>
+            - via Backbone remove or destroy calls. This section will simulate zombie creation in the reference
+            application to demonstrate Backbone Eye Zombie detection.<br/><br/>
 
-            <div class="well well-sm">Step 0 : A model c3 present corresponding to the todo item present in the application. </div>
+            <div class="well well-sm">Step 0 : A model c3 present corresponding to the todo item present in the
+                application.
+            </div>
             <img src="./site/img/zombie_1.png" alt="zombie workflow - step 0"/><br/>
-            <div class="well well-sm">Step 1 : Delete the todo item - "1". The application internally calls view4.remove() </div>
+
+            <div class="well well-sm">Step 1 : Delete the todo item - "1". The application internally calls
+                view4.remove()
+            </div>
             <img src="./site/img/zombie_2.png" alt="zombie workflow - step 1"/><br/>
-            <br/><div class="well well-sm">Step 2 : The view (view4) now moves to the Removed list </div>
+            <br/>
+
+            <div class="well well-sm">Step 2 : The view (view4) now moves to the Removed list</div>
             <img src="./site/img/zombie_3.png" alt="zombie workflow - step 2"/><br/>
-            <div class="well well-sm">Step 3 : Perform a render operation on the removed view - via Firebug and Backbone Eye.</div>
+
+            <div class="well well-sm">Step 3 : Perform a render operation on the removed view - via Firebug and Backbone
+                Eye.
+            </div>
             <img src="./site/img/zombie_4.png" alt="zombie workflow - step 3a"/><br/>
             <br/><img src="./site/img/zombie_5.png" alt="zombie workflow - step 3b"/><br/>
             <br/><img src="./site/img/zombie_6.png" alt="zombie workflow - step 3c"/><br/>
-            <br/><div class="well well-sm">Step 4 : view4 now appears in the Zombies list as operations have been performed on it - even after
+            <br/>
+
+            <div class="well well-sm">Step 4 : view4 now appears in the Zombies list as operations have been performed
+                on it - even after
                 view4.remove() was called in step 1. Use the journal or interaction trails to figure out the
-                callee. </div>
+                callee.
+            </div>
             <img src="./site/img/zombie_7.png" alt="zombie workflow - step 4"/><br/>
         </div>
     </div>
@@ -433,15 +501,20 @@
     <div class="panel panel-primary">
         <div class="panel-heading">Troubleshooting</div>
         <div class="well-lg">
-            Backbone Eye attempts to discover application structure by intercepting calls to various Backbone methods. In case,
-            your application is not working with Backbone Eye, please check the <b>Eye logs</b> section for errors. Please
+            Backbone Eye attempts to discover application structure by intercepting calls to various Backbone methods.
+            In case,
+            your application is not working with Backbone Eye, please check the <b>Eye logs</b> section for errors.
+            Please
             attach a screen-shot of those errors while submitting a <a
                 href="https://github.com/dhruvaray/spa-eye/issues?sort=created&state=open">bug.</a><br/>
 
             <br/><img src="./site/img/introspection_errors.png" alt="Introspection errors"/><br/>
-            <br/><span class="label label-danger">Note</span> Backbone Eye needs either the AMD loader or Backbone to be in global scope.<br/>
+            <br/><span class="label label-danger">Note</span> Backbone Eye needs either the AMD loader or Backbone to be
+            in global scope.<br/>
             <br/><span class="label label-danger">Note</span> Backbone Eye works with Firefox 23+<br/>
-            <br/><span class="label label-danger">Note</span> Edit model attribute values works only with Firebug v1.12+. Download <a href="https://addons.mozilla.org/firefox/downloads/file/224322/firebug-1.12.0b6-fx.xpi">from here.</a><br/>
+            <br/><span class="label label-danger">Note</span> Edit model attribute values works only with Firebug
+            v1.12+. Download <a href="https://addons.mozilla.org/firefox/downloads/file/224322/firebug-1.12.0b6-fx.xpi">from
+            here.</a><br/>
 
 
         </div>
