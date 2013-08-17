@@ -7,14 +7,13 @@ define([
     "firebug/lib/locale",
     "firebug/lib/events",
 
-    "spa_eye/lib/uri",
     "spa_eye/hooks/bb/bbhook",
     "spa_eye/util/common",
 
     "spa_eye/spa_eyeObj",
     "spa_eye/dom/keyPanel"
 ],
-    function (Firebug, FBL, FBTrace, Locale, Events, URI, BBHook, Common, spa_eyeObj, KeyPanel) {
+    function (Firebug, FBL, FBTrace, Locale, Events, BBHook, Common, spa_eyeObj, KeyPanel) {
 
         Firebug.spa_eyeModule = FBL.extend(Firebug.ActivableModule, {
 

@@ -6,16 +6,13 @@ define([
     "firebug/lib/events",
     "firebug/lib/dom",
 
-
-    "spa_eye/lib/sha",
     "spa_eye/lib/dom",
-    "spa_eye/lib/uri",
     "spa_eye/lib/date",
 
     "spa_eye/lib/require/underscore",
     "spa_eye/util/common"
 ],
-    function (FBTrace, Http, Events, Dom, SHA, DOM, URI, DateUtil, _, Common) {
+    function (FBTrace, Http, Events, Dom, DOM, DateUtil, _, Common) {
 
 // ********************************************************************************************* //
 // Constants
@@ -303,7 +300,7 @@ define([
             },
 
             resetTrackingData:function () {
-                this._sequences = {}
+                this._sequences = {};
                 this._templates = {};
                 this._auditRecords = {};
                 this._frame = [];

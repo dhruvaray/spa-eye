@@ -9,12 +9,11 @@ define([
     "firebug/lib/events",
     "firebug/chrome/reps",
 
-    "spa_eye/lib/uri",
     "spa_eye/lib/require/underscore",
     "spa_eye/dom/domReps",
     "spa_eye/panels/basePanel"
 ],
-    function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, FirebugReps, URI, _, DOMReps, BasePanel) {
+    function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, FirebugReps, _, DOMReps, BasePanel) {
 
         var auditPanel = Firebug.auditPanel = BasePanel.extend({
             name:"spa_eye:audit",

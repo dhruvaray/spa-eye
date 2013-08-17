@@ -126,11 +126,17 @@ define([
             },
 
             onBackboneEvent:function (bbentity, operation, args) {
+                _.throttle(this._deferProcessing, 1000)
+
+            },
+
+            _deferProcessing:function (bbentity, operation, args) {
                 _.each(this.follows, function (follow) {
                     if (bbentity  instanceof this.context.spa_eyeObj._spaHook.Backbone[follow])
                         this.show();
                 }, this);
             }
+
         });
         return BasePanel;
     });
