@@ -18,22 +18,15 @@ function(FBTrace, TraceModule, TraceListener, SPAPanel, SPAModule) {
 // ********************************************************************************************* //
 // The application/extension object
 
-var theApp =
-{
-    initialize: function()
-    {
-
+var theApp = {
+    initialize: function() {
         if (FBTrace.DBG_SPA_EYE)
             FBTrace.sysout("spa_eye; spa_eye extension initialize");
-
-
     },
 
-    shutdown: function()
-    {
+    shutdown: function() {
         if (FBTrace.DBG_SPA_EYE)
-            FBTrace.sysout("spa_eye extension shutdown");
-
+            FBTrace.sysout("spa_eye; spa_eye extension shutdown");
     }
 }
 

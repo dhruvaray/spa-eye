@@ -180,10 +180,9 @@ define([
                     Events.dispatch(self.listener.fbListeners, 'onBackboneEntityAdded', [e]);
                 });
                 root.addEventListener('Backbone_Eye:RECORD', function (e) {
-
                     //{'detail':{entity:this, post:false, args:arguments, type:type}}
-                    if (e.detail)
-                        var data = e.detail;
+                    if (!e.detail) return;
+                    var data = e.detail;
                     self.function_womb.Operation(
                         data.post,
                         data.entity,
@@ -191,7 +190,6 @@ define([
                         data.operation_type,
                         data.args
                     )
-
                 });
                 root.addEventListener('Backbone_Eye:ERROR', function (e) {
                     self.logError(e.detail.error);
@@ -339,8 +337,10 @@ define([
 
             logError:function (e) {
                 this._errors.push(e);
-                Events.dispatch(self.listener.fbListeners, 'onIntrospectionError', [e]);
-                FBTrace.sysout("spa_eye; Unexpected error", e);
+                Events.dispatch(this.listener.fbListeners, 'onIntrospectionError', [e]);
+                if (FBTrace.DBG_SPA_EYE) {
+                    FBTrace.sysout("spa_eye; Unexpected error", e);
+                }
             },
 
             views:function (options) {
