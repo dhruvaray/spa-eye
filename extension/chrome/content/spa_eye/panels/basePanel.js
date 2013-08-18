@@ -97,6 +97,7 @@ define([
                 // Panel focus
                 this.onPanelFocus = this.onPanelFocus.bind(this);
                 Events.addEventListener(this.panelNode, "mousedown", this.onPanelFocus, true);
+                this.lazyEventProcessing = _.debounce(this.eventProcessing, 1000)
             },
 
             destroy:function () {
@@ -126,11 +127,10 @@ define([
             },
 
             onBackboneEvent:function (bbentity, operation, args) {
-                _.throttle(this._deferProcessing, 1000)
-
+                this.lazyEventProcessing(bbentity, operation, args);
             },
 
-            _deferProcessing:function (bbentity, operation, args) {
+            eventProcessing:function (bbentity, operation, args) {
                 _.each(this.follows, function (follow) {
                     if (bbentity  instanceof this.context.spa_eyeObj._spaHook.Backbone[follow])
                         this.show();
