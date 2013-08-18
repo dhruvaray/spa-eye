@@ -94,3 +94,11 @@
     color: #000000;
     font: message-box;
 }
+
+.notification {
+    height:30px;
+    line-height:30px;
+    padding:3px 10px;
+    cursor: pointer;
+    font-weight: bold;
+}

@@ -7,13 +7,13 @@ define([
     "firebug/lib/options",
 
     "spa_eye/lib/require/underscore",
+    "spa_eye/dom/notification",
     "spa_eye/util/common",
     "spa_eye/panels/basePanel",
     "spa_eye/dom/modelReps",
     "spa_eye/dom/editablePanel"
 ],
-    function (Firebug, Obj, FBTrace, Dom, Css, Options, _, Common, BasePanel, ModelReps, EditablePanel) {
-
+    function (Firebug, Obj, FBTrace, Dom, Css, Options, _, Notification, Common, BasePanel, ModelReps, EditablePanel) {
 
         var BasePlate = function (options) {
             this.initialize && this.initialize(options);
@@ -22,7 +22,6 @@ define([
         BasePlate.prototype = Obj.extend(EditablePanel, {
             constructor:BasePlate,
 
-
             initialize:function (options) {
                 if (options) {
                     this.context = options.context;
@@ -30,7 +29,6 @@ define([
                     this.sections = this.createSections();
                 }
                 this.spa_eyeObj = this.context.spa_eyeObj;
-
             },
 
             render:function () {
@@ -41,12 +39,19 @@ define([
                     mainPanel:this
                 };
 
-                ModelReps.DirTablePlate.tag.replace(args, this.parent.panelNode);
+                var self = this;
+                var loading = new Notification(this.parent.panelNode, {
+                    replace: true
+                });
+                setTimeout(function(){
+                    ModelReps.DirTablePlate.tag.replace(args, self.parent.panelNode);
 
-                if (!this.context.spa_eyeObj.selectedEntity) {
-                    var firstRow = this.parent.panelNode.getElementsByClassName("0level").item(0);
-                    return ModelReps.selectRow(firstRow, this);
-                }
+                    if (!self.context.spa_eyeObj.selectedEntity) {
+                        var firstRow = self.parent.panelNode.getElementsByClassName("0level").item(0);
+                        return ModelReps.selectRow(firstRow, self);
+                    }
+                    loading.destroy();
+                }, 10);
             },
 
             isCurrentPlate:function () {
@@ -173,8 +178,6 @@ define([
                     this[method] && this[method].apply(this, catchall_args);
                 }
             }
-
         });
-
         return BasePlate;
     });
