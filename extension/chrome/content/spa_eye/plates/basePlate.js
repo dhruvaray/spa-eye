@@ -21,7 +21,7 @@ define([
         BasePlate.extend = BasePanel.extend;
         BasePlate.prototype = Obj.extend(EditablePanel, {
             constructor:BasePlate,
-            _pending:[],
+
 
             initialize:function (options) {
                 if (options) {
@@ -30,7 +30,7 @@ define([
                     this.sections = this.createSections();
                 }
                 this.spa_eyeObj = this.context.spa_eyeObj;
-                this.lazyEventProcessing = _.debounce(this.processEvents, 1000);
+
             },
 
             render:function () {
@@ -152,42 +152,27 @@ define([
 
             onBackboneEvent:function (bbentity, operation, args) {
                 if (!this.parent.isCurrentPanel()) return false;
-                //Only the last op should matter - further optimization possible
-                this._pending.push({entity:bbentity, operation:operation, args:args});
-                this.lazyEventProcessing();
-            },
 
-            processEvents:function () {
-
-                var tbp = this._pending.splice(0, this._pending.length);
                 var type = '';
                 if (this.name)
                     type = this.name.charAt(0).toUpperCase() + this.name.slice(1);
 
-                _.each(tbp, function (event) {
-                    var operation = event.operation;
-                    var bbentity = event.entity;
-                    var args = event.args;
+                //Note the case
+                var Operation = operation.charAt(0).toUpperCase() + operation.slice(1);
 
-                    //Note the case
-                    var Operation = operation.charAt(0).toUpperCase() + operation.slice(1);
+                if (type &&
+                    this.spa_eyeObj._spaHook.Backbone[type] &&
+                    (bbentity instanceof this.spa_eyeObj._spaHook.Backbone[type])) {
+                    this.sections && this.sections.forEach(function (section) {
+                        section._onRowAdd(bbentity, {type:Common.OperationClass[operation]});
+                    }, this);
 
-                    if (type &&
-                        this.spa_eyeObj._spaHook.Backbone[type] &&
-                        (bbentity instanceof this.spa_eyeObj._spaHook.Backbone[type])) {
-                        this.sections && this.sections.forEach(function (section) {
-                            section._onRowAdd(bbentity, {type:Common.OperationClass[operation]});
-                        }, this);
-
-                        var catchall_args = [bbentity];
-                        catchall_args.push.apply(catchall_args, args);
-                        var method = 'on' + type + Operation;
-                        this[method] && this[method].apply(this, catchall_args);
-                    }
-                }, this);
-
+                    var catchall_args = [bbentity];
+                    catchall_args.push.apply(catchall_args, args);
+                    var method = 'on' + type + Operation;
+                    this[method] && this[method].apply(this, catchall_args);
+                }
             }
-
 
         });
 

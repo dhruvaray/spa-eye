@@ -23,7 +23,7 @@ define([
 
                 if (frame && frame.script && frame.script && frame.script.fileName) {
                     var matches = frame.script.fileName.match(/fileName=([^;]*)/)
-                    matches.length == 2 && (this.templateName = matches[1]);
+                    matches && matches.length == 2 && (this.templateName = matches[1]);
                 }
 
                 try {

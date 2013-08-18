@@ -255,10 +255,13 @@ define([
 
                             if (sr instanceof this.Backbone.Model)
                                 isNewInteraction = isNewInteractionModel;
-                            if (sr instanceof this.Backbone.Collection)
+                            else if (sr instanceof this.Backbone.Collection)
                                 isNewInteraction = isNewInteractionCollection;
-                            if (sr instanceof this.Backbone.View)
+                            else if (sr instanceof this.Backbone.View)
                                 isNewInteraction = isNewInteractionView;
+                            else {
+                                return;
+                            }
 
                             isNewInteraction ? flows.push([record]) : flows[flows.length - 1].push(record);
                         }
