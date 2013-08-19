@@ -48,13 +48,9 @@ define([
                 var state = '';
 
                 try {
-
                     self._current[entity_type] = entity;
-
                     if (!post) {
-
                         self._frame.push(entity);
-
                         if (entity instanceof self.Backbone.Model) {
                             try {
                                 state = (typeof entity.attributes !== 'undefined') ?
@@ -63,8 +59,9 @@ define([
                             } catch (e) {
                                 state = entity;
                             }
-                        } else
+                        } else {
                             state = entity.cid;
+                        }
 
                         self.recordSequenceEvent({
                             cid:entity.cid,
@@ -91,12 +88,14 @@ define([
                             }
                         }
 
+                        if (entity instanceof self.Backbone.Model &&
+                                (Operation.SAVE === operation_type || Operation.SET === operation_type)) {
+                            self.context.spa_eyeObj._mostused_models.add(entity.cid, entity, operation_type);
+                        }
+
                         Events.dispatch(self.listener.fbListeners, 'onBackboneEvent', [entity, operation_type]);
-
                     } else {
-
                         self._frame.pop();
-
                         if (!_.contains(self._frame, self._current[entity_type]))
                             self._sequence[entity_type] = undefined;
 

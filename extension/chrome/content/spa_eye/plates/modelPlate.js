@@ -149,19 +149,7 @@ define([
 
             setValue:function (obj, key, value) {
                 obj.set(key, value);
-            },
-
-// ********************************************************************************************* //
-// onModelSet and onModelSave
-// ********************************************************************************************* //
-            onModelSet:function (model) {
-                this.context.spa_eyeObj._mostused_models.add(model.cid, model, 'set');
-            },
-
-            onModelSave:function (model) {
-                this.context.spa_eyeObj._mostused_models.add(model.cid, model, 'save');
             }
-
         });
 
         return PANEL;
