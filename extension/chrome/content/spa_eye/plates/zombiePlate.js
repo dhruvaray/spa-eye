@@ -25,8 +25,6 @@ define([
                     name:'all_zombies',
                     title:Locale.$STR('spa_eye.all'),
                     parent:this.parent.panelNode,
-                    container:'allZombiesDiv',
-                    body:'allZombiesDivBody',
                     data:FBL.bindFixed(this.context.spa_eyeObj.getZombies, this.context.spa_eyeObj)
                 });
                 sections.push(all);

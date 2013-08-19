@@ -26,8 +26,6 @@ define([
                     title:Locale.$STR('spa_eye.all'),
                     parent:this.parent.panelNode,
                     order:0,
-                    container:'allCollectionsDiv',
-                    body:'allCollectionsDivBody',
                     data:FBL.bindFixed(this.context.spa_eyeObj.getCollections, this.context.spa_eyeObj)
                 });
                 sections.push(allCollections);
@@ -42,8 +40,6 @@ define([
                 spa_eyeObj.selectedEntity = m;
                 Events.dispatch(spa_eyeObj._spaHook.listener.fbListeners, 'onSelectedEntityChange', [m]);
             }
-
-
         });
 
         return PANEL;

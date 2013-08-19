@@ -50,8 +50,6 @@ define([
                     title:Locale.$STR('spa_eye.models.pinned'),
                     parent:this.parent.panelNode,
                     order:0,
-                    container:'pinnedModelsDiv',
-                    body:'pinnedModelsDivBody',
                     autoAdd:false,
                     data:spa_eyeObj._pinned_models,
                     onRowRemove:function (model) {
@@ -65,8 +63,6 @@ define([
                     title:Locale.$STR('spa_eye.models.mostused'),
                     parent:this.parent.panelNode,
                     order:1,
-                    container:'mostUsedModelsDiv',
-                    body:'mostUsedModelsDivBody',
                     autoAdd:false,
                     data:FBL.bindFixed(spa_eyeObj._mostused_models.values, spa_eyeObj._mostused_models),
                     onRowRemove:function (model) {
@@ -80,8 +76,6 @@ define([
                     title:Locale.$STR('spa_eye.all'),
                     parent:this.parent.panelNode,
                     order:2,
-                    container:'allModelsDiv',
-                    body:'allModelsDivBody',
                     data:FBL.bindFixed(spa_eyeObj.getModels, spa_eyeObj),
                     onRowRemove:function (model) {
                         if (!model || !model.cid) return;

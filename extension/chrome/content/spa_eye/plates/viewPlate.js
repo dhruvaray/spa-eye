@@ -52,8 +52,6 @@ define([
                     name:'live_views',
                     title:Locale.$STR('spa_eye.views.live'),
                     parent:this.parent.panelNode,
-                    container:'liveViewsDiv',
-                    body:'liveViewsDivBody',
                     data:function () {
                         return self.spa_eyeObj.getViews({live:true})
                     }

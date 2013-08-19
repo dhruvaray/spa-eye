@@ -94,6 +94,7 @@ define([
                     var sections = [];
                     for (var i = this.sequenceData.length - 1; i >= 0; --i) {
                         sections.push(new ChildSection({
+                            name:'eventsection_t' + i,
                             title:'t=' + i,
                             parent:this.panelNode,
                             autoAdd:false,

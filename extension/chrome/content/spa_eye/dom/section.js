@@ -22,6 +22,8 @@ define([
             for (var key in option) {
                 this[key] = option[key];
             }
+            this.container = this.name + '_Div';
+            this.body = this.name + '_DivBody';
         };
 
         ChildSection.prototype = {
@@ -52,7 +54,8 @@ define([
             // Other default property for its data
             autoAdd:true,
             highlight:true,
-            bubble:true,
+            bubble:false,
+            dragToTop:true,
 
             // Utils
             getBody:function () {
@@ -86,8 +89,9 @@ define([
                     }
                 }
 
-                var rows = tbody.getElementsByClassName('0level');
-                var found = false;
+                var rows = tbody.getElementsByClassName('0level'),
+                    found = false;
+
                 if (rows) {
                     for (var i = 0; i < rows.length; i++) {
                         var row = rows[i];
@@ -96,7 +100,11 @@ define([
                             found = true;
                             ModelReps._foldRow(row, function (r) {
                                 ModelReps.highlightRow(r, options.type || 'row-warning');
-                                ModelReps._bubbleUpRow(r);
+                                if (this.dragToTop) {
+                                    ModelReps._dragToTop(r);
+                                } else if (this.bubble) {
+                                    ModelReps._bubbleUpRow(r);
+                                }
                             }, this);
                             break;
                         }
@@ -108,8 +116,13 @@ define([
                     obj[model.cid] = model;
                     var members = ModelReps.DirTablePlate.memberIterator({data: obj, section: this});
                     var result = ModelReps.DirTablePlate.rowTag.insertRows({members:members}, tbody);
-                    ModelReps.highlightRow(result[0], options.type || 'row-warning');
-                    ModelReps._bubbleUpRow(result[0]);
+                    var row = result[0];
+                    ModelReps.highlightRow(row, options.type || 'row-warning');
+                    if (this.dragToTop) {
+                        ModelReps._dragToTop(row);
+                    } else if (this.bubble) {
+                        ModelReps._bubbleUpRow(row);
+                    }
                 }
             },
 

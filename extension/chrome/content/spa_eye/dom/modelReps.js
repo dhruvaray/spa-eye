@@ -399,6 +399,17 @@ define([
             }, 100);
         }
 
+        var _dragToTop = function (row) {
+            var tbody = row.parentNode,
+                level = parseInt(row.getAttribute('level'), 10),
+                firstRow = tbody.firstChild;
+
+            if (isNaN(level) || (level !== 0) || (row === firstRow)) return;
+
+            tbody.removeChild(row);
+            tbody.insertBefore(row, firstRow);
+        }
+
         var _foldRow = function (row, cb, context, otherArgs) {
             var args = [row];
             otherArgs && args.push.apply(args, otherArgs);
@@ -452,6 +463,7 @@ define([
             selectRow:selectRow,
             getSelectedRow:getSelectedRow,
             _bubbleUpRow:_bubbleUpRow,
+            _dragToTop:_dragToTop,
             _foldRow:_foldRow
         };
 

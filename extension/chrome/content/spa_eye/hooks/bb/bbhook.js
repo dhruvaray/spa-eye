@@ -89,6 +89,7 @@ define([
                         }
 
                         if (entity instanceof self.Backbone.Model &&
+                                self.context.spa_eyeObj._mostused_models &&
                                 (Operation.SAVE === operation_type || Operation.SET === operation_type)) {
                             self.context.spa_eyeObj._mostused_models.add(entity.cid, entity, operation_type);
                         }
