@@ -57,15 +57,15 @@ function main () {
  * Build Firebug XPI
  */
 
-function build (destination) {    
+function build (destination) {
     console.log("Version: " + version);
     clean();
     prepareBuild();
 
     // Update install.rdf with updated release version info
     copy(
-        path.join(buildDir, "install.rdf"), 
-        path.join(buildDir, "install.rdf"), 
+        path.join(buildDir, "install.rdf"),
+        path.join(buildDir, "install.rdf"),
         function (data) {
             return data.replace(/@VERSION@/gm, version);
         }
@@ -104,7 +104,7 @@ function showError(err, stdout, stderr) {
 }
 
 function createFirebugXPI (filename, callback) {
-    // Create final XPI package.    
+    // Create final XPI package.
     var zip = null;
     rm(filename);
     if (os.platform() === "win32") {
