@@ -44,7 +44,8 @@ define([
 
         var DirTablePlate = D.domplate(Firebug.Rep, {
 
-            memberRowTag:D.TR({"class":"memberRow $member.open $member.type\\Row $member.noMemberRow modelRow $member.level\\level",
+            memberRowTag:D.TR({
+                    "class":"memberRow $member.open $member.type\\Row $member.noMemberRow modelRow $member.level\\level $member|uniqClassName",
                     _domObject:"$member",
                     $hasChildren:"$member.hasChildren",
                     role:"presentation",
@@ -169,6 +170,10 @@ define([
                     data:data,
                     section:section
                 }
+            },
+
+            uniqClassName:function (member) {
+                return (member.value && member.value.cid) || '';
             },
 
             // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

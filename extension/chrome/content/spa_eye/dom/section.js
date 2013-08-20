@@ -89,7 +89,7 @@ define([
                     }
                 }
 
-                var rows = tbody.getElementsByClassName('0level'),
+                var rows = tbody.getElementsByClassName('0level ' + (model.cid || '')),
                     found = false;
 
                 if (rows) {
