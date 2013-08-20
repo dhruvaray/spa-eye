@@ -133,7 +133,7 @@ define([
                 var tbody = this.getBody();
 
                 // All rows from this section
-                var rows = tbody.getElementsByClassName("0level");
+                var rows = tbody.getElementsByClassName('0level ' + (model.cid + ''));
 
                 try {
                     for (var i = 0; i < rows.length; i++) {
