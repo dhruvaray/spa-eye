@@ -59,7 +59,6 @@
 
 
         var createDebuggableScript = function (id, oldval, newval) {
-
             var getMatchingNode = function (tag, tagbody) {
                 var elements = root.document.getElementsByTagName(tag);
 
@@ -73,7 +72,6 @@
             }
 
             var wrapper = function (text, data, settings) {
-
                 _.extend(newval, wrapper);
                 if (text) {
                     var script = getMatchingNode("script", text)
@@ -84,9 +82,9 @@
                         root.dispatchEvent(new CustomEvent('Backbone_Eye:TEMPLATE:ADD', {'detail':{
                             script_id:script_id,
                             text:text}}));
-                        compiledTemplate = newval(text, undefined, settings);
+                        compiledTemplate = newval.call(_, text, undefined, settings);
                     }
-                    if (typeof data !== 'undefined') {//Data
+                    if (data) {//Data
                         root.dispatchEvent(
                             new CustomEvent('Backbone_Eye:TEMPLATE:INFER', {'detail':{script_id:script_id}}));
                         return compiledTemplate.call(_, data)
@@ -102,9 +100,8 @@
                 } else {
                     root.dispatchEvent(new CustomEvent('Backbone_Eye:ERROR',
                         {'detail':{error:"Template Text is empty"}}));
-                    return newval(arguments);
+                    return newval.apply(_, arguments);
                 }
-
             }
             return wrapper;
         };

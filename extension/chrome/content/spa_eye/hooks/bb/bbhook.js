@@ -245,16 +245,13 @@ define([
 
                     if ((!this._sequence.Model) || (!this._sequence.Model.entity)) {
                         this._sequence.Model = {entity:this._current.Model, entity_type:EntityType.Model};
-                    }
-                    ;
+                    };
                     if ((!this._sequence.Collection) || (!this._sequence.Collection.entity)) {
                         this._sequence.Collection = {entity:this._current.Collection, entity_type:EntityType.Collection};
-                    }
-                    ;
+                    };
                     if ((!this._sequence.View) || (!this._sequence.View.entity)) {
                         this._sequence.View = {entity:this._current.View, entity_type:EntityType.View};
-                    }
-                    ;
+                    };
 
                     _.each([this._sequence.Model, this._sequence.Collection, this._sequence.View], function (seq_type) {
                         var sr = seq_type.entity;
