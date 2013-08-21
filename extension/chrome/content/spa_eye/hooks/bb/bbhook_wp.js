@@ -79,9 +79,13 @@
                     var proxiedTemplateRef = '_t' + script_id;
                     var compiledTemplate = root[proxiedTemplateRef];
                     if (!compiledTemplate) {
-                        root.dispatchEvent(new CustomEvent('Backbone_Eye:TEMPLATE:ADD', {'detail':{
-                            script_id:script_id,
-                            text:text}}));
+                        root.dispatchEvent(new CustomEvent('Backbone_Eye:TEMPLATE:ADD', {
+                            'detail':{
+                                script_id:script_id,
+                                text:text,
+                                settings:_.defaults({}, settings ,_.templateSettings)
+                            }
+                        }));
                         compiledTemplate = newval.call(_, text, undefined, settings);
                     }
                     if (data) {//Data

@@ -109,7 +109,6 @@ define([
                 } catch (e) {
                     self.logError(e);
                 }
-
             };
         }
 
@@ -134,10 +133,10 @@ define([
                 }
             },
 
-            createDebuggableScript:function (root, script_id, text) {
+            createDebuggableScript:function (root, script_id, text, settings) {
                 var self = this;
                 try {
-                    var source = _.template.call(_, text).source;
+                    var source = _.template.call(_, text, undefined, settings).source;
                     var proxiedTemplateRef = '_t' + script_id;
                     var f = escape("window['" + proxiedTemplateRef + "']=" + source);
                     DOM.appendExternalScriptTagToHead(root.document,
@@ -197,7 +196,10 @@ define([
                     self.logError(e.detail.error);
                 });
                 root.addEventListener('Backbone_Eye:TEMPLATE:ADD', function (e) {
-                    self.createDebuggableScript(root, e.detail.script_id, e.detail.text);
+                    self.createDebuggableScript(root,
+                        e.detail.script_id,
+                        e.detail.text,
+                        e.detail.settings);
                 });
                 root.addEventListener('Backbone_Eye:TEMPLATE:INFER', function (e) {
                     self.inferScriptForView(e.detail.script_id);
