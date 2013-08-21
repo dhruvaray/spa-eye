@@ -11,6 +11,9 @@ define([
             "destroy":"row-error",
             "remove":"row-error",
             "sync":"row-success"
+        },
+        EntityType:{
+            Model:"Model", View:"View", Collection:"Collection"
         }
     };
 });

@@ -116,7 +116,7 @@
             (function (entity, proxy, proxyproto, operation) {
                 if (proxy) {
                     Backbone[entity] = function () {
-                        var event = new CustomEvent('Backbone_Eye:ADD', {'detail':{data:this}});
+                        var event = new CustomEvent('Backbone_Eye:ADD', {'detail':{data:this, entity_type:entity}});
                         root.dispatchEvent(event);
                         _.each(operation.instance, function (key) {
                             if (this[key]) {

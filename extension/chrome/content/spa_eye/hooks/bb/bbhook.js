@@ -23,6 +23,7 @@ define([
         const bbhook_wp = "chrome://spa_eye/content/hooks/bb/bbhook_wp.js";
 
         var Operation = Common.Operation;
+        var EntityType = Common.EntityType;
 
         var BBHook = function (obj) {
             this.context = null;
@@ -51,7 +52,7 @@ define([
                     self._current[entity_type] = entity;
                     if (!post) {
                         self._frame.push(entity);
-                        if (entity instanceof self.Backbone.Model) {
+                        if (entity_type === EntityType.Model) {
                             try {
                                 state = (typeof entity.attributes !== 'undefined') ?
                                     _.clone(entity.attributes) :
@@ -63,7 +64,7 @@ define([
                             state = entity.cid;
                         }
 
-                        self.recordSequenceEvent({
+                        self.recordSequenceEvent(entity_type, {
                             cid:entity.cid,
                             target:state,
                             operation:operation_type,
@@ -82,15 +83,15 @@ define([
                         }
 
                         if (Operation.DESTROY === operation_type || Operation.REMOVE === operation_type) {
-                            if (!(entity instanceof self.Backbone.Collection)) {
+                            if (!(entity_type === EntityType.Collection)) {
                                 entity.__mfd__ = true;
                                 self._deleted.push(entity.cid);
                             }
                         }
 
-                        if (entity instanceof self.Backbone.Model &&
-                                self.context.spa_eyeObj._mostused_models &&
-                                (Operation.SAVE === operation_type || Operation.SET === operation_type)) {
+                        if (entity_type === EntityType.Model &&
+                            self.context.spa_eyeObj._mostused_models &&
+                            (Operation.SAVE === operation_type || Operation.SET === operation_type)) {
                             self.context.spa_eyeObj._mostused_models.add(entity.cid, entity, operation_type);
                         }
 
@@ -165,14 +166,15 @@ define([
                 root.addEventListener('Backbone_Eye:ADD', function (e) {
 
                     var target = e.detail && e.detail.data;
+                    var entity_type = e.detail && e.detail.entity_type;
 
-                    if (target instanceof self.Backbone.View) {
+                    if (entity_type === EntityType.View) {
                         target.cid = target.cid || _.uniqueId('view');
                         self._views.push(_.extend(target, {__templates__:[], __mfd__:false}));
-                    } else if (target instanceof self.Backbone.Model) {
+                    } else if (entity_type === EntityType.Model) {
                         self._models.push(target);
                         target.cid = target.cid || _.uniqueId('c');
-                    } else if (target instanceof self.Backbone.Collection) {
+                    } else if (entity_type === EntityType.Collection) {
                         self._collections.push(target);
                         target.cid = target.cid || _.uniqueId('col');
                     }
@@ -229,7 +231,7 @@ define([
                 return root.Backbone;
             },
 
-            recordSequenceEvent:function (record) {
+            recordSequenceEvent:function (entity_type, record) {
 
                 if (!Firebug.Options.get("spa_eye.record")) return;
 
@@ -241,11 +243,16 @@ define([
                     var isNewInteractionCollection = (!this._sequence.Collection);
                     var isNewInteractionView = (!this._sequence.View);
 
-                    this._sequence.Model = this._sequence.Model || this._current.Model;
-                    this._sequence.Collection = this._sequence.Collection || this._current.Collection;
-                    this._sequence.View = this._sequence.View || this._current.View;
+                    this._sequence.Model = this._sequence.Model ||
+                    {entity:this._current.Model, entity_type:entity_type };
+                    this._sequence.Collection = this._sequence.Collection ||
+                    {entity:this._current.Collection, entity_type:entity_type };
+                    this._sequence.View = this._sequence.View ||
+                    {entity:this._current.View, entity_type:entity_type };
 
-                    _.each([this._sequence.Model, this._sequence.Collection, this._sequence.View], function (sr) {
+                    _.each([this._sequence.Model, this._sequence.Collection, this._sequence.View], function (seq_type) {
+                        var sr = seq_type.entity;
+                        var type = seq_type.entity_type;
                         if (sr && sr.cid) {
                             this._sequences[sr.cid] = this._sequences[sr.cid] || [];
                             var flows =
@@ -253,15 +260,12 @@ define([
                                     this._sequences[sr.cid].flows || []);
                             var isNewInteraction = false;
 
-                            if (sr instanceof this.Backbone.Model)
+                            if (type === EntityType.Model)
                                 isNewInteraction = isNewInteractionModel;
-                            else if (sr instanceof this.Backbone.Collection)
+                            else if (type === EntityType.Collection)
                                 isNewInteraction = isNewInteractionCollection;
-                            else if (sr instanceof this.Backbone.View)
+                            else if (type === EntityType.View)
                                 isNewInteraction = isNewInteractionView;
-                            else {
-                                return;
-                            }
 
                             isNewInteraction ? flows.push([record]) : flows[flows.length - 1].push(record);
                         }
