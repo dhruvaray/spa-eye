@@ -64,7 +64,7 @@ define([
                             state = entity.cid;
                         }
 
-                        self.recordSequenceEvent(entity_type, {
+                        self.recordSequenceEvent({
                             cid:entity.cid,
                             target:state,
                             operation:operation_type,
@@ -231,7 +231,7 @@ define([
                 return root.Backbone;
             },
 
-            recordSequenceEvent:function (entity_type, record) {
+            recordSequenceEvent:function (record) {
 
                 if (!Firebug.Options.get("spa_eye.record")) return;
 
@@ -239,16 +239,22 @@ define([
 
                     record.source = this._frame[this._frame.length - 2];
 
-                    var isNewInteractionModel = (!this._sequence.Model);
-                    var isNewInteractionCollection = (!this._sequence.Collection);
-                    var isNewInteractionView = (!this._sequence.View);
+                    var isNewInteractionModel = (!this._sequence.Model) || (!this._sequence.Model.entity);
+                    var isNewInteractionCollection = (!this._sequence.Collection) || (!this._sequence.Collection.entity);
+                    var isNewInteractionView = (!this._sequence.View) || (!this._sequence.View.entity);
 
-                    this._sequence.Model = this._sequence.Model ||
-                    {entity:this._current.Model, entity_type:entity_type };
-                    this._sequence.Collection = this._sequence.Collection ||
-                    {entity:this._current.Collection, entity_type:entity_type };
-                    this._sequence.View = this._sequence.View ||
-                    {entity:this._current.View, entity_type:entity_type };
+                    if ((!this._sequence.Model) || (!this._sequence.Model.entity)) {
+                        this._sequence.Model = {entity:this._current.Model, entity_type:EntityType.Model};
+                    }
+                    ;
+                    if ((!this._sequence.Collection) || (!this._sequence.Collection.entity)) {
+                        this._sequence.Collection = {entity:this._current.Collection, entity_type:EntityType.Collection};
+                    }
+                    ;
+                    if ((!this._sequence.View) || (!this._sequence.View.entity)) {
+                        this._sequence.View = {entity:this._current.View, entity_type:EntityType.View};
+                    }
+                    ;
 
                     _.each([this._sequence.Model, this._sequence.Collection, this._sequence.View], function (seq_type) {
                         var sr = seq_type.entity;
