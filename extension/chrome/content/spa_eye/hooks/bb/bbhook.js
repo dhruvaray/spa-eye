@@ -139,7 +139,7 @@ define([
                 try {
                     var source = _.template.call(_, text, undefined, settings).source;
                     var proxiedTemplateRef = '_t' + script_id;
-                    var f = escape("window['" + proxiedTemplateRef + "']=" + source);
+                    var f = encodeURIComponent("window['" + proxiedTemplateRef + "']=" + source);
                     DOM.appendExternalScriptTagToHead(root.document,
                         "data:text/javascript;fileName=" + script_id + ";," + f);
                     this._templates[script_id] = text;
