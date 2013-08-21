@@ -21,6 +21,7 @@ define([
         const Ci = Components.interfaces;
         const Cr = Components.results;
         const bbhook_wp = "chrome://spa_eye/content/hooks/bb/bbhook_wp.js";
+        const bbhook_template_engines = "chrome://spa_eye/content/hooks/bb/template_engines.js";
 
         var Operation = Common.Operation;
         var EntityType = Common.EntityType;
@@ -147,9 +148,13 @@ define([
                 }
             },
 
-            registerWPHooks:function (root) {
+            registerContentHooks:function (root) {
                 Firebug.CommandLine.evaluateInWebPage(
                     Http.getResource(bbhook_wp),
+                    this.context,
+                    root);
+                Firebug.CommandLine.evaluateInWebPage(
+                    Http.getResource(bbhook_template_engines),
                     this.context,
                     root);
             },
@@ -215,7 +220,7 @@ define([
                             this.root = root;
                             this.Backbone = root.Backbone;
                             this.Underscore = root._;
-                            this.registerWPHooks(root);
+                            this.registerContentHooks(root);
                             if (FBTrace.DBG_SPA_EYE) {
                                 FBTrace.sysout("spa_eye; Successfully registered Backbone hooks for spa-eye module");
                             }
@@ -247,13 +252,16 @@ define([
 
                     if ((!this._sequence.Model) || (!this._sequence.Model.entity)) {
                         this._sequence.Model = {entity:this._current.Model, entity_type:EntityType.Model};
-                    };
+                    }
+                    ;
                     if ((!this._sequence.Collection) || (!this._sequence.Collection.entity)) {
                         this._sequence.Collection = {entity:this._current.Collection, entity_type:EntityType.Collection};
-                    };
+                    }
+                    ;
                     if ((!this._sequence.View) || (!this._sequence.View.entity)) {
                         this._sequence.View = {entity:this._current.View, entity_type:EntityType.View};
-                    };
+                    }
+                    ;
 
                     _.each([this._sequence.Model, this._sequence.Collection, this._sequence.View], function (seq_type) {
                         var sr = seq_type.entity;
