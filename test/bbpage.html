@@ -1,0 +1,22 @@
+<html>
+    <head>
+        <title>Backbone hook</title>
+        <script src="_vendor/underscore.js"></script>
+        <script src="_vendor/backbone.js"></script>
+    </head>
+    <body>
+        <button id="createModelButton" onclick="onCreateModel()">Create Model</button>
+        <script type="text/javascript">
+            var number = 1;
+            function onCreateModel(){
+                var model = new Backbone.Model({
+                    name: number++,
+                    createdOn: new Date().getTime()
+                });
+                console.log("cid:"+model.cid);
+                console.log(model);
+                return model;
+            }
+        </script>
+    </body>
+<html>
