@@ -53,7 +53,6 @@
     color: #468847;
     background-color: #dff0d8;
     border-color: #d6e9c6;
-:
 }
 
 .row-error {
@@ -90,7 +89,7 @@
     right: 0;
     position: absolute;
     padding: 10px 10px 0px 90px;
-    background: #FFFFFF url(chrome://spa_eye/skin/spa/backbone.png) no-repeat 30px 30px;
+    background: #FFFFFF url(chrome://spa_eye/skin/spa/backbone.svg) no-repeat 30px 30px;
     color: #000000;
     font: message-box;
 }
