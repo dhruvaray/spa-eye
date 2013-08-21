@@ -10,9 +10,25 @@ For details on how to download and use the extension, go to http://dhruvaray.git
 
 ### Want to build the latest?
 
-Clone the repository and run ant. This will create the xpi in the releases folder. Install the extension from the file and restart Firefox.
+1.  Clone the repository
+  
+    ```sh
+    git clone https://github.com/dhruvaray/spa-eye.git
+    cd spa-eye
+    ```
+  
+2.  Build
+    
+    Using Node.js ( **Recommended** )
+    ```sh
+    node build.js
+    ```
+    **OR**
 
-
-
-
-
+    Using Apache Ant
+    ```sh
+    ant
+    ```
+    This step will create the `xpi` file in the releases folder.
+    
+3.  Install the extension from the file and restart Firefox.
