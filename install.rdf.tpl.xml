@@ -21,6 +21,7 @@
         <em:name>SPA-eye</em:name>
         <em:description>Firebug Extension to debug Backbone applications</em:description>
         <em:homepageURL>http://dhruvaray.github.io/spa-eye</em:homepageURL>
+        <em:iconURL>chrome://spa_eye/skin/spa/backbone.svg</em:iconURL>
         <!--<em:updateURL>http://dhruvaray.github.io/spa-eye/releases/@VERSION@/update.rdf</em:updateURL> -->
 
         <em:creator>Dhruva Ray</em:creator>
