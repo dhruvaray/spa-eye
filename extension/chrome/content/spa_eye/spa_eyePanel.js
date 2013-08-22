@@ -139,8 +139,25 @@ define([
                 var scriptPanel = this.context.getPanel('script'),
                     hooked = this.context.spa_eyeObj.hooked();
 
-                var warn = !(hooked && scriptPanel && !scriptPanel.showWarning());
-                return warn ? this.showNotHooked() : false;
+                if (!(hooked && scriptPanel && !scriptPanel.showWarning())) {
+                    return this.showNotHooked();
+                } else {
+                    try {
+                        var v = Firebug.getVersion().split('.');
+                        if (parseInt(v[0], 10) === 1 && parseInt(v[1], 10) < 11) {
+                            return this.showFirebugUpgrade();
+                        }
+                    } catch (e) {}
+                }
+                return false;
+            },
+
+            showFirebugUpgrade:function () {
+                var args = {
+                    pageTitle:Locale.$STR("spa_eye.warning.upgrade_firebug"),
+                    suggestion:Locale.$STR("spa_eye.suggestion.upgrade_firebug")
+                };
+                return this.WarningRep.tag.replace(args, this.panelNode);
             },
 
             showNotHooked:function () {
