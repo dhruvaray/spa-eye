@@ -3,7 +3,7 @@ function createModel(win) {
     var config = {tagName: "div", classes: "logRow logRow-log"};
     FBTest.waitForDisplayedElement("console", config, function(row) {
         FBTest.ok(/cid:c(\d+)/.test(row.textContent), "The model cid must be displayed.");
-        FBTest.testDone("BBHook.DONE"); 
+        FBTest.testDone("BBHook.DONE");
     });
     FBTest.click(win.document.getElementById("createModelButton"));
 }
