@@ -12,11 +12,11 @@ For technical details on how to compile the extension, add test cases etc, go to
 
 ###Thanks
 * Backbone Eye [contributors](https://github.com/dhruvaray/spa-eye/graphs/contributors)!
-* The awesome folks @ the [Firebug forum](https://groups.google.com/forum/#!forum/firebug)
+* The awesome folks @ the [Firebug forum](https://groups.google.com/forum/#!forum/firebug).
 * The awesome [Firebug](https://github.com/firebug/firebug) code. Even better than the available documentation!
 * [js-sequence diagrams](https://github.com/bramp/js-sequence-diagrams) for interaction trails.
 * [icoMoon - free version](http://icomoon.io/#icons) for our extension icons.
-* The [todomvc](http://todomvc.com/) site for providing (sexy looking) reference examples and (is also used in our documentation)
+* The [todomvc](http://todomvc.com/) site for providing (sexy looking) reference examples and is also used as a reference example in our documentation.
 
 
 
