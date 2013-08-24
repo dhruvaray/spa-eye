@@ -59,6 +59,12 @@ define([
                 this.plates.collection = new CollectionPlate(args);
                 this.plates.view = new ViewPlate(args);
                 this.plates.zombie = new ZombiePlate(args);
+
+                // set currentPlate
+                var spObj = this.context.spa_eyeObj;
+                if (spObj && spObj.currentPlate) {
+                    this.currentPlate = spObj.currentPlate;
+                }
             },
 
             onBackboneLoaded:function () {
@@ -251,11 +257,10 @@ define([
                 });
                 chrome.$('spa_eye_panel_button_' + cpName).checked = true;
 
-                this.currentPlate = cpName;
+                this.context.spa_eyeObj.currentPlate = this.currentPlate = cpName;
 
                 listener.addListener(this.getCurrentPlate());
                 this.getCurrentPlate().render();
-
             },
 
             toggleRecord:function () {

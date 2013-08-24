@@ -44,12 +44,16 @@ define([
                             spObj._spaHook,
                             context.window.wrappedJSObject);
                     }
+                    spObj.currentPlate = persistedState.currentPlate;
                 }
             },
 
             // Called when a context is destroyed. Module may store info on persistedState
             // for reloaded pages.
             destroyContext:function (context, persistedState) {
+                // Record persistedState for currentPlate
+                persistedState.currentPlate = context.spa_eyeObj.currentPlate;
+
                 context.spa_eyeObj._spaHook.cleanup();
                 if (FBTrace.DBG_SPA_EYE) {
                     FBTrace.sysout("spa_eye; Successfully emptied maintenance collections for spa-eye module.");

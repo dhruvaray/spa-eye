@@ -9,6 +9,8 @@ define([
     function (FBL, FBTrace, Locale, Events) {
 
         var spa_eyeObj = function (initObj) {
+            this.currentPlate = null;
+
             this._currentSynced = {};
             this._pinned_models = {};
             this._spaHook = null;
