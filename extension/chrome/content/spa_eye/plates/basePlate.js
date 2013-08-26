@@ -45,12 +45,20 @@ define([
                 });
                 setTimeout(function(){
                     ModelReps.DirTablePlate.tag.replace(args, self.parent.panelNode);
-
-                    if (!self.context.spa_eyeObj.selectedEntity) {
-                        var firstRow = self.parent.panelNode.getElementsByClassName("0level").item(0);
-                        return ModelReps.selectRow(firstRow, self);
-                    }
                     loading.destroy();
+
+                    var sRow = null;
+                    var sEntity = self.context.spa_eyeObj.selectedEntity;
+                    if (!sEntity) {
+                        sRow = self.parent.panelNode.getElementsByClassName("0level").item(0);
+                    } else {
+                        sRow = self.parent
+                                .panelNode
+                                .getElementsByClassName("0level " + (sEntity.cid || ''))
+                                .item(0);
+                    }
+                    sRow && ModelReps.selectRow(sRow, self);
+
                 }, 10);
             },
 
@@ -168,6 +176,7 @@ define([
                 if (type &&
                     this.spa_eyeObj._spaHook.Backbone[type] &&
                     (bbentity instanceof this.spa_eyeObj._spaHook.Backbone[type])) {
+
                     this.sections && this.sections.forEach(function (section) {
                         section._onRowAdd(bbentity, {type:Common.OperationClass[operation]});
                     }, this);
