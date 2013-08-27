@@ -13,6 +13,7 @@ define([
     "firebug/dom/domEditor",
 
     "spa_eye/lib/require/underscore",
+    "spa_eye/util/common",
     "spa_eye/panels/basePanel",
     "spa_eye/plates/modelPlate",
     "spa_eye/plates/collectionPlate",
@@ -20,7 +21,7 @@ define([
     "spa_eye/plates/zombiePlate",
     "spa_eye/panels/basePanel"
 ],
-    function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, Toolbar, DOMEditor, _, BasePanel, ModelPlate, CollectionPlate, ViewPlate, ZombiePlate) {
+    function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, Toolbar, DOMEditor, _, Common, BasePanel, ModelPlate, CollectionPlate, ViewPlate, ZombiePlate) {
 
         var childPlate = {
             MODEL:'model',
@@ -289,6 +290,17 @@ define([
 
             getCurrentPlate:function (plateName) {
                 return this.plates[plateName || this.currentPlate];
+            },
+
+            getOptionsMenuItems:function () {
+                var versionLabel = Locale.$STR('spa_eye.about')
+                    .replace('$VERSION$', Common.getVersion("chrome://spa_eye/content/build.properties"));
+                return [
+                    {
+                        label: versionLabel,
+                        nol10n:true
+                    }
+                ];
             },
 
             optionMenu:function (label, option) {

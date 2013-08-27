@@ -110,6 +110,13 @@ function build(destination) {
             return data.replace(/@VERSION@/gm, version);
         }
     );
+    copy(
+        path.join(buildDir, "chrome/content/spa_eye/build.properties"),
+        path.join(buildDir, "chrome/content/spa_eye/build.properties"),
+        function (data) {
+            return data.replace(/@VERSION@/gm, version);
+        }
+    );
 
     // Create XPI (zipping is asynchronous)
     var leaf = "spa_eye-" + version + ".xpi";
@@ -175,6 +182,7 @@ function prepareBuild() {
 
     copyDir(extensionDir, buildDir);
     copy("install.rdf.tpl.xml", path.join(buildDir, "install.rdf"));
+    copy("build.properties.tpl", path.join(buildDir, "chrome/content/spa_eye/build.properties"));
 }
 
 // ********************************************************************************************* //
