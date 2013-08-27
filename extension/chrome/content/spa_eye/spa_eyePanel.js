@@ -44,6 +44,7 @@ define([
 
             currentPlate:childPlate.MODEL,
             plates:null,
+            logger:null,
 
             initialize:function () {
                 this._super.apply(this, arguments);
@@ -106,13 +107,15 @@ define([
                             });
                         }
                         this.activated = true;
+                        this.logger = this.context.getPanel("spa_eye:logs");
                     }
-
                 } else {
                     this.cleanup();
                     Dom.collapse(panelToolbar, true);
                     this.activated = false;
                 }
+                this.logger && this.logger.show();
+
             },
 
             onActivationChanged:function (enable) {
@@ -123,6 +126,7 @@ define([
                         Firebug.currentContext.window.wrappedJSObject
                     );
                 } else {
+
                     Firebug.spa_eyeModule.removeObserver(this);
                 }
             },
@@ -153,7 +157,8 @@ define([
                         if (parseInt(v[0], 10) === 1 && parseInt(v[1], 10) < 11) {
                             return this.showFirebugUpgrade();
                         }
-                    } catch (e) {}
+                    } catch (e) {
+                    }
                 }
                 return false;
             },

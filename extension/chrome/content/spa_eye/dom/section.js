@@ -114,7 +114,7 @@ define([
                 if (!found && options.autoAdd) {
                     var obj = {};
                     obj[model.cid] = model;
-                    var members = ModelReps.DirTablePlate.memberIterator({data: obj, section: this});
+                    var members = ModelReps.DirTablePlate.memberIterator({data:obj, section:this});
                     var result = ModelReps.DirTablePlate.rowTag.insertRows({members:members}, tbody);
                     var row = result[0];
                     ModelReps.highlightRow(row, options.type || 'row-warning');
@@ -127,10 +127,11 @@ define([
             },
 
             _onRowRemove:function (model) {
-                if (!model) return;
 
                 // Get section body
                 var tbody = this.getBody();
+
+                if (!model || !tbody) return;
 
                 // All rows from this section
                 var rows = tbody.getElementsByClassName('0level ' + (model.cid + ''));
@@ -161,7 +162,8 @@ define([
                     // Remove model from section
                     try {
                         this.onRowRemove && this.onRowRemove(model);
-                    } catch (e) {}
+                    } catch (e) {
+                    }
                 }
 
                 return model;
