@@ -44,7 +44,7 @@ define([
                             spObj._spaHook,
                             context.window.wrappedJSObject);
                     }
-                    spObj.currentPlate = persistedState.currentPlate;
+                    persistedState && (spObj.currentPlate = persistedState.currentPlate);
                 }
             },
 

@@ -1,5 +1,3 @@
-
-
 /*************************************************************************************************/
 
 /* Firebug Tracing Console customization. All messages from this example use this color.
@@ -14,4 +12,18 @@
 
 .hide {
     display: none;
+}
+
+/* Splitter */
+
+.topPane {
+    height: 50%;
+    pointer-events: none
+}
+
+.spa_eye_resizer {
+    width: 100%;
+    height: 5px;
+    background-color: lightgrey;
+    cursor: ns-resize;
 }

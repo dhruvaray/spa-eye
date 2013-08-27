@@ -8,23 +8,23 @@
         <em:version>@VERSION@</em:version>
         <em:type>2</em:type>
         <em:bootstrap>true</em:bootstrap>
-       
+
         <!-- Firefox -->
         <em:targetApplication>
-          <Description>
-            <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
-            <em:minVersion>23.0</em:minVersion>
-            <em:maxVersion>24.0</em:maxVersion>
-          </Description>
+            <Description>
+                <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+                <em:minVersion>23.0</em:minVersion>
+                <em:maxVersion>24.0</em:maxVersion>
+            </Description>
         </em:targetApplication>
 
-        <em:name>SPA-eye</em:name>
+        <em:name>Backbone Eye</em:name>
         <em:description>Firebug Extension to debug Backbone applications</em:description>
         <em:homepageURL>http://dhruvaray.github.io/spa-eye</em:homepageURL>
         <em:iconURL>chrome://spa_eye/skin/spa/backbone.svg</em:iconURL>
         <!--<em:updateURL>http://dhruvaray.github.io/spa-eye/releases/@VERSION@/update.rdf</em:updateURL> -->
 
         <em:creator>Dhruva Ray</em:creator>
-        <em:creator>Jaynti Kanani</em:creator>        
+        <em:creator>Jaynti Kanani</em:creator>
     </Description>
 </RDF>

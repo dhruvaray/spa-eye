@@ -8,13 +8,14 @@ define([
     "firebug/lib/css",
     "firebug/lib/events",
     "firebug/chrome/reps",
+    "firebug/lib/dragdrop",
 
     "spa_eye/dom/section",
     "spa_eye/dom/modelReps",
     "spa_eye/dom/domReps",
     "spa_eye/panels/basePanel"
 ],
-    function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, FirebugReps, ChildSection, ModelReps, DOMReps, BasePanel) {
+    function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, FirebugReps, DragDrop, ChildSection, ModelReps, DOMReps, BasePanel) {
 
         var eventPanel = Firebug.eventPanel = BasePanel.extend({
             name:"spa_eye:event",
@@ -29,12 +30,19 @@ define([
             initialize:function () {
                 this._super.apply(this, arguments);
                 this.timeline.TIMELINE.replace({object:[]}, this.panelNode);
+                this.timeline.RESIZER.append({}, this.panelNode);
                 this.timeline.TABLE.append({}, this.panelNode);
                 this.timeline.tag.append({sections:[], mainPanel:this.panelNode}, this.panelNode.lastChild);
                 this.sequenceEditor = this.panelNode.firstChild.contentWindow;
                 var self = this;
                 this.panelNode.firstChild.onload = function () {
                     self.show();
+                    var resizer = self.panelNode.querySelector(".spa_eye_resizer");
+                    new DragDrop.Tracker(resizer, {
+                        onDragStart:Obj.bind(self.onDragStart, self),
+                        onDragOver:Obj.bind(self.onDragOver, self),
+                        onDrop:Obj.bind(self.onDrop, self)
+                    });
                 }
             },
 
@@ -111,7 +119,38 @@ define([
 
                     this.timeline.tag.replace(args, this.panelNode.lastChild);
                 }
+            },
+
+
+            // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+            // Splitter
+
+            onDragStart:function (tracker) {
+                var body = Dom.getBody(this.document);
+                body.setAttribute("resizingHtmlPreview", "true");
+
+                var topPane = this.panelNode.querySelector(".topPane");
+                this.startHeight = topPane.clientHeight;
+            },
+
+            onDragOver:function (newPos, tracker) {
+                var body = Dom.getBody(this.document);
+                if (body.getAttribute("resizingHtmlPreview")) {
+                    var newHeight = (this.startHeight + newPos.y);
+                    var topPane = this.panelNode.querySelector(".topPane");
+                    if (this.panelNode.clientHeight) {
+                        topPane.style.height = (newHeight / this.panelNode.clientHeight) * 100 + "%";
+                    }
+                }
+            },
+
+            onDrop:function (tracker) {
+                var body = Dom.getBody(this.document);
+                body.removeAttribute("resizingHtmlPreview");
             }
+            // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+
         });
 
         with (Domplate) {
@@ -120,11 +159,13 @@ define([
                     width:"100%",
                     name:"timeline",
                     id:"timeline",
-                    height:"50%",
-                    frameborder:"0"
+                    frameborder:"0",
+                    class:"topPane"
                 }),
 
-                TABLE:DIV({width:"100%", height:"50%"})
+                RESIZER:DIV({"class":"spa_eye_resizer"}),
+
+                TABLE:DIV({width:"100%"})
             });
         }
 

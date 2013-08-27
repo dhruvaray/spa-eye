@@ -97,7 +97,8 @@ define([
                 // Panel focus
                 this.onPanelFocus = this.onPanelFocus.bind(this);
                 Events.addEventListener(this.panelNode, "mousedown", this.onPanelFocus, true);
-                this.lazyEventProcessing = _.debounce(this.eventProcessing, 1000)
+                //this.lazyEventProcessing = _.debounce(this.eventProcessing, 1000);
+                this.lazyEventProcessing = this.eventProcessing;
             },
 
             destroy:function () {
