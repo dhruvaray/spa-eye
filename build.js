@@ -3,7 +3,7 @@
 var http = require("http"),
     path = require("path"),
     fs = require("fs");
-    url = require("url"),
+url = require("url"),
     os = require("os"),
     exec = require("child_process").exec;
 
@@ -25,7 +25,7 @@ var buildDir = "./build",
 
 // ********************************************************************************************* //
 
-function help () {
+function help() {
     console.log('Usage:');
     console.log('');
     console.log('1. In order to build `spa_eye` xpi run:');
@@ -57,7 +57,7 @@ function help () {
 
 // ********************************************************************************************* //
 
-function main () {
+function main() {
     if (!version) return;
     var args = process.argv;
 
@@ -97,7 +97,7 @@ function main () {
  * Build Firebug XPI
  */
 
-function build (destination) {
+function build(destination) {
     console.log("Version: " + version);
     clean();
     prepareBuild();
@@ -130,7 +130,7 @@ function build (destination) {
                 }
             );
             clean();
-            console.log("spa-eye version: " + version + " in "+ destination);
+            console.log("spa-eye version: " + version + " in " + destination);
         }
     );
 }
@@ -143,14 +143,14 @@ function showError(err, stdout, stderr) {
     err && console.log(err);
 }
 
-function createFirebugXPI (filename, callback) {
+function createFirebugXPI(filename, callback) {
     // Create final XPI package.
     var zip = null;
     rm(filename);
     if (os.platform() === "win32") {
         zip = exec("7z.exe a -tzip " + filename + " " + buildDir + "/* ", showError);
     } else {
-        zip = exec("zip -r ../" + filename + " * ", { cwd: buildDir }, showError);
+        zip = exec("zip -r ../" + filename + " * -x  '*.DS_Store'", { cwd:buildDir }, showError);
     }
 
     if (zip) {
@@ -164,11 +164,11 @@ function createFirebugXPI (filename, callback) {
 
 // ********************************************************************************************* //
 
-function clean () {
+function clean() {
     rmDir(buildDir);
 }
 
-function prepareBuild () {
+function prepareBuild() {
     mkdir(buildDir);
     mkdir(releaseDir);
     mkdir(nightlyDir);
@@ -181,11 +181,11 @@ function prepareBuild () {
 // Test case
 // ********************************************************************************************* //
 
-function runTest (profile, callback) {
+function runTest(profile, callback) {
     var command = "firefox -P " + profile + " -runFBTests --no-remote " + testUrl;
     var testInstance = exec(command, showError);
     if (testInstance) {
-        testInstance.on("exit", function(){
+        testInstance.on("exit", function () {
             callback && callback();
         });
     } else {
@@ -197,20 +197,20 @@ function runTest (profile, callback) {
 // Simple HTTP Server
 // ********************************************************************************************* //
 
-function startServer () {
-    http.createServer(function(request, response) {
+function startServer() {
+    http.createServer(function (request, response) {
         var uri = url.parse(request.url).pathname,
             filename = path.join(process.cwd(), uri);
 
         var contentTypesByExtension = {
-            '.html': "text/html",
-            '.css':  "text/css",
-            '.js':   "text/javascript"
+            '.html':"text/html",
+            '.css':"text/css",
+            '.js':"text/javascript"
         };
 
-        fs.exists(filename, function(exists) {
-            if(!exists) {
-                response.writeHead(404, {"Content-Type": "text/plain"});
+        fs.exists(filename, function (exists) {
+            if (!exists) {
+                response.writeHead(404, {"Content-Type":"text/plain"});
                 response.write("404 Not Found\n");
                 response.end();
                 return;
@@ -218,9 +218,9 @@ function startServer () {
 
             if (fs.statSync(filename).isDirectory()) filename += '/index.html';
 
-            fs.readFile(filename, "utf8", function(err, file) {
-                if(err) {
-                    response.writeHead(500, {"Content-Type": "text/plain"});
+            fs.readFile(filename, "utf8", function (err, file) {
+                if (err) {
+                    response.writeHead(500, {"Content-Type":"text/plain"});
                     response.write(err + "\n");
                     response.end();
                     return;
@@ -244,7 +244,7 @@ function startServer () {
 // Utils
 // ********************************************************************************************* //
 
-function getGitRevision (callback) {
+function getGitRevision(callback) {
     exec("git describe --tags --always HEAD", function (err, stdout, stderr) {
         if (err) {
             throw err;
@@ -253,7 +253,7 @@ function getGitRevision (callback) {
     });
 }
 
-function rm (path) {
+function rm(path) {
     try {
         fs.unlinkSync(path);
     } catch (e) {
@@ -263,7 +263,7 @@ function rm (path) {
     }
 }
 
-function mkdir (dir) {
+function mkdir(dir) {
     try {
         fs.mkdirSync(dir, 0755);
     } catch (e) {
@@ -273,7 +273,7 @@ function mkdir (dir) {
     }
 }
 
-function rmDir (dir) {
+function rmDir(dir) {
     var files = [];
     try {
         files = fs.readdirSync(dir);
@@ -296,16 +296,16 @@ function rmDir (dir) {
     fs.rmdirSync(dir);
 }
 
-function copyDir (src, dest) {
+function copyDir(src, dest) {
     mkdir(dest);
     var files = fs.readdirSync(src);
-    for(var i = 0; i < files.length; i++) {
+    for (var i = 0; i < files.length; i++) {
         var f = files[i],
             sPath = path.join(src, f),
             dPath = path.join(dest, f),
             current = fs.lstatSync(sPath);
 
-        if(current.isDirectory()) {
+        if (current.isDirectory()) {
             copyDir(sPath, dPath);
         } else {
             copy(sPath, dPath);
@@ -313,7 +313,7 @@ function copyDir (src, dest) {
     }
 }
 
-function copy (src, dest, filter) {
+function copy(src, dest, filter) {
     var data = fs.readFileSync(src, 'utf-8');
     filter && (data = filter(data));
     fs.writeFileSync(dest, data);
