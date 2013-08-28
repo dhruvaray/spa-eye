@@ -1,6 +1,7 @@
 define([
-    "firebug/lib/http"
-], function (Http) {
+    "firebug/lib/http",
+    "firebug/lib/locale"
+], function (Http, Locale) {
     return {
         Operation:{
             SAVE:"save", FETCH:"fetch", SET:"set", UNSET:"unset", CLEAR:"clear", RENDER:"render", ADD:"add",
@@ -16,7 +17,7 @@ define([
             Model:"Model", View:"View", Collection:"Collection"
         },
         getVersion:function (versionURL) {
-            var version = '';
+            var version = Locale.$STR("spa_eye.version.custom");
             var content = Http.getResource(versionURL);
             if (content) {
                 var m = /VERSION=(.*)/.exec(content);
