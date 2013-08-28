@@ -2,8 +2,8 @@
 
 var http = require("http"),
     path = require("path"),
-    fs = require("fs");
-url = require("url"),
+    fs = require("fs"),
+    url = require("url"),
     os = require("os"),
     exec = require("child_process").exec;
 
