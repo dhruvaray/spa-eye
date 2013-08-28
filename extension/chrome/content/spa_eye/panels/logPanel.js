@@ -23,6 +23,12 @@ define([
             parentPanel:"spa_eye",
             tag:DOMReps.DirTablePlate.tag,
             order:2,
+            panelBar:null,
+
+            initialize:function () {
+                this._super.apply(this, arguments);
+                this.panelBar = Firebug.chrome.$("fbPanelBar2");
+            },
 
             onIntrospectionError:function () {
                 this.show();
@@ -33,16 +39,14 @@ define([
                 var result = spa_eyeObj._spaHook.errors();
                 if (result.length) {
                     this.title = Locale.$STR("spa_eye.logs.title") + " (" + result.length + ")";
-
-                    //clunky + cache : https://groups.google.com/forum/#!topic/firebug/SVPiRHku_IU
-                    var panelBar = Firebug.chrome.$("fbPanelBar2");
-                    var tab = panelBar.getTab(this.name);
-                    tab.setAttribute("label", this.title);
-                    //end clunky
-
                     this.tag.replace({object:result}, this.panelNode);
-                } else
+                }
+                else {
+                    this.title = Locale.$STR("spa_eye.logs.title");
                     FirebugReps.Warning.tag.replace({object:"spa_eye.logs.noerror"}, this.panelNode);
+                }
+                var tab = this.panelBar.getTab(this.name);
+                tab && tab.setAttribute("label", this.title);
             }
 
 

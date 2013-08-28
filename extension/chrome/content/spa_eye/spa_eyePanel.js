@@ -282,6 +282,8 @@ define([
 
             cleanup:function () {
                 this.context.spa_eyeObj.cleanup();
+                var eyelogs = this.context.getPanel("spa_eye:logs");
+                eyelogs && eyelogs.show();
             },
 
             resetTrackingData:function () {
@@ -297,7 +299,7 @@ define([
                     .replace('$VERSION$', Common.getVersion("chrome://spa_eye/content/build.properties"));
                 return [
                     {
-                        label: versionLabel,
+                        label:versionLabel,
                         nol10n:true
                     }
                 ];
