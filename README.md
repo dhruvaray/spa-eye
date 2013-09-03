@@ -12,6 +12,8 @@ For technical details on how to compile the extension, add test cases etc, go to
 ###Download
 This extension has been being submitted to Mozilla for a complete review. The direct link to download from the add-ons store is : https://addons.mozilla.org/en-US/firefox/addon/Backbone-Eye/
 
+If Backbone Eye is useful in your work, do show your appreciation and encouragement by starring this repo!
+
 
 
 ###Thanks
