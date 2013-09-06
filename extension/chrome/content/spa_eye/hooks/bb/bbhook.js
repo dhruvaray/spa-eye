@@ -357,7 +357,8 @@ define([
 
             logError:function (e) {
                 this._errors.push(e);
-                Events.dispatch([this.context.getPanel("spa_eye:logs")], 'onIntrospectionError', [e]);
+                var eye_logs = this.context.getPanel("spa_eye:logs");
+                eye_logs && Events.dispatch([eye_logs], 'onIntrospectionError', [e]);
                 if (FBTrace.DBG_SPA_EYE) {
                     FBTrace.sysout("spa_eye; Unexpected error", e);
                 }
