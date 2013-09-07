@@ -74,6 +74,9 @@ define([
             },
 
             show:function (state) {
+
+                if (Firebug.chrome.getSelectedPanel() != this) return;
+
                 var enabled = this.isEnabled();
                 if (!enabled) return;
 

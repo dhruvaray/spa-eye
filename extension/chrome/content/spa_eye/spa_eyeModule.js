@@ -61,8 +61,7 @@ define([
 
                             if (flag & STATE_IS_REQUEST && flag & STATE_START) {
                                 // We need to get the hook in as soon as the new DOMWindow is created, but before
-                                // it starts executing any scripts in the page.  After lengthy analysis, it seems
-                                // that the start of these "dummy" requests is the only state that works.
+                                // it starts executing any scripts in the page.
                                 var win = progress.DOMWindow;
                                 if (win.parent != win)//child window
                                     context.spa_eyeObj._spaHook.registerContentLoadedHook(win.wrappedJSObject);
@@ -85,6 +84,7 @@ define([
                     FBTrace.sysout("spa_eye; Successfully emptied maintenance collections for spa-eye module.");
                 }
             }
+
         });
 
         Firebug.registerStringBundle("chrome://spa_eye/locale/spa_eye.properties");
