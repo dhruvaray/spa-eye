@@ -52,6 +52,8 @@ define([
 
         });
 
+        Firebug.registerPanel(Firebug.logPanel);
+
         return Firebug.logPanel;
 
     });

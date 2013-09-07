@@ -19,7 +19,12 @@ define([
     "spa_eye/plates/collectionPlate",
     "spa_eye/plates/viewPlate",
     "spa_eye/plates/zombiePlate",
-    "spa_eye/panels/basePanel"
+    "spa_eye/panels/basePanel",
+
+    "spa_eye/panels/viewPanel",
+    "spa_eye/panels/auditPanel",
+    "spa_eye/panels/eventPanel",
+    "spa_eye/panels/logPanel"
 ],
     function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, Toolbar, DOMEditor, _, Common, BasePanel, ModelPlate, CollectionPlate, ViewPlate, ZombiePlate) {
 
@@ -45,7 +50,6 @@ define([
 
             currentPlate:childPlate.MODEL,
             plates:null,
-            logger:null,
 
             initialize:function () {
                 this._super.apply(this, arguments);
@@ -81,44 +85,27 @@ define([
                 if (!enabled) return;
 
                 var active = !this.showWarning();
+
                 var panelToolbar = Firebug.chrome.$("fbPanelToolbar");
+                var panelSplitter = Firebug.chrome.$("fbPanelSplitter");
+                var sidePanelDeck = Firebug.chrome.$("fbSidePanelDeck");
+                var toolbar = Firebug.chrome.$("fbToolbar");
+                var logger = this.context.getPanel("spa_eye:logs");
+
+                Dom.collapse(panelToolbar, !active);
 
                 if (active) {
-                    var buttons = this.getSPA_EyeToolbar();
-                    for (var i = 0; i < buttons.length; ++i)
-                        Toolbar.createToolbarButton(panelToolbar, buttons[i]);
-
                     this.selectChildPlate();
-                    Dom.collapse(panelToolbar, false);
-
-                    if (!this.activated) {
-                        var self = this;
-
-                        var sidePanelsLoaded = Firebug.auditPanel || Firebug.viewPanel || Firebug.eventPanel;
-
-                        if (!sidePanelsLoaded) {
-                            define([
-                                "spa_eye/panels/viewPanel",
-                                "spa_eye/panels/auditPanel",
-                                "spa_eye/panels/eventPanel",
-                                "spa_eye/panels/logPanel"
-                            ], function (ViewPanel, AuditPanel, EventPanel, LogPanel) {
-                                Firebug.registerPanel(Firebug.auditPanel);
-                                Firebug.registerPanel(Firebug.eventPanel);
-                                Firebug.registerPanel(Firebug.logPanel);
-                                Firebug.registerPanel(Firebug.viewPanel);
-                                Events.dispatch(Firebug.uiListeners, "updateSidePanels", [self]);
-                            });
-                        }
-                        this.activated = true;
-                        this.logger = this.context.getPanel("spa_eye:logs");
-                    }
                 } else {
                     this.cleanup();
-                    Dom.collapse(panelToolbar, true);
-                    this.activated = false;
                 }
-                this.logger && this.logger.show();
+
+                logger && logger.show();
+
+                // Additional panels are shown only if active.
+                Dom.collapse(toolbar, !active);
+                panelSplitter.collapsed = !active;
+                sidePanelDeck.collapsed = !active;
 
             },
 
@@ -190,7 +177,7 @@ define([
                         Firebug.currentContext));
             },
 
-            getSPA_EyeToolbar:function () {
+            getPanelToolbarButtons:function () {
 
                 var buttons = [];
 
@@ -249,7 +236,9 @@ define([
                         command:FBL.bindFixed(this.selectChildPlate, this, childPlate.ZOMBIE)
                     }
                 );
+
                 return buttons;
+
             },
 
             selectChildPlate:function (cpName) {
