@@ -1,7 +1,9 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/lib/object",
     "firebug/firebug",
+    "firebug/lib/http",
     "firebug/lib/lib",
     "firebug/lib/trace",
     "firebug/lib/locale",
@@ -13,7 +15,15 @@ define([
     "spa_eye/spa_eyeObj",
     "spa_eye/dom/keyPanel"
 ],
-    function (Firebug, FBL, FBTrace, Locale, Events, BBHook, Common, spa_eyeObj, KeyPanel) {
+    function (Obj, Firebug, Http, FBL, FBTrace, Locale, Events, BBHook, Common, spa_eyeObj, KeyPanel) {
+
+        const Cc = Components.classes;
+        const Ci = Components.interfaces;
+        const Cr = Components.results;
+
+        const nsIWebProgressListener = Ci.nsIWebProgressListener;
+        const STATE_IS_REQUEST = nsIWebProgressListener.STATE_IS_REQUEST;
+        const STATE_START = nsIWebProgressListener.STATE_START;
 
         Firebug.spa_eyeModule = FBL.extend(Firebug.ActivableModule, {
 
@@ -30,7 +40,7 @@ define([
             // Called when a new context is created but before the page is loaded.
             initContext:function (context, persistedState) {
                 // Initializing hooks
-                if (!context.spa_eye) {
+                if (!context.spa_eyeObj) {
                     var spObj = context.spa_eyeObj = new spa_eyeObj({
                         context:context
                     });
@@ -45,6 +55,21 @@ define([
                             context.window.wrappedJSObject);
                     }
                     persistedState && (spObj.currentPlate = persistedState.currentPlate);
+                    context.browser.addProgressListener(Obj.extend(Http.BaseProgressListener, {
+
+                        onStateChange:function (progress, request, flag, status) {
+
+                            if (flag & STATE_IS_REQUEST && flag & STATE_START) {
+                                // We need to get the hook in as soon as the new DOMWindow is created, but before
+                                // it starts executing any scripts in the page.
+                                var win = progress.DOMWindow;
+                                if (win.parent != win)//child window
+                                    context.spa_eyeObj._spaHook.registerContentLoadedHook(win.wrappedJSObject);
+                            }
+                            return;
+
+                        }
+                    }));
                 }
             },
 
@@ -59,6 +84,7 @@ define([
                     FBTrace.sysout("spa_eye; Successfully emptied maintenance collections for spa-eye module.");
                 }
             }
+
         });
 
         Firebug.registerStringBundle("chrome://spa_eye/locale/spa_eye.properties");
@@ -66,3 +92,4 @@ define([
 
         return Firebug.spa_eyeModule;
     });
+

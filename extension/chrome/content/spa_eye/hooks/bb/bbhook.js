@@ -20,8 +20,10 @@ define([
         const Cc = Components.classes;
         const Ci = Components.interfaces;
         const Cr = Components.results;
+
         const bbhook_wp = "chrome://spa_eye/content/hooks/bb/bbhook_wp.js";
         const bbhook_template_engines = "chrome://spa_eye/content/hooks/bb/template_engines.js";
+
 
         var Operation = Common.Operation;
         var EntityType = Common.EntityType;
@@ -160,6 +162,12 @@ define([
             },
 
             registerContentLoadedHook:function (root) {
+
+                if (_.indexOf(this._roots, root) != -1) //already registered
+                    return;
+
+                this._roots.push(root);
+
                 var self = this;
                 var register = function () {
                     self.registerBBHooks(root);
@@ -314,6 +322,7 @@ define([
                 this._views = [];
                 this._errors = [];
                 this._zombies = {};
+                this._roots = [];
                 this.resetTrackingData();
             },
 
@@ -395,5 +404,7 @@ define([
             }
         };
 
+
         return BBHook;
     });
+
