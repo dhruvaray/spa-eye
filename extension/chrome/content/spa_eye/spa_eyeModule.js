@@ -63,7 +63,7 @@ define([
                                 // We need to get the hook in as soon as the new DOMWindow is created, but before
                                 // it starts executing any scripts in the page.
                                 var win = progress.DOMWindow;
-                                if (win.parent != win)//child window
+                                if (win.parent != win && win.location.href != "about:blank")//child window
                                     context.spa_eyeObj._spaHook.registerContentLoadedHook(win.wrappedJSObject);
                             }
                             return;
