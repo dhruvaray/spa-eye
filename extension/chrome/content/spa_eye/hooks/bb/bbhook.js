@@ -2,6 +2,7 @@
 
 define([
     "firebug/lib/trace",
+    "firebug/lib/wrapper",
     "firebug/lib/http",
     "firebug/lib/events",
     "firebug/lib/dom",
@@ -12,7 +13,7 @@ define([
     "spa_eye/lib/require/underscore",
     "spa_eye/util/common"
 ],
-    function (FBTrace, Http, Events, Dom, DOM, DateUtil, _, Common) {
+    function (FBTrace, Wrapper, Http, Events, Dom, DOM, DateUtil, _, Common) {
 
 // ********************************************************************************************* //
 // Constants
@@ -21,15 +22,28 @@ define([
         const Ci = Components.interfaces;
         const Cr = Components.results;
 
+        const DebuggerService = Cc["@mozilla.org/js/jsd/debugger-service;1"];
+        const jsdIDebuggerService = Ci.jsdIDebuggerService;
+        const jsdICallHook = Ci.jsdICallHook;
+
+        const TYPE_FUNCTION_RETURN = jsdICallHook.TYPE_FUNCTION_RETURN;
+
         const bbhook_wp = "chrome://spa_eye/content/hooks/bb/bbhook_wp.js";
         const bbhook_template_engines = "chrome://spa_eye/content/hooks/bb/template_engines.js";
-
 
         var Operation = Common.Operation;
         var EntityType = Common.EntityType;
 
         var BBHook = function (obj) {
             this.context = null;
+
+            // bind `onFunction`
+            this.onFunction = _.bind(this.onFunction, this);
+
+            // create js debugger
+            this.jsd = DebuggerService.getService(jsdIDebuggerService);
+            // create function call hook
+            this.jsd.functionHook = { onCall: this.onFunction };
 
             // Data container cleanup
             this.cleanup();
@@ -118,6 +132,32 @@ define([
         BBHook.prototype = {
             constructor:BBHook,
 
+            onFunction: function(frame, type) {
+                switch(type) {
+                    case TYPE_FUNCTION_RETURN:
+                        var scope = Wrapper.unwrapIValue(frame.scope, Firebug.viewChrome),
+                            root = this.context.getCurrentGlobal().wrappedJSObject;
+                        if (root && scope && scope['_'] && scope['Backbone']) {
+
+                            // backup for `_` and `Backbone`
+                            var us = root._,
+                                bb = root.Backbone;
+
+                            root._ = scope['_'];
+                            root.Backbone = scope['Backbone']
+
+                            this.jsd.functionHook = null;
+                            this.jsd = null;
+                            this.registerBBHooks(root, frame);
+
+                            // reset global `_` and `Backbone`
+                            root._ = us;
+                            root.Backbone = bb;
+                        }
+                        break;
+                }
+            },
+
             markAsZombie:function (entity) {
                 if (entity.__mfd__) {
                     this._zombies[entity.cid] = entity;
@@ -150,7 +190,7 @@ define([
                 }
             },
 
-            registerContentHooks:function (root) {
+            registerContentHooks:function (root, frame) {
                 Firebug.CommandLine.evaluateInWebPage(
                     Http.getResource(bbhook_wp),
                     this.context,
@@ -220,7 +260,7 @@ define([
 
             },
 
-            registerBBHooks:function (root) {
+            registerBBHooks:function (root, frame) {
                 if (this.isBackboneInitialized(root)) {
                     if (!this.hooked) {
                         try {
@@ -228,7 +268,7 @@ define([
                             this.root = root;
                             this.Backbone = root.Backbone;
                             this.Underscore = root._;
-                            this.registerContentHooks(root);
+                            this.registerContentHooks(root, frame);
                             if (FBTrace.DBG_SPA_EYE) {
                                 FBTrace.sysout("spa_eye; Successfully registered Backbone hooks for spa-eye module");
                             }
