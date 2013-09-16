@@ -13,9 +13,10 @@ define([
     "firebug/lib/string",
     "firebug/dom/domModule",
 
-    "spa_eye/dom/modelReps"
+    "spa_eye/dom/modelReps",
+    "spa_eye/util/common"
 ],
-    function (Firebug, D, FirebugReps, Locale, Events, Dom, Css, Str, DOMModule, ModelReps) {
+    function (Firebug, D, FirebugReps, Locale, Events, Dom, Css, Str, DOMModule, ModelReps, Common) {
 
         "use strict";
         var ChildSection = function ChildSection(option) {
@@ -73,12 +74,11 @@ define([
             },
 
             _onRowAdd:function (model, options) {
-                options = options || {};
-                options.autoAdd = options.autoAdd || this.autoAdd;
-
                 var tbody = this.getBody();
-
                 if (!model || !tbody) return;
+
+                options = options || {};
+                options.autoAdd = options.autoAdd || Common.result(this, 'autoAdd', model);
 
                 if (options.autoAdd) {
                     var noObjectRow = Dom.getChildByClass(tbody, 'noMemberRow');

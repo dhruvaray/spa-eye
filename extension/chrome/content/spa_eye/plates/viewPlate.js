@@ -52,6 +52,9 @@ define([
                     name:'live_views',
                     title:Locale.$STR('spa_eye.views.live'),
                     parent:this.parent.panelNode,
+                    autoAdd:function (view) {
+                        return !view.__mfd__;
+                    },
                     data:function () {
                         return self.spa_eyeObj.getViews({live:true})
                     }

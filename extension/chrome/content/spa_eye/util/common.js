@@ -1,7 +1,9 @@
 define([
     "firebug/lib/http",
-    "firebug/lib/locale"
-], function (Http, Locale) {
+    "firebug/lib/locale",
+
+    "spa_eye/lib/require/underscore"
+], function (Http, Locale, _) {
     return {
         Operation:{
             SAVE:"save", FETCH:"fetch", SET:"set", UNSET:"unset", CLEAR:"clear", RENDER:"render", ADD:"add",
@@ -26,6 +28,16 @@ define([
                 }
             }
             return version;
+        },
+        // Extended version of _.result
+        //
+        // If the value of the named `key` is a function then invoke it with the
+        // `object` as context; otherwise, return it.
+        result: function(object, key) {
+            if (object == null) return void 0;
+            var value = object[key],
+                args = Array.prototype.slice.call(arguments, 2);
+            return _.isFunction(value) ? value.apply(object, args) : value;
         }
     };
 });
