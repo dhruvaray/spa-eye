@@ -136,7 +136,7 @@ define([
                 switch(type) {
                     case TYPE_FUNCTION_RETURN:
                         var scope = Wrapper.unwrapIValue(frame.scope, Firebug.viewChrome),
-                            root = this.context.getCurrentGlobal().wrappedJSObject;
+                            root = Wrapper.unwrapIValue(frame.executionContext.globalObject, Firebug.viewChrome);
                         if (root && scope && scope['_'] && scope['Backbone']) {
 
                             // backup for `_` and `Backbone`
