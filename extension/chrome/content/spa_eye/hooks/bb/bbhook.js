@@ -43,7 +43,7 @@ define([
             // create js debugger
             this.jsd = DebuggerService.getService(jsdIDebuggerService);
             // create function call hook
-            this.jsd.functionHook = { onCall: this.onFunction };
+            this.jsd.functionHook = { onCall:this.onFunction };
 
             // Data container cleanup
             this.cleanup();
@@ -132,8 +132,8 @@ define([
         BBHook.prototype = {
             constructor:BBHook,
 
-            onFunction: function(frame, type) {
-                switch(type) {
+            onFunction:function (frame, type) {
+                switch (type) {
                     case TYPE_FUNCTION_RETURN:
                         var scope = Wrapper.unwrapIValue(frame.scope, Firebug.viewChrome),
                             root = Wrapper.unwrapIValue(frame.executionContext.globalObject, Firebug.viewChrome);
@@ -345,12 +345,10 @@ define([
                 if (record.cid) {
                     try {
                         t = DateUtil.getFormattedTime(new Date());
-                        this._auditRecords[record.cid] || (this._auditRecords[record.cid] = {});
-                        this._auditRecords[record.cid][t] = record;
+                        this._auditRecords[record.cid] || (this._auditRecords[record.cid] = []);
+                        this._auditRecords[record.cid].push(record);
                     } catch (e) {
                         this.logError(e);
-                        t ? (this._auditRecords[record.cid][t] = e) :
-                            (this._auditRecords[record.cid][_.uniqueId('e')] = e)
                     }
                 }
             },
