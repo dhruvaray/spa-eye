@@ -290,7 +290,7 @@ define([
                 var versionLabel = Locale.$STR('spa_eye.about')
                     .replace('$VERSION$', Common.getVersion("chrome://spa_eye/content/build.properties"));
 
-                var dcOption = "extensions.firebug.spa_eye.record";
+                var dcOption = "extensions.firebug.spa_eye.check.deep";
                 var dcVal = Firebug.getPref(Firebug.prefDomain, dcOption);
                 return [
                     {

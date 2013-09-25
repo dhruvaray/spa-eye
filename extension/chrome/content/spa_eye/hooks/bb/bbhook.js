@@ -41,7 +41,7 @@ define([
             // bind `onFunction`
             this.onFunction = _.bind(this.onFunction, this);
 
-            if (Firebug.getPref(Firebug.prefDomain, "extensions.firebug.spa_eye.record")) {
+            if (Firebug.getPref(Firebug.prefDomain, "extensions.firebug.spa_eye.check.deep")) {
                 // create js debugger
                 this.jsd = DebuggerService.getService(jsdIDebuggerService);
                 // create function call hook
