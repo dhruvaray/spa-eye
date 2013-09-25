@@ -146,9 +146,8 @@ define([
                             root._ = scope['_'];
                             root.Backbone = scope['Backbone']
 
-                            this.jsd.functionHook = null;
-                            this.jsd = null;
-                            this.registerBBHooks(root, frame);
+                            this.registerContentLoadedHook(root);
+                            this.registerBBHooks(root);
 
                             // reset global `_` and `Backbone`
                             root._ = us;
@@ -190,7 +189,7 @@ define([
                 }
             },
 
-            registerContentHooks:function (root, frame) {
+            registerContentHooks: function (root) {
                 Firebug.CommandLine.evaluateInWebPage(
                     Http.getResource(bbhook_wp),
                     this.context,
@@ -260,17 +259,21 @@ define([
 
             },
 
-            registerBBHooks:function (root, frame) {
+            registerBBHooks: function (root) {
                 if (this.isBackboneInitialized(root)) {
                     if (!this.hooked) {
                         try {
                             this.hooked = true;
-                            this.root = root;
                             this.Backbone = root.Backbone;
                             this.Underscore = root._;
-                            this.registerContentHooks(root, frame);
+                            this.registerContentHooks(root);
                             if (FBTrace.DBG_SPA_EYE) {
                                 FBTrace.sysout("spa_eye; Successfully registered Backbone hooks for spa-eye module");
+                            }
+                            //Listen to the first Backbone instance only.
+                            if (this.jsd) {
+                                this.jsd.functionHook = null;
+                                this.jsd = null;
                             }
                             Events.dispatch(this.listener.fbListeners, 'onBackboneLoaded', [this]);
 
