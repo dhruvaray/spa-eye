@@ -34,16 +34,19 @@ define([
         var Operation = Common.Operation;
         var EntityType = Common.EntityType;
 
+
         var BBHook = function (obj) {
             this.context = null;
 
             // bind `onFunction`
             this.onFunction = _.bind(this.onFunction, this);
 
-            // create js debugger
-            this.jsd = DebuggerService.getService(jsdIDebuggerService);
-            // create function call hook
-            this.jsd.functionHook = { onCall:this.onFunction };
+            if (Firebug.getPref(Firebug.prefDomain, "extensions.firebug.spa_eye.record")) {
+                // create js debugger
+                this.jsd = DebuggerService.getService(jsdIDebuggerService);
+                // create function call hook
+                this.jsd.functionHook = { onCall: this.onFunction };
+            }
 
             // Data container cleanup
             this.cleanup();
@@ -131,6 +134,14 @@ define([
 
         BBHook.prototype = {
             constructor:BBHook,
+
+            setDeepCheck: function (val) {
+                this.deepCheck = val;
+            },
+
+            isDeepCheckEnabled: function () {
+                return this.deepCheck;
+            },
 
             onFunction:function (frame, type) {
                 switch (type) {
@@ -304,15 +315,12 @@ define([
                     if ((!this._sequence.Model) || (!this._sequence.Model.entity)) {
                         this._sequence.Model = {entity:this._current.Model, entity_type:EntityType.Model};
                     }
-                    ;
                     if ((!this._sequence.Collection) || (!this._sequence.Collection.entity)) {
                         this._sequence.Collection = {entity:this._current.Collection, entity_type:EntityType.Collection};
                     }
-                    ;
                     if ((!this._sequence.View) || (!this._sequence.View.entity)) {
                         this._sequence.View = {entity:this._current.View, entity_type:EntityType.View};
                     }
-                    ;
 
                     _.each([this._sequence.Model, this._sequence.Collection, this._sequence.View], function (seq_type) {
                         var sr = seq_type.entity;

@@ -289,23 +289,21 @@ define([
             getOptionsMenuItems:function () {
                 var versionLabel = Locale.$STR('spa_eye.about')
                     .replace('$VERSION$', Common.getVersion("chrome://spa_eye/content/build.properties"));
+
+                var dcOption = "extensions.firebug.spa_eye.record";
+                var dcVal = Firebug.getPref(Firebug.prefDomain, dcOption);
                 return [
                     {
                         label:versionLabel,
                         nol10n:true
+                    },
+                    {
+                        label: Locale.$STR('spa_eye.check.deep'),
+                        type: "checkbox",
+                        checked: dcVal,
+                        command: FBL.bindFixed(Firebug.setPref, this, Firebug.prefDomain, dcOption, !dcVal)
                     }
                 ];
-            },
-
-            optionMenu:function (label, option) {
-                var value = Firebug.getPref(Firebug.prefDomain, option);
-                return {
-                    label:label,
-                    nol10n:true,
-                    type:"checkbox",
-                    checked:value,
-                    command:FBL.bindFixed(Firebug.setPref, this, Firebug.prefDomain, option, !value)
-                };
             },
 
             getContextMenuItems:function (object, target) {

@@ -72,6 +72,14 @@ define([
             resetTrackingData:function () {
                 this._spaHook.resetTrackingData();
                 Events.dispatch(this._spaHook.listener.fbListeners, 'onTrackingDataCleared');
+            },
+
+            setDeepCheck: function (val) {
+                this._spaHook.setDeepCheck(val);
+            },
+
+            isDeepCheckEnabled: function () {
+                this._spaHook.isDeepCheckEnabled();
             }
         };
 
