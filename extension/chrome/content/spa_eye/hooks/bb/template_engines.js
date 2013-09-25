@@ -29,7 +29,7 @@
                             'detail':{
                                 script_id:script_id,
                                 text:text,
-                                settings:_.defaults({}, settings, _.templateSettings)
+                                settings:_.extend({}, _.templateSettings, settings)
                             }
                         }));
                         compiledTemplate = newval.call(_, text, undefined, settings);
