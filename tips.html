@@ -64,11 +64,13 @@
 
             <h4>Backbone app not detected?</h4>
 
-            Backbone Eye attempts to discover application structure by intercepting calls to various Backbone methods.
-            In case,
-            your application is not working with Backbone Eye, please check the <b>Eye logs</b> section for errors.
-            Please
-            attach a screen-shot of those errors while submitting a <a
+            If you are using Backbone.js in any closure (or function) context - like browserify.js environments as an example, please switch on the deep check option. This can slow down the browser, so please do ensure that Backbone Eye is disabled or deep-check option is switched off after the debugging session.<br/>
+
+            <br/><img src="./site/img/deepcheck.png" alt="deep check on"/><br/>
+
+            <br/>Backbone Eye attempts to discover application structure by intercepting calls to various Backbone methods.
+            In case, your application is not working with Backbone Eye, please check the <b>Eye logs</b> section for errors.
+            Please attach a screen-shot of those errors and the version of Backbone Eye while submitting a <a
                 href="https://github.com/dhruvaray/spa-eye/issues?sort=created&state=open">bug.</a><br/>
 
             <br/><img src="./site/img/introspection_errors.png" alt="Introspection errors"/><br/>
@@ -82,7 +84,11 @@
 
             <h4>Backbone Eye becoming sluggish?</h4>
 
-            For complex applications, this data can grow and Backbone Eye can become sluggish. Click on the clear
+            Turn off 'Deep-check' if it is not required.<br/>
+
+            <br/><img src="./site/img/deepcheck.png" alt="deep check on"/><br/>
+
+            <br/>For complex applications, introspection data can grow and Backbone Eye can become sluggish. Click on the clear
             button to reset this data.<br/>
             <br/><img src="./site/img/clear.png" alt="Clear command"/><br/>
             <br/>This will cause both the journal and interaction data collected so far to be wiped out.<br/>
