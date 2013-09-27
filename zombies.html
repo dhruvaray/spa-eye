@@ -42,13 +42,13 @@
 <div class="navbar navbar-fixed-top navbar-inverse" id="bbeye-header">
 
     <ul class="nav navbar-nav">
-        <li class="active"><a href="index.html">Home</a></li>
+        <li><a href="index.html">Home</a></li>
         <li><a href="getstarted.html">Get Started</a></li>
         <li><a href="models.html">Models</a></li>
         <li><a href="interaction_trails.html">Interaction Trails</a></li>
         <li><a href="journals.html">Journals</a></li>
         <li><a href="views.html">Views</a></li>
-        <li><a href="zombies.html">Zombies</a></li>
+        <li class="active"><a href="zombies.html">Zombies</a></li>
         <li><a href="tips.html">Troubleshooting</a></li>
     </ul>
     <a href="https://github.com/dhruvaray/spa-eye"><img style="position: absolute; top: 0; right: 0; border: 0;"
@@ -56,87 +56,49 @@
                                                         alt="Fork me on GitHub"></a>
 </div>
 
+<div id="zombies">
 
-<div id="home">
-    <br/><br/><br/>
+    <div class="panel panel-primary">
+        <div class="panel-heading">Zombies</div>
 
-    <div class="container">
-        <div class="jumbotron">
-            <h1>Backbone Eye</h1>
+        <div class="well-lg">
+            <br/><span class="label label-success">Labs Feature</span> Feedback will be appreciated!<br/>
 
-            <p class="lead">Understand Backbone application behavior without debugging JavaScript</p>
+            <br/>Contains a listing of objects which are in use - even after they have been removed from the application
+            - via Backbone remove or destroy calls. This section will simulate zombie creation in the reference
+            application to demonstrate Backbone Eye Zombie detection.<br/><br/>
 
-            <a class="btn btn-default"
-               href=https://addons.mozilla.org/en-US/firefox/addon/Backbone-Eye/>Download</a>
-
-            <ul class="list-inline">
-                <li><a href="https://twitter.com/share" class="twitter-share-button"
-                       data-url="http://dhruvaray.github.io/spa-eye/" data-count="none"
-                       data-hashtags="BackboneJS,JavaScript">Tweet</a></li>
-                <li><a href="https://twitter.com/dhruvaray" class="twitter-follow-button" data-show-count="false"
-                       data-show-screen-name="false">Follow for updates</a></li>
-            </ul>
-
-
-        </div>
-
-        <div class="row marketing">
-            <div class="col-sm-6">
-                <h4>Application layer debugging</h4>
-
-                <p>Understand Backbone application behavior without wading through JavaScript code. Backbone Eye is
-                    production-site friendly and can work off uglified and minified Javascript without needing any
-                    source maps.</p><br/>
-
-                <h4>Work with application constructs</h4>
-
-                <p>Backbone Eye presents application specific models and views to introspect. Models show only
-                    application specific properties and shield away internal Backbone framework details. Search for
-                    models having certain attribute values, pin interesting models or use most-used models list to dig
-                    deeper.</p>
-
-                <h4>Encourages <a href="interaction_trails.html">"What-if"</a> exploration</h4>
-
-                <p>Change an application model attribute and see the impact of the change throughout the application in
-                    a graphical fashion. Or drill down to details about past state and operation arguments.</p>
-
+            <div class="well well-sm">Step 0 : A model c3 present corresponding to the todo item present in the
+                application.
             </div>
+            <img src="./site/img/zombie_1.png" alt="zombie workflow - step 0"/><br/>
 
-            <div class="col-sm-6">
-
-                <h4>Detect Zombies</h4>
-
-                <p>Backbone Eye attempts to detect models and views which are used by the application - even after they
-                    have been destroyed. Leverage the model interaction trails and journals to piece together what may
-                    have triggered this behavior.</p><br/>
-
-                <h4>Understand event-callback entropy</h4>
-
-                <p>Visualize how Backbone Model (and Collection) updates may lead to redundant calls (multiple render
-                    calls to the same view as a result of an update). Develop insights into application flow to minimize
-                    (or remove) redundant callbacks and thereby improve application performance.</p>
-
-                <h4>Debug templates</h4>
-
-                <p>Backbone Eye makes underscore templates a debuggable unit. Put breakpoints in template code. At
-                    runtime, inspect model data being passed to the template, step through template code and
-                    observe template output being incrementally built.</p><br/><br/>
-
-
+            <div class="well well-sm">Step 1 : Delete the todo item - "1". The application internally calls
+                view4.remove()
             </div>
-        </div>
+            <img src="./site/img/zombie_2.png" alt="zombie workflow - step 1"/><br/>
+            <br/>
 
+            <div class="well well-sm">Step 2 : The view (view4) now moves to the Removed list</div>
+            <img src="./site/img/zombie_3.png" alt="zombie workflow - step 2"/><br/>
+
+            <div class="well well-sm">Step 3 : Perform a render operation on the removed view - via Firebug and Backbone
+                Eye.
+            </div>
+            <img src="./site/img/zombie_4.png" alt="zombie workflow - step 3a"/><br/>
+            <br/><img src="./site/img/zombie_5.png" alt="zombie workflow - step 3b"/><br/>
+            <br/><img src="./site/img/zombie_6.png" alt="zombie workflow - step 3c"/><br/>
+            <br/>
+
+            <div class="well well-sm">Step 4 : view4 now appears in the Zombies list as operations have been performed
+                on it - even after
+                view4.remove() was called in step 1. Use the journal or interaction trails to figure out the
+                callee.
+            </div>
+            <img src="./site/img/zombie_7.png" alt="zombie workflow - step 4"/><br/>
+        </div>
     </div>
 </div>
-
-
-
-
-
-
-
-
-
 <div class="well well-sm">
 
 
@@ -173,15 +135,7 @@
 </div>
 <script src="http:////ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script src="./site/js/bootstrap.js" type="text/javascript"></script>
-<script>!function (d, s, id) {
-    var js, fjs = d.getElementsByTagName(s)[0], p = /^http:/.test(d.location) ? 'http' : 'https';
-    if (!d.getElementById(id)) {
-        js = d.createElement(s);
-        js.id = id;
-        js.src = p + '://platform.twitter.com/widgets.js';
-        fjs.parentNode.insertBefore(js, fjs);
-    }
-}(document, 'script', 'twitter-wjs');</script>
+
 
 </body>
 </html>

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Backbone.js debugger for Firebug">
+    <meta name="author" content="Dhruva Ray">
+    <meta name="keywords"
+          content="download debug backbone.js backbone debugger,application layer debugging, firebug extension, debugging backbone applications, debugging, debugging backbone.js">
+
+    <title>Backbone debugger for Firebug.</title>
+
+
+    <link href="./site/css/bootstrap.css" rel="stylesheet">
+    <link href="./site/css/jumbotron-narrow.css" rel="stylesheet">
+
+    <script>
+        (function (i, s, o, g, r, a, m) {
+            i['GoogleAnalyticsObject'] = r;
+            i[r] = i[r] || function () {
+                (i[r].q = i[r].q || []).push(arguments)
+            }, i[r].l = 1 * new Date();
+            a = s.createElement(o),
+                    m = s.getElementsByTagName(o)[0];
+            a.async = 1;
+            a.src = g;
+            m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+
+        ga('create', 'UA-43200032-1', 'dhruvaray.github.io');
+        ga('send', 'pageview');
+
+    </script>
+
+
+</head>
+
+<body data-spy="scroll" data-target="#bbeye-header">
+
+<div class="container">
+
+    <div class="navbar navbar-fixed-top navbar-inverse" id="bbeye-header">
+
+        <ul class="nav navbar-nav">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="getstarted.html">Get Started</a></li>
+            <li class="active"><a href="models.html">Models</a></li>
+            <li><a href="interaction_trails.html">Interaction Trails</a></li>
+            <li><a href="journals.html">Journals</a></li>
+            <li><a href="views.html">Views</a></li>
+            <li><a href="zombies.html">Zombies</a></li>
+            <li><a href="tips.html">Troubleshooting</a></li>
+        </ul>
+        <a href="https://github.com/dhruvaray/spa-eye"><img style="position: absolute; top: 0; right: 0; border: 0;"
+                                                            src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"
+                                                            alt="Fork me on GitHub"></a>
+    </div>
+
+<div id="models">
+
+    <div class="panel panel-primary">
+        <div class="panel-heading">Models</div>
+        <div class="well-lg">
+            This section lists out all the models which were discovered by Backbone Eye and is the starting point for
+            discovering model behavior.<br/>
+
+            <br/><h4>Model categorization</h4><br/>
+            <table class="table">
+                <tr>
+                    <td><img src="./site/img/all_sections.png"
+                             alt="Pinned, Most Used and All subsections in Models perspective"/></td>
+                    <td>
+                        This section has three sub sections.
+                        <table>
+                            <tr>
+                                <td><b>Pinned</b></td>
+                            </tr>
+                            <tr>
+                                <td>Right click and select "Pin model" to nail down a model (among all application
+                                    models)
+                                    to investigate. All pinned models will reside in this section. Which model to pin
+                                    may be
+                                    discovered by using the Backbone Eye <a href="#model.search">search</a>
+                                    functionality
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><b>Most Used</b></td>
+                            </tr>
+                            <tr>
+                                <td>Backbone Eye attempts to identify the models that are most used by the application
+                                    (based on write access counts). In real world applications which could have a large
+                                    number of models, this list can be used as a starting point for investigating
+                                    application behavior.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><b>All</b></td>
+                            </tr>
+                            <tr>
+                                <td>Lists all the models which were discovered.</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+
+            <br/><h4>Enumeration of Model attributes</h4><br/>
+            Backbone Eye only enumerates application specific model properties and hides internal Backbone properties.
+            Internal properties can be viewed - if required - in the journal and interaction trails views. <br/><img
+                src="./site/img/modelattributes.png" alt="Shows only model attributes"/><br/>
+
+            <br id="what-if"/>
+            <br/><br/><h4>Edit model attributes</h4><br/>
+
+            Backbone Eye allows you to edit the value of a model attribute to see the ripple effect - that model change
+            - has on the entire application. To edit any attribute value, double click on the attribute name of the
+            specific model and change it to a new value.<br/>
+
+            <br/><span class="label label-info">Internals</span> This maps to model.set({attribute_name:value})<br/>
+            <br/><span class="label label-success">Simulate "what-if" scenarios</span> In the todo example, it is
+            possible to change the model value from the UI as well (Primarily because it is editable, visible on the
+            screen etc). But in the general case, it may be difficult to use application screens to edit model values.
+            This feature will help you simulate what-if scenarios by allowing to update model attributes directly. To
+            see the impact of the update, use the model <a href="interaction_trails.html">interaction trails</a>.<br/></span><br/>
+            <br/><img src="./site/img/model_editattributes.png" alt="Edit attributes"/><br/>
+
+
+            <br id="model.search"/><br/><br/><br/>
+            <h4>Search for models to investigate</h4><br/>
+            Search can be either case sensitive or case insensitive. Valid search strings are
+            <ol>
+                <li>attributename:value</li>
+                <li>(partial) or full attribute name</li>
+            </ol>
+            <br/>
+            <table class="table">
+                <tr>
+                    <td>Search by partial attribute values</td>
+                </tr>
+                <tr>
+                    <td><img src="./site/img/search_attribute_value.png" alt="Search by value"/></td>
+                </tr>
+                <tr>
+                    <td>Narrow further by specifying a attribute name</td>
+                </tr>
+                <tr>
+                    <td><img src="./site/img/search_attribute_keyvalue.png" alt="Search by key:value"/></td>
+                </tr>
+            </table>
+
+            <br/><h4>Nail down a model</h4><br/>
+
+            Use the <b>pin</b> command to nail down models to investigate. Typically, <a href="#model.search">search</a>
+            would precede the pin command.<br/>
+            <table class="table">
+                <tr>
+                    <td>Pin a model</td>
+                </tr>
+                <tr>
+                    <td><img src="./site/img/pin.png" alt="Pin a model"/></td>
+                </tr>
+                <tr>
+                    <td>Un Pin a model</td>
+                </tr>
+                <tr>
+                    <td><img src="./site/img/unpin.png" alt="Un Pin a model"/></td>
+                </tr>
+            </table>
+            Pinned models (and any other model - for that matter) can be selected by clicking on it to view it's <a
+                href="journals.html">journal</a> or <a href="interaction_trails.html">interaction trails</a>.<br/>
+
+            <br/><h4>Model Activity Indicators</h4><br/>
+
+            Models having updates are momentarily highlighted with a colored band to draw user attention to model
+            activity.<br/>
+
+            <table class="table">
+                <tr>
+                    <td>Update a Model</td>
+                </tr>
+                <tr>
+                    <td><img src="./site/img/highlight.png" alt="Model being highlighted due to activity"/></td>
+                </tr>
+                <tr>
+                    <td>Destroy a Model</td>
+                </tr>
+                <tr>
+                    <td><img src="./site/img/highlight2.png" alt="Model being highlighted due to activity"/></td>
+                </tr>
+            </table>
+
+        </div>
+    </div>
+</div>
+
+<div id="collections">
+
+        <div class="panel panel-primary">
+            <div class="panel-heading">Collections</div>
+            <div class="well-lg">
+                Similar to the Models section, it shows all collections discovered by Backbone Eye so far. <br/>
+                <br/>
+                <img src="./site/img/coll_interaction.png" alt="Collection interaction trail"/><br/>
+            </div>
+        </div>
+    </div>
+
+<div class="well well-sm">
+
+
+        <small>
+            <ul class="list-inline text-center">
+                <li>
+                    <iframe src="./site/ext/github_btn.html?user=dhruvaray&repo=spa-eye&type=watch&count=true&size=large"
+                            allowtransparency="true" frameborder="0" scrolling="0" width="170" height="30"></iframe>
+                </li>
+                <li>
+                    <iframe src="./site/ext/github_btn.html?user=dhruvaray&repo=spa-eye&type=fork&count=true&size=large"
+                            allowtransparency="true" frameborder="0" scrolling="0" width="170" height="30"></iframe>
+                </li>
+            </ul>
+
+            <p class="text-center">Code licensed under <a
+                    href="https://github.com/dhruvaray/spa-eye/blob/master/extension/license.txt">Simplified BSD</a></p>
+            <ul class="list-inline text-center">
+                <li>
+                    <a href="https://github.com/dhruvaray/spa-eye/blob/master/CHANGELOG.md">Change log</a>
+                </li>
+                <li class="muted"> |</li>
+                <li>
+                    <a href="https://github.com/dhruvaray/spa-eye/issues?sort=created&state=open">Issues</a>
+                </li>
+                <li class="muted"> |</li>
+                <li>
+                    <a href="https://github.com/dhruvaray/spa-eye/contributors">Contributors</a>
+                </li>
+            </ul>
+        </small>
+
+    </div>
+</div>
+<script src="http:////ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="./site/js/bootstrap.js" type="text/javascript"></script>
+
+
+</body>
+</html>
