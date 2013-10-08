@@ -10,7 +10,7 @@ For details on how to download and use the extension, go to http://dhruvaray.git
 For technical details on how to compile the extension, add test cases etc, go to the [wiki](https://github.com/dhruvaray/spa-eye/wiki).
 
 ###Download
-Download the xpi from our releases page : https://github.com/dhruvaray/spa-eye/releases.
+Download the xpi from  : https://addons.mozilla.org/en-US/firefox/addon/Backbone-Eye/.
 If Backbone Eye is useful in your work, do show your appreciation and encouragement by starring this repo!
 
 
