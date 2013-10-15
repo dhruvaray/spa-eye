@@ -7,10 +7,11 @@ define([
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/events",
+    "firebug/lib/string",
 
     "spa_eye/lib/require/underscore"
 ],
-function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events,  _) {
+function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events,  Str, _) {
     var Notification = function (parent, options) {
         this.parent = parent;
         this.doc = this.parent.ownerDocument;
@@ -38,7 +39,7 @@ function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events,  _) {
         constructor:Notification,
         initialize:function () {
             this.element = this.doc.createElement('div');
-            this.element.innerHTML = this.text;
+            this.element.innerHTML = Str.escapeForTextNode(this.text);
             Css.setClass(this.element, 'notification');
             Css.setClass(this.element, this.type);
 
