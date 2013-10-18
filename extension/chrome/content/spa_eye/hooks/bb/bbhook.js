@@ -190,10 +190,9 @@ define([
                 var self = this;
                 try {
                     var source = _.template.call(_, text, undefined, settings).source;
-                    var proxiedTemplateRef = '_t' + script_id;
-                    var f = encodeURIComponent("window['" + proxiedTemplateRef + "']=" + source);
+                    var f = encodeURIComponent("window[" + String.quote("_t"+ script_id) + "]=" + source);
                     DOM.appendExternalScriptTagToHead(root.document,
-                        "data:text/javascript;fileName=" + script_id + ";," + f);
+                        "data:text/javascript;fileName=" + String.quote(script_id) + ";," + f);
                     this._templates[script_id] = text;
                 } catch (e) {
                     self.logError(e);

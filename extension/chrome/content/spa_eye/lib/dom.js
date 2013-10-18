@@ -25,6 +25,9 @@ define([
         }
 
         DOM.appendExternalScriptTagToHead = function (document, path) {
+            if (!/^(file|chrome|resource|data):/.test(path)) {
+                throw Error('Invalid path');
+            }
             var script = document.createElement("script");
             script.src = path;
             script.type = "text/javascript";
