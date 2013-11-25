@@ -29,3 +29,7 @@ If Backbone Eye is useful in your work, do show your appreciation and encouragem
 
 
 
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/dhruvaray/spa-eye/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
