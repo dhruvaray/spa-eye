@@ -39,7 +39,7 @@ function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events,  Str, _) {
         constructor:Notification,
         initialize:function () {
             this.element = this.doc.createElement('div');
-            this.element.innerHTML = Str.escapeForTextNode(this.text);
+            this.element.textContent = this.text;
             Css.setClass(this.element, 'notification');
             Css.setClass(this.element, this.type);
 
