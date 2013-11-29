@@ -10,10 +10,12 @@ For details on how to download and use the extension, go to http://dhruvaray.git
 For technical details on how to compile the extension, add test cases etc, go to the [wiki](https://github.com/dhruvaray/spa-eye/wiki).
 
 
+### Screenshots
+![Screenshot](http://dhruvaray.github.io/spa-eye/site/img/composite.gif)
+
+
 ### Watch a quick (3 minute) usage video
-
 [![ScreenShot](http://dhruvaray.github.io/spa-eye/site/img/video.png)](http://youtu.be/tEIxBqjR1Cc)
-
 
 
 ###Download
