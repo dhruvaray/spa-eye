@@ -178,10 +178,11 @@ define([
 
             inferScriptForView:function (script_id) {
                 var rendered = this._current.View;
+                var id = String.quote(script_id);
                 if (rendered) {// Is this being rendered in context of a view?
                     var templates = rendered.__templates__;
-                    if (templates.indexOf(script_id) == -1) {
-                        templates.push(script_id);
+                    if (templates.indexOf(id) == -1) {
+                        templates.push(id);
                     }
                 }
             },
@@ -193,7 +194,7 @@ define([
                     var f = encodeURIComponent("window[" + String.quote("_t"+ script_id) + "]=" + source);
                     DOM.appendExternalScriptTagToHead(root.document,
                         "data:text/javascript;fileName=" + String.quote(script_id) + ";," + f);
-                    this._templates[script_id] = text;
+                    this._templates[String.quote(script_id)] = text;
                 } catch (e) {
                     self.logError(e);
                 }
