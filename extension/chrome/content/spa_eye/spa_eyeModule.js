@@ -65,8 +65,10 @@ define([
                                 var win = progress.DOMWindow;
                                 if (win.parent != win &&
                                     win.location.href != "about:blank" &&
-                                    win.document.URL != "about:blank")//child window
+                                    win.document.URL != "about:blank"){//child window
+                                    context.spa_eyeObj && //weird? I don't see the need for this check.
                                     context.spa_eyeObj._spaHook.registerContentLoadedHook(win.wrappedJSObject);
+                                }
                             }
                             return;
 

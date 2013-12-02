@@ -11,6 +11,7 @@ define([
     "firebug/lib/string",
     "firebug/chrome/toolbar",
     "firebug/dom/domEditor",
+    "firebug/chrome/panelActivation",
 
     "spa_eye/lib/require/underscore",
     "spa_eye/util/common",
@@ -26,7 +27,7 @@ define([
     "spa_eye/panels/eventPanel",
     "spa_eye/panels/logPanel"
 ],
-    function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, Toolbar, DOMEditor, _, Common, BasePanel, ModelPlate, CollectionPlate, ViewPlate, ZombiePlate) {
+    function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, Toolbar, DOMEditor, PanelActivation, _, Common, BasePanel, ModelPlate, CollectionPlate, ViewPlate, ZombiePlate) {
 
         var childPlate = {
             MODEL:'model',
@@ -170,12 +171,19 @@ define([
 
                 var box = this.WarningRep.tag.replace(args, this.panelNode);
                 var description = box.getElementsByClassName("disabledPanelDescription").item(0);
-                return FirebugReps.Description.render(args.suggestion,
-                    description,
+
+                var reload = function(){
+                    PanelActivation.enablePanel(Firebug.getPanelType("script"));
                     Obj.bindFixed(Firebug.TabWatcher.reloadPageFromMemory,
                         Firebug.TabWatcher,
-                        Firebug.currentContext));
+                        Firebug.currentContext)();
+
+                };
+                return FirebugReps.Description.render(args.suggestion,
+                    description,
+                    reload);
             },
+
 
             getPanelToolbarButtons:function () {
 
