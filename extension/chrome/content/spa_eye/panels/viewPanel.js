@@ -19,7 +19,7 @@ define([
             order:4,
 
             updateSelection:function (frame) {
-
+                var spa_eyeObj = this.context.spa_eyeObj;
 
                 if (frame && frame.script && frame.script && frame.script.fileName) {
                     var matches = frame.script.fileName.match(/fileName=([^;]*)/)
@@ -30,11 +30,15 @@ define([
                     this.show(frame);
                 }
                 catch (e) {
-                    this.context.spa_eyeObj._spaHook.logError(e);
+                    spa_eyeObj && spa_eyeObj._spaHook.logError(e);
                 }
             },
 
             show:function () {
+                var spa_eyeObj = this.context.spa_eyeObj;
+
+                if (!spa_eyeObj) return;
+
                 var source = ["obj", "__p"];
                 var attr = [
                     Locale.$STR("spa_eye.script.view.template.source"),
@@ -43,7 +47,7 @@ define([
                 ];
                 var context = this.context;
                 var data = {};
-                data[attr[0]] = this.context.spa_eyeObj._spaHook.templates()[this.templateName];
+                data[attr[0]] = spa_eyeObj._spaHook.templates()[this.templateName];
                 data[attr[1]] = source[0];
                 data[attr[2]] = source[1];
 

@@ -103,9 +103,10 @@ define([
             destroy:function () {
                 try {
                     Events.removeEventListener(this.panelNode, "mousedown", this.onPanelFocus, true);
-
-                    var listener = this.context.spa_eyeObj._spaHook.listener;
-                    listener.removeListener(this);
+                    if (this.context.spa_eyeObj){
+                        var listener = this.context.spa_eyeObj._spaHook.listener;
+                        listener.removeListener(this);
+                    }
                 } catch (e) {
                     if (FBTrace.DBG_SPA_EYE) {
                         FBTrace.sysout("Error while removing listener", e);

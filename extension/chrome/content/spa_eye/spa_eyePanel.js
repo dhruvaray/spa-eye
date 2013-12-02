@@ -81,6 +81,7 @@ define([
             show:function (state) {
 
                 if (Firebug.chrome.getSelectedPanel() != this) return;
+                if (!this.context.spa_eyeObj) return;
 
                 var enabled = this.isEnabled();
                 if (!enabled) return;
@@ -252,8 +253,10 @@ define([
             selectChildPlate:function (cpName) {
                 cpName = cpName || this.currentPlate;
                 if (!cpName) return false;
+                var spa_eyeObj = this.context.spa_eyeObj;
+                if (!spa_eyeObj) return;
 
-                var listener = this.context.spa_eyeObj._spaHook.listener,
+                var listener = spa_eyeObj._spaHook.listener,
                     chrome = Firebug.chrome;
 
                 listener.removeListener(this.getCurrentPlate());
@@ -263,7 +266,7 @@ define([
                 });
                 chrome.$('spa_eye_panel_button_' + cpName).checked = true;
 
-                this.context.spa_eyeObj.currentPlate = this.currentPlate = cpName;
+                spa_eyeObj.currentPlate = this.currentPlate = cpName;
 
                 listener.addListener(this.getCurrentPlate());
                 this.getCurrentPlate().render();
@@ -271,7 +274,6 @@ define([
 
             toggleRecord:function () {
                 var recordButton = Firebug.chrome.$('spa_eye_panel_button_record');
-                var spa_eyeObj = this.context.spa_eyeObj;
                 if (recordButton) {
                     recordButton.image = recordButton.checked
                         ? "chrome://spa_eye/skin/recording.svg"

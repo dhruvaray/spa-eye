@@ -36,7 +36,7 @@ define([
 
             show:function () {
                 var spa_eyeObj = this.context.spa_eyeObj;
-                var result = spa_eyeObj._spaHook.errors();
+                var result = spa_eyeObj ? spa_eyeObj._spaHook.errors() : [];
                 if (result.length) {
                     this.title = Locale.$STR("spa_eye.logs.title") + " (" + result.length + ")";
                     this.tag.replace({object:result}, this.panelNode);

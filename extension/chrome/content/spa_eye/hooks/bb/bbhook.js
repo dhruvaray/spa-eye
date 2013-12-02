@@ -110,6 +110,7 @@ define([
                         }
 
                         if (entity_type === EntityType.Model &&
+                            self.context.spa_eyeObj &&
                             self.context.spa_eyeObj._mostused_models &&
                             (Operation.SAVE === operation_type || Operation.SET === operation_type)) {
                             self.context.spa_eyeObj._mostused_models.add(entity.cid, entity, operation_type);
@@ -350,7 +351,6 @@ define([
 
             recordAuditEvent:function (record) {
                 // return if `record` is off
-                var spa_eyeObj = this.context.spa_eyeObj;
                 if (!Firebug.Options.get("spa_eye.record")) return;
 
                 if (record.cid) {
