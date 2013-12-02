@@ -3,11 +3,12 @@ Backbone Eye
 
 A Firebug extension to debug Backbone based applications running off web-browsers.
 
-Understand Backbone application behavior without wading through JavaScript code. Work with application level constructs, pursue what-if exploration and more...
+> "Understand Backbone application behavior without wading through JavaScript code. Work with application level constructs, pursue what-if exploration and more..."
 
-For details on how to download and use the extension, go to http://dhruvaray.github.io/spa-eye/
 
-For technical details on how to compile the extension, add test cases etc, go to the [wiki](https://github.com/dhruvaray/spa-eye/wiki).
+For detailed help, visit : http://dhruvaray.github.io/spa-eye/
+
+For technical details on how to compile the extension, add test cases etc, visit the [wiki](https://github.com/dhruvaray/spa-eye/wiki).
 
 
 ### Watch a quick (3 minute) usage video
@@ -17,7 +18,7 @@ For technical details on how to compile the extension, add test cases etc, go to
 ###Download
 Download from the Mozilla store  : https://addons.mozilla.org/en-US/firefox/addon/Backbone-Eye/
 
-If Backbone Eye is useful in your work, do show your appreciation and encouragement by starring this repo or giving a review on the Mozilla store!
+If Backbone-Eye is useful in your work, do show your appreciation and encouragement by starring this repo or giving a review on the Mozilla store!
 
 ### Screenshots
 ![Screenshot](http://dhruvaray.github.io/spa-eye/site/img/composite.gif)
@@ -34,10 +35,5 @@ If Backbone Eye is useful in your work, do show your appreciation and encouragem
 ###License
 [Simplified BSD 2-Clause](https://github.com/dhruvaray/spa-eye/blob/master/extension/license.txt)
 
-
-
-
-
-
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/dhruvaray/spa-eye/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
-
+###Usage
+[Usage Stats](https://addons.mozilla.org/en-US/firefox/addon/Backbone-Eye/statistics/?last=30)
