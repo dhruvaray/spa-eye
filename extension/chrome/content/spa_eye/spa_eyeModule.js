@@ -81,11 +81,13 @@ define([
             // for reloaded pages.
             destroyContext:function (context, persistedState) {
                 // Record persistedState for currentPlate
-                persistedState.currentPlate = context.spa_eyeObj.currentPlate;
+                if (context.spa_eyeObj){
+                    persistedState.currentPlate = context.spa_eyeObj.currentPlate;
 
-                context.spa_eyeObj._spaHook.cleanup();
-                if (FBTrace.DBG_SPA_EYE) {
-                    FBTrace.sysout("spa_eye; Successfully emptied maintenance collections for spa-eye module.");
+                    context.spa_eyeObj._spaHook.cleanup();
+                    if (FBTrace.DBG_SPA_EYE) {
+                        FBTrace.sysout("spa_eye; Successfully emptied maintenance collections for spa-eye module.");
+                    }
                 }
             }
 
