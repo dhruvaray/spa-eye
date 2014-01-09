@@ -20,6 +20,7 @@ define([
     "spa_eye/plates/collectionPlate",
     "spa_eye/plates/viewPlate",
     "spa_eye/plates/zombiePlate",
+    "spa_eye/dom/keyPanel",
     "spa_eye/panels/basePanel",
 
     "spa_eye/panels/viewPanel",
@@ -27,7 +28,7 @@ define([
     "spa_eye/panels/eventPanel",
     "spa_eye/panels/logPanel"
 ],
-    function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, Toolbar, DOMEditor, PanelActivation, _, Common, BasePanel, ModelPlate, CollectionPlate, ViewPlate, ZombiePlate) {
+    function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, Toolbar, DOMEditor, PanelActivation, _, Common, BasePanel, ModelPlate, CollectionPlate, ViewPlate, ZombiePlate, KeyPanel) {
 
         var childPlate = {
             MODEL:'model',
@@ -35,7 +36,7 @@ define([
             VIEW:'view',
             ZOMBIE:'zombie'
         };
-        var spa_eyePanel = Firebug.spa_eyePanel = BasePanel.extend(Obj.extend(Firebug.ActivablePanel, {
+        var spa_eyePanel = Firebug.spa_eyePanel = BasePanel.extend(Obj.extend(Firebug.ActivablePanel, KeyPanel, {
             name:"spa_eye",
             tooltip:Locale.$STR("spa_eye.tooltip"),
             title:Locale.$STR("spa_eye.title"),
@@ -79,7 +80,6 @@ define([
             },
 
             show:function (state) {
-
                 if (Firebug.chrome.getSelectedPanel() != this) return;
                 if (!this.context.spa_eyeObj) return;
 
@@ -98,6 +98,7 @@ define([
 
                 if (active) {
                     this.selectChildPlate();
+                    this.attachKeyListeners();
                 } else {
                     this.cleanup();
                 }
@@ -111,6 +112,15 @@ define([
 
             },
 
+            destroyNode: function () {
+                this.detachKeyListeners();
+                this._super.apply(this, arguments);
+            },
+
+            hide: function () {
+                this.detachKeyListeners();
+            },
+
             onActivationChanged:function (enable) {
                 if (enable) {
                     Firebug.spa_eyeModule.addObserver(this);
@@ -119,7 +129,6 @@ define([
                         Firebug.currentContext.window.wrappedJSObject
                     );
                 } else {
-
                     Firebug.spa_eyeModule.removeObserver(this);
                 }
             },

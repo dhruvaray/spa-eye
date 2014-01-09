@@ -48,6 +48,7 @@ define([
                         chrome.keyIgnore(this.keyListeners[i]);
                     }
                 }
+                this.keyListeners = null;
             },
 
             getCurrentPanel:function () {

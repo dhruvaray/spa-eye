@@ -29,12 +29,12 @@ define([
 
             initialize:function () {
                 // Attach key listener
-                KeyPanel.attachKeyListeners();
+                // KeyPanel.attachKeyListeners();
             },
 
             destroy:function () {
                 // Attach key listener
-                KeyPanel.detachKeyListeners();
+                // KeyPanel.detachKeyListeners();
             },
 
             // Called when a new context is created but before the page is loaded.
