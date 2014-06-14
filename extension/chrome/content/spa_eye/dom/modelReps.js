@@ -11,9 +11,10 @@ define([
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/string",
-    "firebug/dom/domModule"
+    "firebug/dom/domModule",
+    "firebug/dom/domMemberProvider"
 ],
-    function (Firebug, D, FirebugReps, Locale, Events, Dom, Css, Str, DOMModule) {
+    function (Firebug, D, FirebugReps, Locale, Events, Dom, Css, Str, DOMModule,DOMMemberProvider) {
 
         "use strict";
 
@@ -112,7 +113,7 @@ define([
                         _repObject:"$section.data|result",
                         role:"tree",
                         _mainPanel:"$mainPanel",
-                        "aria-label":Locale.$STR("aria.labels.dom properties")},
+                        "aria-label": Locale.$STR("a11y.labels.dom_properties")},
                     D.TBODY({role:"presentation", "class":"$section.body"},
                         SizerRow,
                         D.FOR("member", "$section|augment|memberIterator",
@@ -133,7 +134,8 @@ define([
                     });
                 }
 
-                var members = Firebug.DOMBasePanel.prototype.getMembers(result, 0, null);
+                var memberProvider = new DOMMemberProvider(null);
+                var members = memberProvider.getMembers(result, 0);
                 if (members.length)
                     return members;
 
@@ -220,6 +222,16 @@ define([
             toggleRow:function (row, callback, context) {
                 var level = parseInt(row.getAttribute("level"), 10);
                 var table = Dom.getAncestorByClass(row, "domTable");
+                var domPanel = table.domPanel;
+                if (!domPanel)
+                {
+                    var panel = Firebug.getElementPanel(row);
+                    domPanel = panel.context.getPanel("dom");
+                }
+
+                if (!domPanel)
+                    return;
+
                 var target = row.lastChild.firstChild;
                 var isString = Css.hasClass(target, "objectBox-string");
 
@@ -273,9 +285,7 @@ define([
                             }
                         }
 
-                        var members = Firebug.DOMBasePanel.prototype.getMembers(repObj,
-                            level + 1,
-                            null);
+                        var members = domPanel.getMembers(repObj,level + 1);
 
                         var rowTag = this.rowTag;
                         var lastRow = row;
