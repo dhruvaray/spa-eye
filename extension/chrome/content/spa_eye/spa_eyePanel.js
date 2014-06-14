@@ -12,6 +12,7 @@ define([
     "firebug/chrome/toolbar",
     "firebug/dom/domEditor",
     "firebug/chrome/panelActivation",
+    "firebug/debugger/script/scriptPanelWarning",
 
     "spa_eye/lib/require/underscore",
     "spa_eye/util/common",
@@ -27,8 +28,9 @@ define([
     "spa_eye/panels/auditPanel",
     "spa_eye/panels/eventPanel",
     "spa_eye/panels/logPanel"
+
 ],
-    function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, Toolbar, DOMEditor, PanelActivation, _, Common, BasePanel, ModelPlate, CollectionPlate, ViewPlate, ZombiePlate, KeyPanel) {
+    function (Firebug, Obj, FBTrace, Locale, Domplate, Dom, Css, Events, Str, Toolbar, DOMEditor, PanelActivation, ScriptPanelWarning, _, Common, BasePanel, ModelPlate, CollectionPlate, ViewPlate, ZombiePlate, KeyPanel) {
 
         var childPlate = {
             MODEL:'model',
@@ -148,10 +150,9 @@ define([
             },
 
             showWarning:function () {
-                var scriptPanel = this.context.getPanel('script'),
-                    hooked = this.context.spa_eyeObj.hooked();
+                var hooked = this.context.spa_eyeObj.hooked();
 
-                if (!(hooked && scriptPanel && !scriptPanel.showWarning())) {
+                if (!(hooked && !ScriptPanelWarning.showWarning(this.context.getPanel('script')))) {
                     return this.showNotHooked();
                 } else {
                     try {
@@ -374,7 +375,7 @@ define([
         }));
 
         with (Domplate) {
-            spa_eyePanel.prototype.WarningRep = domplate(Firebug.ScriptPanel.WarningRep, {
+            spa_eyePanel.prototype.WarningRep = domplate(ScriptPanelWarning.WarningRep, {
                 tag:DIV({"class":"disabledSPA_EyePanelBox"},
                     H1({"class":"disabledPanelHead"},
                         SPAN("$pageTitle")

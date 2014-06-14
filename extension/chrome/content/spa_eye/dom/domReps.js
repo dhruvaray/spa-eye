@@ -2,7 +2,11 @@ define([
     "firebug/lib/trace"
 ],
 function (FBTrace) {
-    if (/^1\.12/.test(Firebug.version)) {
+    return require("firebug/dom/domReps");
+    /*return {
+        DirTablePlate: Firebug.DOMPanel.DirTable
+    }*/
+    /*if (/^1\.12/.test(Firebug.version)) {
         try{
             return require("firebug/dom/domReps");
         } catch(e) {
@@ -11,5 +15,5 @@ function (FBTrace) {
     }
     return {
         DirTablePlate: Firebug.DOMPanel.DirTable
-    }
+    }*/
 });
