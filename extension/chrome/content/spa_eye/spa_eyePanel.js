@@ -157,7 +157,7 @@ define([
                 } else {
                     try {
                         var v = Firebug.getVersion().split('.');
-                        if (parseInt(v[0], 10) === 1 && parseInt(v[1], 10) < 11) {
+                        if (parseInt(v[0], 10) < 2) {
                             return this.showFirebugUpgrade();
                         }
                     } catch (e) {
