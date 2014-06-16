@@ -21,13 +21,13 @@ define([
             updateSelection:function (frame) {
                 var spa_eyeObj = this.context.spa_eyeObj;
 
-                if (frame && frame.script && frame.script && frame.script.fileName) {
-                    var matches = frame.script.fileName.match(/fileName=([^;]*)/)
+                if (frame && frame.href) {
+                    var matches = frame.href.match(/fileName=([^;]*)/)
                     matches && matches.length == 2 && (this.templateName = matches[1]);
                 }
 
                 try {
-                    this.show(frame);
+                    this.show();
                 }
                 catch (e) {
                     spa_eyeObj && spa_eyeObj._spaHook.logError(e);
