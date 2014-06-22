@@ -2,10 +2,10 @@
 
 define([
     "firebug/lib/trace",
-    "firebug/lib/wrapper",
     "firebug/lib/http",
     "firebug/lib/events",
-    "firebug/lib/dom",
+    "firebug/debugger/debuggerLib",
+    "firebug/lib/wrapper",
 
     "spa_eye/lib/dom",
     "spa_eye/lib/date",
@@ -13,20 +13,10 @@ define([
     "spa_eye/lib/require/underscore",
     "spa_eye/util/common"
 ],
-    function (FBTrace, Wrapper, Http, Events, Dom, DOM, DateUtil, _, Common) {
+    function (FBTrace, Http, Events, DebuggerLib, Wrapper, DOM, DateUtil, _, Common) {
 
 // ********************************************************************************************* //
 // Constants
-
-        const Cc = Components.classes;
-        const Ci = Components.interfaces;
-        const Cr = Components.results;
-
-        const DebuggerService = Cc["@mozilla.org/js/jsd/debugger-service;1"];
-        const jsdIDebuggerService = Ci.jsdIDebuggerService;
-        const jsdICallHook = Ci.jsdICallHook;
-
-        const TYPE_FUNCTION_RETURN = jsdICallHook.TYPE_FUNCTION_RETURN;
 
         const bbhook_wp = "chrome://spa_eye/content/hooks/bb/bbhook_wp.js";
         const bbhook_template_engines = "chrome://spa_eye/content/hooks/bb/template_engines.js";
@@ -34,19 +24,7 @@ define([
         var Operation = Common.Operation;
         var EntityType = Common.EntityType;
 
-
         var BBHook = function (obj) {
-            this.context = null;
-
-            // bind `onFunction`
-            this.onFunction = _.bind(this.onFunction, this);
-
-            if (Firebug.getPref(Firebug.prefDomain, "extensions.firebug.spa_eye.check.deep")) {
-                // create js debugger
-                this.jsd = DebuggerService.getService(jsdIDebuggerService);
-                // create function call hook
-                this.jsd.functionHook = { onCall: this.onFunction };
-            }
 
             // Data container cleanup
             this.cleanup();
@@ -59,6 +37,13 @@ define([
                 for (var key in obj) {
                     this[key] = obj[key];
                 }
+            }
+
+            if (Firebug.getPref(Firebug.prefDomain, "extensions.firebug.spa_eye.check.deep")) {
+                // Get a debugger for the current context (top level window and all iframes).
+                this.dbg = DebuggerLib.makeDebuggerForContext(this.context);
+                // Hook function calls.
+                this.dbg.onEnterFrame = this.onEnterFrame.bind(this);
             }
 
             // Womb initialization
@@ -144,30 +129,48 @@ define([
                 return this.deepCheck;
             },
 
-            onFunction:function (frame, type) {
-                switch (type) {
-                    case TYPE_FUNCTION_RETURN:
-                        var scope = Wrapper.unwrapIValue(frame.scope, Firebug.viewChrome),
-                            root = Wrapper.unwrapIValue(frame.executionContext.globalObject, Firebug.viewChrome);
-                        if (root && scope && scope['_'] && scope['Backbone']) {
+            onEnterFrame: function (frame) {
 
-                            // backup for `_` and `Backbone`
-                            var us = root._,
-                                bb = root.Backbone;
-
-                            root._ = scope['_'];
-                            root.Backbone = scope['Backbone']
-
-                            this.registerContentLoadedHook(root);
-                            this.registerBBHooks(root);
-
-                            // reset global `_` and `Backbone`
-                            root._ = us;
-                            root.Backbone = bb;
-                        }
-                        break;
+                if (frame.live && frame.script) {
+                    frame.onPop = this.onPopFrame.bind(this, frame);
                 }
             },
+
+            onPopFrame: function (frame, completionValue) {
+
+                var env = frame.environment;
+
+                if (!env)
+                    return;
+
+                var root = DebuggerLib.unwrapDebuggeeValue(frame.script.global);
+                var scope_ = DebuggerLib.unwrapDebuggeeValue(env.getVariable('_'));
+                var scope_bb = DebuggerLib.unwrapDebuggeeValue(env.getVariable('Backbone'));
+
+                if (root && scope_ && scope_bb) {
+
+                    // backup for `_` and `Backbone`
+                    var us = root._,
+                        bb = root.Backbone;
+
+                    root._ = scope_;
+                    root.Backbone = scope_bb;
+
+                    this.registerContentLoadedHook(root);
+                    this.registerBBHooks(root);
+
+                    // reset global `_` and `Backbone`
+                    root._ = us;
+                    root.Backbone = bb;
+
+                    //remove since we have found a ref
+                    this.dbg.onEnterFrame = undefined;
+                    frame.onPop = undefined;//safe?
+                    DebuggerLib.destroyDebuggerForContext(this.context, this.dbg);
+                }
+
+            },
+
 
             markAsZombie:function (entity) {
                 if (entity.__mfd__) {
@@ -214,19 +217,20 @@ define([
 
             registerContentLoadedHook:function (root) {
 
-                if (_.indexOf(this._roots, root) != -1) //already registered
-                    return;
+                var roots = _.filter(root.frames, function (frame) {
+                    return _.indexOf(this._roots, frame.contentWindow) == -1
+                });
 
-                this._roots.push(root);
+                if (_.indexOf(this._roots, root) == -1) { //new
+                    roots.push(root);
+                }
 
                 var self = this;
-                var register = function () {
+
+                var register = function (e) {
                     self.registerBBHooks(root);
                 };
-
-                root.document && root.document.addEventListener("afterscriptexecute", register);
-                root.addEventListener("load", register);
-                root.addEventListener('Backbone_Eye:ADD', function (e) {
+                var add = function (e) {
 
                     var target = e.detail && e.detail.data;
                     var entity_type = e.detail && e.detail.entity_type;
@@ -243,8 +247,8 @@ define([
                     }
 
                     Events.dispatch(self.listener.fbListeners, 'onBackboneEntityAdded', [e]);
-                });
-                root.addEventListener('Backbone_Eye:RECORD', function (e) {
+                };
+                var record = function (e) {
                     //{'detail':{entity:this, post:false, args:arguments, type:type}}
                     if (!e.detail) return;
                     var data = e.detail;
@@ -255,18 +259,29 @@ define([
                         data.operation_type,
                         data.args
                     )
-                });
-                root.addEventListener('Backbone_Eye:ERROR', function (e) {
+                };
+                var error = function (e) {
                     self.logError(e.detail.error);
-                });
-                root.addEventListener('Backbone_Eye:TEMPLATE:ADD', function (e) {
+                };
+                var template_add = function (e) {
                     self.createDebuggableScript(root,
                         e.detail.script_id,
                         e.detail.text,
                         e.detail.settings);
-                });
-                root.addEventListener('Backbone_Eye:TEMPLATE:INFER', function (e) {
+                };
+                var template_infer = function (e) {
                     self.inferScriptForView(e.detail.script_id);
+                };
+
+                _.each(roots, function (root) {
+                    self._roots.push(root);
+                    root.document && root.document.addEventListener("afterscriptexecute", register);
+                    root.addEventListener("load", register);
+                    root.addEventListener('Backbone_Eye:ADD', add);
+                    root.addEventListener('Backbone_Eye:RECORD', record);
+                    root.addEventListener('Backbone_Eye:ERROR', error);
+                    root.addEventListener('Backbone_Eye:TEMPLATE:ADD', template_add);
+                    root.addEventListener('Backbone_Eye:TEMPLATE:INFER', template_infer);
                 });
 
             },
