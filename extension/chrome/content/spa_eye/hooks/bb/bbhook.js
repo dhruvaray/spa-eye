@@ -217,20 +217,19 @@ define([
 
             registerContentLoadedHook:function (root) {
 
-                var roots = _.filter(root.frames, function (frame) {
-                    return _.indexOf(this._roots, frame.contentWindow) == -1
-                });
+                if (_.indexOf(this._roots, root) != -1) //already registered
+                    return;
 
-                if (_.indexOf(this._roots, root) == -1) { //new
-                    roots.push(root);
-                }
+                this._roots.push(root);
 
                 var self = this;
-
-                var register = function (e) {
+                var register = function () {
                     self.registerBBHooks(root);
                 };
-                var add = function (e) {
+
+                root.document && root.document.addEventListener("afterscriptexecute", register);
+                root.addEventListener("load", register);
+                root.addEventListener('Backbone_Eye:ADD', function (e) {
 
                     var target = e.detail && e.detail.data;
                     var entity_type = e.detail && e.detail.entity_type;
@@ -247,8 +246,8 @@ define([
                     }
 
                     Events.dispatch(self.listener.fbListeners, 'onBackboneEntityAdded', [e]);
-                };
-                var record = function (e) {
+                });
+                root.addEventListener('Backbone_Eye:RECORD', function (e) {
                     //{'detail':{entity:this, post:false, args:arguments, type:type}}
                     if (!e.detail) return;
                     var data = e.detail;
@@ -259,29 +258,18 @@ define([
                         data.operation_type,
                         data.args
                     )
-                };
-                var error = function (e) {
+                });
+                root.addEventListener('Backbone_Eye:ERROR', function (e) {
                     self.logError(e.detail.error);
-                };
-                var template_add = function (e) {
+                });
+                root.addEventListener('Backbone_Eye:TEMPLATE:ADD', function (e) {
                     self.createDebuggableScript(root,
                         e.detail.script_id,
                         e.detail.text,
                         e.detail.settings);
-                };
-                var template_infer = function (e) {
+                });
+                root.addEventListener('Backbone_Eye:TEMPLATE:INFER', function (e) {
                     self.inferScriptForView(e.detail.script_id);
-                };
-
-                _.each(roots, function (root) {
-                    self._roots.push(root);
-                    root.document && root.document.addEventListener("afterscriptexecute", register);
-                    root.addEventListener("load", register);
-                    root.addEventListener('Backbone_Eye:ADD', add);
-                    root.addEventListener('Backbone_Eye:RECORD', record);
-                    root.addEventListener('Backbone_Eye:ERROR', error);
-                    root.addEventListener('Backbone_Eye:TEMPLATE:ADD', template_add);
-                    root.addEventListener('Backbone_Eye:TEMPLATE:INFER', template_infer);
                 });
 
             },
